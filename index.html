@@ -3,7 +3,6 @@
 
 <!-- ===== AREA 1: CONFIGURAÇÕES GERAIS (meta, fonts, tailwind, estilos globais) ===== -->
 <head>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#d6249f">
@@ -229,6 +228,8 @@
         }
 
     </style>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="text-gray-800 font-sans bg-[#f8f9fa] relative w-full">
     
@@ -2131,26 +2132,12 @@
             setTimeout(initDraggableCart, 300);
         });
     </script>
+
 <script>
-function teste() {
-  alert('ok')
-}
-<script>
-window.addEventListener('load', async () => {
-  const supabase = window.supabase.createClient(
-    'https://omjaecifdhrlgmmehweq.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tamFlY2lmZGhybGdtbWVod2VxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMzQ1NzYsImV4cCI6MjA4OTcxMDU3Nn0.xsQ0HFYJpZ0twCUOhtTFc0AoY7HC7aCOJ0lbX1NuPmk'
-  );
-
-  const { data, error } = await supabase.from('produto').select('*');
-
-  if (error) {
-    alert(error.message);
-    return;
-  }
-
-  console.log(data); // 👈 OLHA AQUI NO CONSOLE
-});
+const supabase = window.supabase.createClient(
+  'https://omjaecifdhrlgmmehweq.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tamFlY2lmZGhybGdtbWVod2VxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMzQ1NzYsImV4cCI6MjA4OTcxMDU3Nn0.xsQ0HFYJpZ0twCUOhtTFc0AoY7HC7aCOJ0lbX1NuPmk'
+);
 </script>
 </body>
 </html>
