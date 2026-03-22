@@ -1,0 +1,2134 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+
+<!-- ===== AREA 1: CONFIGURAÇÕES GERAIS (meta, fonts, tailwind, estilos globais) ===== -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#d6249f">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>InstaLanches - Cardápio Premium</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Poppins', 'sans-serif'], display: ['Bangers', 'cursive'] },
+                    colors: {
+                        'insta-pink': '#d6249f',
+                        'insta-purple': '#405de6',
+                        'insta-orange': '#fbad50',
+                        'success-green': '#28a745',
+                        'dark-bg': '#121212'
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.4s ease-out forwards',
+                        'slide-up': 'slideUp 0.4s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+                        slideUp: { '0%': { opacity: '0', transform: 'translateY(20px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- MÁGICA DO APP SHELL: Calcula a altura real da tela ANTES de renderizar o CSS -->
+    <script>
+        function setAppHeight() {
+            const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+            document.documentElement.style.setProperty('--app-height', `${vh}px`);
+        }
+        window.addEventListener('resize', setAppHeight);
+        window.addEventListener('orientationchange', setAppHeight);
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', setAppHeight);
+            window.visualViewport.addEventListener('scroll', setAppHeight);
+        }
+        setAppHeight();
+    </script>
+
+    <!-- Google Fonts & FontAwesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* ===== BARRAS DE ROLAGEM INVISÍVEIS (SITE SEM CORTES) ===== */
+        ::-webkit-scrollbar { display: none !important; }
+        * { scrollbar-width: none !important; -ms-overflow-style: none !important; }
+
+        /* ===== ESTRUTURA GLOBAL NATIVA E FLUIDA ===== */
+        html, body {
+            margin: 0; 
+            padding: 0;
+            width: 100%;
+            height: var(--app-height, 100vh) !important;
+            position: fixed !important;
+            top: 0;
+            left: 0;
+            overflow: hidden !important; 
+            overscroll-behavior: none;
+            background-color: #f8f9fa;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='#d6249f' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .glass-header { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        .gradient-bg { background: linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
+        .gradient-text { background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        
+        .nav-link.active { border-bottom: 3px solid #d6249f; color: #d6249f; font-weight: 700; }
+        .custom-scroll { overscroll-behavior-y: contain; -webkit-overflow-scrolling: touch; }
+        
+        @keyframes marquee {
+            0% { transform: translate3d(100vw, 0, 0); }
+            100% { transform: translate3d(-100%, 0, 0); }
+        }
+        .marquee-animation {
+            display: inline-block;
+            white-space: nowrap;
+            animation: marquee 35s linear infinite; 
+            will-change: transform;
+        }
+
+        .modal-wrapper { position: fixed; inset: 0; z-index: 10010; visibility: hidden; pointer-events: none; }
+        .modal-wrapper.show { visibility: visible; pointer-events: auto; }
+        .modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); opacity: 0; transition: opacity 0.3s ease; }
+        .modal-wrapper.show .modal-overlay { opacity: 1; }
+        .modal-content { transform: translateY(100%); transition: transform 0.3s ease-out; position: relative; z-index: 10; }
+        @media (min-width: 640px) { .modal-content { transform: scale(0.95) translateY(20px); opacity: 0; transition: all 0.3s ease-out; } }
+        .modal-wrapper.show .modal-content { transform: translateY(0); opacity: 1; }
+        @media (min-width: 640px) { .modal-wrapper.show .modal-content { transform: scale(1) translateY(0); } }
+        
+        .pb-safe-modal { padding-bottom: max(1.5rem, env(safe-area-inset-bottom)) !important; }
+        
+        @media (max-width: 640px) {
+            .modal-wrapper { 
+                padding: 0 !important; 
+                align-items: flex-start !important; 
+                height: var(--app-height, 100dvh) !important; 
+            }
+            .modal-content {
+                width: 100% !important; height: 100% !important; max-height: 100% !important;
+                border-radius: 0 !important; display: flex; flex-direction: column;
+                padding-top: max(1.5rem, env(safe-area-inset-top)) !important;
+                justify-content: flex-start;
+            }
+            .modal-content > button.absolute { top: max(1.25rem, env(safe-area-inset-top)) !important; right: 1.25rem !important; }
+            
+            #modal-add-item.modal-wrapper, #modal-loja-fechada.modal-wrapper, #modal-opcoes.modal-wrapper, #virtual-input-overlay.modal-wrapper, #modal-confirm-zap.modal-wrapper, #modal-admin-auth.modal-wrapper { padding: 1rem !important; align-items: center !important; justify-content: center !important;}
+            #modal-add-item .modal-content, #modal-loja-fechada .modal-content, #modal-opcoes .modal-content, #virtual-input-overlay .modal-content, #modal-confirm-zap .modal-content, #modal-admin-auth .modal-content {
+                width: 95% !important; height: auto !important; max-height: 90dvh !important;
+                border-radius: 2rem !important; padding-top: 1.5rem !important; margin: auto;
+                justify-content: flex-start !important; display: flex; flex-direction: column;
+            }
+            #modal-add-item .modal-content > button.absolute, #modal-loja-fechada .modal-content > button.absolute, #modal-opcoes .modal-content > button.absolute, #modal-admin-auth .modal-content > button.absolute { top: 1.25rem !important; right: 1.25rem !important; }
+            
+            /* Admin Panel Mobile (Transformado em página completa) */
+            #modal-admin-panel .modal-content {
+                width: 100% !important; height: 100% !important; max-height: 100% !important;
+                border-radius: 0 !important; padding-top: max(1.5rem, env(safe-area-inset-top)) !important; margin: 0;
+                justify-content: flex-start !important; display: flex; flex-direction: column;
+            }
+        }
+        
+        input, select, textarea { font-size: 16px !important; }
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
+        img { max-width: 100%; height: auto; }
+        button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+        
+        @media (max-width: 640px) {
+            #main-header > div:first-child { padding-top: 0.25rem !important; padding-bottom: 0.25rem !important; }
+            #menu-categorias { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; gap: 0.75rem !important; }
+            #menu-categorias .nav-link { font-size: 0.9rem !important; padding-bottom: 0.35rem !important; }
+            #container-cardapio { padding-left: 1rem !important; padding-right: 1rem !important; margin-top: 0.5rem !important; }
+            #container-cardapio section { margin-bottom: 2.5rem !important; }
+            #container-cardapio section h2 { font-size: 1.55rem !important; line-height: 1.15 !important; margin-bottom: 1.15rem !important; }
+            #container-cardapio section > div.grid > div.group { padding: 1rem !important; gap: 1rem !important; border-radius: 1.6rem !important; }
+        }
+
+        @keyframes popCartAnimation {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .animate-pop-cart { animation: popCartAnimation 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+        @keyframes slideUpFadeBar {
+            0% { opacity: 0; transform: translate(-50%, 80px) scale(0.8); }
+            60% { opacity: 1; transform: translate(-50%, -15px) scale(1.05); }
+            100% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+        }
+        .show-checkout-bar { display: flex !important; animation: slideUpFadeBar 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        
+        @keyframes party-glow-pulse {
+            0% { transform: scale(1) translateX(-50%); left: 50%; }
+            50% { transform: scale(1.03) translateX(-50%); left: 50%; }
+            100% { transform: scale(1) translateX(-50%); left: 50%; }
+        }
+        .btn-checkout-ready { animation: party-glow-pulse 1.8s infinite ease-in-out !important; }
+
+        @keyframes shake {
+            0%, 100% { margin-left: 0px; }
+            10%, 30%, 50%, 70%, 90% { margin-left: -5px; }
+            20%, 40%, 60%, 80% { margin-left: 5px; }
+        }
+        .animate-shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
+        
+        #cardapio-loading{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:40px 0; width:100%; }
+        #cardapio-loading img{width:90px;height:auto;}
+        #cardapio-loading span{font-weight:600;opacity:.8;}
+
+        .toast-add{ position:fixed; left:50%; transform:translateX(-50%); bottom:20%; background:linear-gradient(135deg,#ff7a18,#ff3cac); color:white; padding:14px 22px; border-radius:999px; font-weight:700; box-shadow:0 10px 25px rgba(0,0,0,0.25); z-index:99999; animation:toastPop .35s ease, toastFade 3s ease forwards; }
+        @keyframes toastPop{ 0%{transform:translate(-50%,20px);opacity:0;} 100%{transform:translate(-50%,0);opacity:1;} }
+        @keyframes toastFade{ 0%{opacity:1;} 85%{opacity:1;} 100%{opacity:0;} }
+
+        .categoria-img{ width:110px; height:110px; object-fit:contain; margin:-20px; display:inline-block; }
+
+        :root {
+            --banner-height: max(32px, calc(26px + env(safe-area-inset-top)));
+            --header-height: 100px;
+            --top-offset: calc(var(--banner-height) + var(--header-height));
+        }
+
+        #statusBanner {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            z-index: 10000 !important;
+            height: var(--banner-height);
+        }
+
+        #main-header {
+            position: fixed !important;
+            top: var(--banner-height) !important;
+            left: 0 !important;
+            width: 100% !important;
+            z-index: 9999 !important;
+            height: var(--header-height);
+        }
+
+        #main-scroll-area {
+            position: absolute !important;
+            top: var(--top-offset) !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            -webkit-overflow-scrolling: touch !important;
+            display: block !important;
+        }
+
+    </style>
+</head>
+<body class="text-gray-800 font-sans bg-[#f8f9fa] relative w-full">
+    
+    <!-- Banner Dinâmico em Letreiro -->
+    <div id="statusBanner" style="background:#121212;color:white;padding-top: max(6px, env(safe-area-inset-top)); padding-bottom: 6px; font-size:14px;overflow:hidden;display:flex;align-items:center;">
+        <div id="marqueeText" class="marquee-animation" style="font-weight:bold; letter-spacing:1px; text-transform:uppercase;">
+            Carregando horário...
+        </div>
+    </div>
+
+    <!-- Header Principal (Com Botão de Rastreio Permanente) -->
+    <header class="glass-header shadow-sm border-b border-gray-200" id="main-header">
+        <div class="bg-white px-4 py-1 sm:py-2 relative shadow-sm rounded-b-[2rem]">
+            <div class="max-w-5xl mx-auto flex items-center justify-between gap-3">
+                <div class="w-11 shrink-0 sm:w-12"></div>
+                <div class="flex-1 flex justify-center">
+                    <img src="https://res.cloudinary.com/de9bsqp2z/image/upload/v1773272375/logo_insta_lanches_instagram_transparente_rk9lxq.png" alt="Logo InstaLanches" decoding="async" class="h-[55px] sm:h-[65px] object-contain select-none pointer-events-none drop-shadow-sm scale-[1.9]">
+                </div>
+                <!-- SINO DE NOTIFICAÇÕES SEMPRE VISÍVEL -->
+                <button onclick="abrirRastreio()" id="btn-rastreio-header" aria-label="Notificações e Rastreio" class="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white text-gray-400 border border-gray-200 hover:text-insta-pink transition flex items-center justify-center relative shadow-sm shrink-0 cursor-pointer">
+                    <i class="fas fa-bell text-lg"></i>
+                    <span id="notif-dot" class="absolute top-[8px] right-[10px] w-2.5 h-2.5 bg-red-500 rounded-full border border-white hidden animate-pulse"></span>
+                </button>
+            </div>
+        </div>
+        <nav class="nav-scroll overflow-x-auto whitespace-nowrap px-4 py-2 sm:py-2.5 flex gap-4 sm:gap-6 max-w-5xl mx-auto" id="menu-categorias"></nav>
+    </header>
+
+    <!-- ÁREA ÚNICA DE ROLAGEM ISOLADA (Forçada e Segura) -->
+    <div id="main-scroll-area" class="custom-scroll relative w-full">
+        
+        <!-- Botão Repetir Último Pedido -->
+        <div id="btn-repetir-pedido" class="hidden max-w-5xl mx-auto px-4 mt-6 animate-slide-up">
+            <button onclick="repetirUltimoPedido()" class="w-full sm:w-auto sm:px-8 sm:mx-auto bg-gradient-to-r from-gray-800 to-gray-900 text-white font-semibold py-3.5 rounded-2xl shadow-lg flex items-center justify-center gap-3 hover:shadow-xl transition transform hover:-translate-y-1 border border-gray-700">
+                 <i class="fas fa-redo text-lg"></i> Repetir Meu Último Pedido
+            </button>
+        </div>
+
+        <!-- Container Cardápio -->
+        <main class="max-w-5xl mx-auto px-4 py-4 mt-2 pb-8 w-full" id="container-cardapio"></main>
+
+        <!-- Rodapé Ajustado -->
+        <footer class="relative w-full" style="background:#0b0b0b;color:white;text-align:center;font-family:Poppins; padding: 30px 16px calc(160px + 10vh + env(safe-area-inset-bottom));">
+            <img src="https://res.cloudinary.com/de9bsqp2z/image/upload/v1773272375/logo_insta_lanches_instagram_transparente_rk9lxq.png" style="width:80px;margin:auto;opacity:.95;filter:drop-shadow(0 5px 12px rgba(0,0,0,.5));">
+            
+            <div style="margin-top:12px;font-size:13px;color:#cbd5e1;">📍 R. Rio de Janeiro, 295 • Caucaia - CE</div>
+            
+            <div style="max-width:320px; height:100px; margin: 12px auto; border-radius: 12px; overflow: hidden; border: 1px solid #1f2937; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);">
+                <iframe src="https://maps.google.com/maps?q=R.%20Rio%20de%20Janeiro,%20295,%20Caucaia%20-%20CE&t=&z=15&ie=UTF8&iwloc=&output=embed" width="100%" height="100" style="border:0; filter: invert(90%) hue-rotate(180deg) contrast(1.1);" allowfullscreen="" loading="lazy" title="Localização InstaLanches"></iframe>
+            </div>
+
+            <div style="margin-top:12px;font-size:14px;font-weight:600;">📞 (85) 99155-8671</div>
+            <div style="margin-top:10px;font-size:12px;color:#9ca3af;line-height:1.6;">Abertos das 17:00 ás 23:00 horas <br> Fechado • Toda Quarta-feira </div>
+            <div style="margin-top:20px; display: flex; align-items: center; justify-content: center; gap: 8px; color:#6b7280; font-size:11px;">
+                <span>© 2024 InstaLanches • Todos os direitos reservados</span>
+                <!-- BOTÃO DO ESCUDO RESTAURADO -->
+                <i class="fas fa-user-shield cursor-pointer" onclick="abrirAdminAuth(event)" aria-label="Painel Admin" style="font-size: 13px; opacity: 0.7; margin-left: 4px;"></i>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- DOCK UNIVERSAL: A "Mini Página" inferior que hospeda o Botão Flutuante -->
+    <div id="barra-flutuante-carrinho" class="fixed bottom-0 left-0 w-full z-[10015] pointer-events-none transform translate-y-full transition-transform duration-500 ease-out flex flex-col justify-end">
+        <div class="w-full bg-gradient-to-t from-[#f8f9fa] via-[#f8f9fa]/95 to-transparent pt-8 px-4 flex justify-center" style="padding-bottom: calc(10vh + 16px + env(safe-area-inset-bottom)); pointer-events: none;">
+            
+            <div id="cart-draggable-btn" class="relative flex items-center justify-between bg-white/90 backdrop-blur-xl rounded-2xl p-4 sm:p-5 shadow-[0_20px_40px_rgba(0,0,0,0.15)] border border-gray-200/50 pointer-events-auto w-full max-w-[340px] cursor-grab active:cursor-grabbing transition-transform">
+                <!-- Lado Esquerdo -->
+                <div class="flex flex-col text-left leading-none pointer-events-none select-none">
+                    <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Total</span>
+                    <span id="floating-total" class="text-xl sm:text-2xl font-black text-gray-800 tracking-tight">R$ 0,00</span>
+                </div>
+                <!-- Lado Direito -->
+                <div class="flex items-center gap-3 pointer-events-none select-none bg-gray-50/80 px-4 py-2.5 rounded-xl border border-gray-100 shadow-sm">
+                    <span class="text-sm sm:text-base font-bold text-gray-800 tracking-wide">Ver Pedido</span>
+                    <div class="bg-gradient-to-br from-insta-orange to-insta-pink text-white text-xs font-black rounded-lg w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center shadow-md">
+                        <span id="cart-count">0</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- MODAL ESCOLHA DO PÃO -->
+    <div id="modal-opcoes" class="modal-wrapper flex items-center justify-center p-4 z-[10060]">
+        <div class="modal-overlay" onclick="fecharModal('modal-opcoes')"></div>
+        <div class="modal-content pb-safe-modal bg-white w-[95%] sm:w-[450px] rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-7 shadow-2xl max-h-[90dvh] flex flex-col relative border border-insta-pink/10">
+            <button onclick="fecharModal('modal-opcoes')" class="absolute top-5 right-5 text-gray-400 hover:text-gray-800 bg-gray-100 rounded-full w-8 h-8 flex items-center justify-center transition z-10"><i class="fas fa-times"></i></button>
+            <div class="text-center mb-6 pt-2 shrink-0">
+                <div class="w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-3 shadow-inner">
+                    <i class="fas fa-hamburger text-insta-orange text-2xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 tracking-tight leading-tight" id="opcoes-nome-produto">Nome</h3>
+                <p class="text-xs text-gray-500 mt-1 font-semibold uppercase tracking-wider">Escolha o seu Pão</p>
+            </div>
+            <input type="hidden" id="opcoes-id-produto">
+            <div class="mb-2 overflow-y-auto custom-scroll flex-1 pr-1 pb-4">
+                <div class="space-y-3">
+                    <label class="relative flex items-center p-3 sm:p-4 cursor-pointer rounded-2xl border-2 border-gray-100 bg-white hover:bg-gray-50 transition-all duration-200 group">
+                        <input type="radio" name="tipo_pao" value="Pão Bola" data-adicional="0" class="peer sr-only" checked>
+                        <div class="absolute inset-0 rounded-2xl border-2 border-transparent peer-checked:border-insta-pink peer-checked:bg-pink-50/40 transition-all pointer-events-none"></div>
+                        <div class="relative z-10 flex-1 pl-2">
+                            <h4 class="font-bold text-gray-800 text-sm sm:text-base peer-checked:text-insta-pink transition-colors">Pão Bola</h4>
+                            <p class="text-[11px] text-gray-400 uppercase tracking-widest mt-0.5 font-semibold">Tradicional</p>
+                        </div>
+                        <div class="relative z-10 font-bold text-gray-500 text-sm mr-3 peer-checked:text-insta-pink">Grátis</div>
+                        <div class="relative z-10 w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 border-gray-300 flex items-center justify-center peer-checked:border-insta-pink peer-checked:bg-insta-pink transition-all"></div>
+                    </label>
+                    <label class="relative flex items-center p-3 sm:p-4 cursor-pointer rounded-2xl border-2 border-gray-100 bg-white hover:bg-gray-50 transition-all duration-200 group">
+                        <input type="radio" name="tipo_pao" value="Pão Árabe" data-adicional="1" class="peer sr-only">
+                        <div class="absolute inset-0 rounded-2xl border-2 border-transparent peer-checked:border-insta-pink peer-checked:bg-pink-50/40 transition-all pointer-events-none"></div>
+                        <div class="relative z-10 flex-1 pl-2">
+                            <h4 class="font-bold text-gray-800 text-sm sm:text-base peer-checked:text-insta-pink transition-colors">Pão Árabe</h4>
+                            <p class="text-[11px] text-insta-orange uppercase tracking-widest mt-0.5 font-semibold">Especial</p>
+                        </div>
+                        <div class="relative z-10 font-bold text-insta-purple text-sm mr-3">+ R$ 1,00</div>
+                        <div class="relative z-10 w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 border-gray-300 flex items-center justify-center peer-checked:border-insta-pink peer-checked:bg-insta-pink transition-all"></div>
+                    </label>
+                </div>
+            </div>
+            <button onclick="confirmarOpcoesEAdicionar()" class="w-full gradient-bg text-white font-bold py-4 rounded-2xl shadow-xl hover:opacity-90 transition flex justify-center items-center gap-2 active:scale-95 text-base sm:text-lg shrink-0 mt-2"> <i class="fas fa-cart-plus text-xl"></i> Adicionar ao Pedido</button>
+        </div>
+    </div>
+
+    <!-- MODAL CARRINHO -->
+    <div id="cart-modal" class="modal-wrapper flex items-center justify-center p-4 z-[10050]">
+        <div class="modal-overlay" onclick="fecharModal('cart-modal')"></div>
+        <div class="modal-content pb-safe-modal bg-[#f3f4f6] w-full sm:w-[480px] rounded-[2.5rem] p-6 sm:p-7 shadow-2xl max-h-[90dvh] flex flex-col relative overflow-hidden">
+            
+            <div class="flex justify-between items-center mb-4 pt-2 shrink-0 w-full relative z-20 px-1 bg-transparent before:content-[''] before:absolute before:bottom-full before:left-0 before:w-full before:h-[50vh] before:pointer-events-none">
+                <div class="flex flex-col text-left">
+                    <h2 class="text-2xl sm:text-3xl font-display tracking-wide uppercase italic gradient-text pb-1 -ml-0.5" style="transform: skewX(-8deg);">Seu Pedido</h2>
+                    <p class="text-[10px] sm:text-xs text-gray-500 font-bold uppercase tracking-wider">Confira os Itens</p>
+                </div>
+                <button type="button" onclick="fecharModal('cart-modal')" class="text-gray-400 hover:text-gray-800 bg-transparent text-xl w-8 h-8 flex items-center justify-center transition z-20"><i class="fas fa-times"></i></button>
+            </div>
+
+            <!-- Área Rolável Segura para Teclado -->
+            <div class="overflow-y-auto custom-scroll flex-1 pr-1 pb-36 relative">
+                    
+                <div class="bg-white rounded-[1.5rem] p-4 shadow-sm border border-gray-100/80 mb-4 mt-2 flex flex-col">
+                    <h3 class="text-xs font-bold text-gray-800 mb-3 flex items-center gap-2 uppercase tracking-wider shrink-0"><i class="fas fa-utensils text-insta-orange text-sm"></i> Itens do Carrinho</h3>
+                    <div id="cart-items" class="space-y-3 overflow-y-auto custom-scroll pr-2 pb-1" style="max-height: 25vh;"></div>
+                </div>
+                
+                <div class="bg-white rounded-[1.5rem] p-4 shadow-sm border border-gray-100/80 mb-5 space-y-2">
+                    <div class="flex justify-between text-gray-500 text-sm font-semibold"><span>Subtotal</span><span id="cart-subtotal" class="text-gray-700">R$ 0,00</span></div>
+                    <div class="flex justify-between text-gray-500 text-sm font-semibold"><span>Taxa de Entrega</span><span id="cart-taxa" class="text-gray-700">R$ 0,00</span></div>
+                    <div class="flex justify-between items-center pt-3 border-t border-gray-100 border-dashed mt-2">
+                        <span class="font-black text-gray-800 text-base uppercase tracking-wider">Total a Pagar</span>
+                        <span class="text-2xl font-black text-insta-pink tracking-tight drop-shadow-sm" id="cart-total">R$ 0,00</span>
+                    </div>
+                </div>
+
+                <form id="checkout-form" class="space-y-4 relative group" onsubmit="processarCheckout(event)">
+                    
+                    <div class="bg-white rounded-[1.5rem] p-4 shadow-sm border border-gray-100/80">
+                        <h3 class="text-xs font-bold text-gray-800 mb-3 flex items-center gap-2 uppercase tracking-wider"><i class="fas fa-user-circle text-insta-purple text-sm"></i> Seus Dados</h3>
+                        <div class="space-y-3">
+                            <div class="relative">
+                                <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest absolute -top-2 left-3 bg-white px-1">Seu Nome</label>
+                                <input type="text" id="nome-cliente" placeholder="Como podemos te chamar?" class="w-full bg-transparent border-2 border-gray-100 rounded-2xl py-3 px-4 outline-none focus:border-insta-pink focus:bg-pink-50/10 transition font-semibold text-gray-800 text-sm sm:text-base" required>
+                            </div>
+                            <div class="relative">
+                                <label class="text-[10px] font-bold text-success-green uppercase tracking-widest absolute -top-2 left-3 bg-white px-1"><i class="fab fa-whatsapp mr-1"></i> WhatsApp</label>
+                                <input type="tel" id="whatsapp-cliente" placeholder="(DDD) 90000-0000" class="w-full bg-transparent border-2 border-gray-100 rounded-2xl py-3 px-4 outline-none focus:border-success-green focus:bg-green-50/10 transition font-semibold text-gray-800 text-sm sm:text-base" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-[1.5rem] p-4 shadow-sm border border-gray-100/80">
+                        <h3 class="text-xs font-bold text-gray-800 mb-3 flex items-center gap-2 uppercase tracking-wider"><i class="fas fa-motorcycle text-success-green text-sm"></i> Onde deseja receber?</h3>
+                        
+                        <div class="relative mt-2">
+                            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest absolute -top-2 left-3 bg-white px-1">Tipo de Pedido</label>
+                            <select id="tipo-pedido" class="w-full bg-transparent border-2 border-gray-100 rounded-2xl py-3.5 pl-4 pr-10 outline-none focus:border-insta-pink transition appearance-none font-semibold text-gray-800 text-sm sm:text-base" required onchange="mudarTipoPedido()">
+                                <option value="" disabled selected>Selecione uma opção...</option>
+                                <option value="entrega">🛵 Entregar no meu Endereço</option>
+                                <option value="retirada">🚶 Vou Retirar no Local</option>
+                                <option value="mesa">🍽️ Estou na Mesa (Consumo local)</option>
+                            </select>
+                            <i class="fas fa-chevron-down absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                        </div>
+                        
+                        <div id="area-entrega-resumo" class="hidden mt-4 pt-2 border-t border-gray-100 transition-all space-y-4">
+                            <div class="space-y-1.5">
+                                <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-white px-1 relative top-2 left-2 z-10">Bairro / Taxa</label>
+                                <div class="relative">
+                                    <select id="bairro-select" class="w-full bg-transparent border-2 border-gray-100 rounded-2xl py-3.5 pl-4 pr-10 outline-none focus:border-insta-pink transition appearance-none font-semibold text-gray-800 text-sm sm:text-base" onchange="calcularTotal()">
+                                        <option value="" data-taxa="0">Selecione seu Bairro...</option>
+                                    </select>
+                                    <i class="fas fa-chevron-down absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none mt-1"></i>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-3 gap-3">
+                                <div class="col-span-2 space-y-1.5">
+                                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-white px-1 relative top-2 left-2 z-10">Rua</label>
+                                    <input type="text" id="rua-input" placeholder="Ex: Rua das Flores" class="w-full bg-transparent border-2 border-gray-100 rounded-2xl py-3.5 px-4 outline-none focus:border-insta-pink transition font-semibold text-gray-800 text-sm sm:text-base">
+                                </div>
+                                <div class="space-y-1.5">
+                                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-white px-1 relative top-2 left-2 z-10">Número</label>
+                                    <input type="text" id="numero-input" placeholder="Ex: 123" class="w-full bg-transparent border-2 border-gray-100 rounded-2xl py-3.5 px-4 outline-none focus:border-insta-pink transition font-semibold text-gray-800 text-sm sm:text-base">
+                                </div>
+                            </div>
+
+                            <div class="space-y-1.5">
+                                <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-white px-1 relative top-2 left-2 z-10">Referência</label>
+                                <input type="text" id="referencia-input" placeholder="Ex: Próximo ao mercado..." class="w-full bg-transparent border-2 border-gray-100 rounded-2xl py-3.5 px-4 outline-none focus:border-insta-pink transition font-semibold text-gray-800 text-sm sm:text-base">
+                            </div>
+                        </div>
+
+                        <div id="area-mesa" class="hidden mt-4 transition-all">
+                            <div class="relative">
+                                <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest absolute -top-2 left-3 bg-white px-1">Número da Mesa</label>
+                                <input type="number" id="numero-mesa" placeholder="Ex: 05" class="w-full bg-blue-50/20 border-2 border-blue-100 rounded-2xl py-3.5 px-4 outline-none focus:border-insta-purple focus:bg-blue-50/40 transition font-semibold text-gray-800 text-sm sm:text-base">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-[1.5rem] p-4 shadow-sm border border-gray-100/80">
+                        <h3 class="text-xs font-bold text-gray-800 mb-3 flex items-center gap-2 uppercase tracking-wider"><i class="fas fa-wallet text-gray-400 text-sm"></i> Pagamento</h3>
+                        
+                        <div class="relative mt-2">
+                            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest absolute -top-2 left-3 bg-white px-1">Forma de Pagamento</label>
+                            <select id="pagamento" class="w-full bg-transparent border-2 border-gray-100 rounded-2xl py-3.5 pl-4 pr-10 outline-none focus:border-insta-pink transition appearance-none font-semibold text-gray-800 text-sm sm:text-base" required onchange="toggleTroco()">
+                                <option value="" disabled selected>Como você vai pagar?</option>
+                                <option value="Pix">📱 Pix (Chave no WhatsApp)</option>
+                                <option value="Cartão">💳 Cartão (Máquina na entrega)</option>
+                                <option value="Dinheiro">💵 Dinheiro</option>
+                            </select>
+                            <i class="fas fa-chevron-down absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                        </div>
+
+                        <div id="troco-container" class="hidden mt-4 transition-all">
+                            <div class="relative">
+                                <label class="text-[10px] font-bold text-success-green uppercase tracking-widest absolute -top-2 left-3 bg-white px-1">Troco para quanto?</label>
+                                <input type="number" id="troco" placeholder="Ex: 50" class="w-full bg-green-50/20 border-2 border-green-100 rounded-2xl py-3.5 px-4 outline-none focus:border-success-green focus:bg-green-50/40 transition font-semibold text-gray-800 text-sm sm:text-base">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="btn-submit-hidden" class="hidden"></button>
+
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- DOCK UNIVERSAL DE CHECKOUT -->
+    <div id="checkout-floating-bar" class="fixed bottom-0 left-0 w-full z-[10070] pointer-events-none transform translate-y-full transition-transform duration-500 ease-out flex flex-col justify-end hidden">
+        <div class="w-full bg-gradient-to-t from-[#f3f4f6] via-[#f3f4f6]/95 to-transparent pt-8 px-4 flex justify-center" style="padding-bottom: calc(10vh + 16px + env(safe-area-inset-bottom)); pointer-events: none;">
+            
+            <div id="btn-finalizar" class="relative flex items-center justify-between bg-white/95 backdrop-blur-xl rounded-2xl p-4 sm:p-5 shadow-[0_20px_40px_rgba(0,0,0,0.15)] border border-gray-200/50 pointer-events-auto w-full max-w-[340px] cursor-pointer active:scale-95 transition-transform" onclick="document.getElementById('btn-submit-hidden').click()">
+                <div class="flex flex-col text-left leading-none pointer-events-none select-none">
+                    <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Total a Pagar</span>
+                    <span id="cart-total-floating" class="text-xl sm:text-2xl font-black text-gray-800 tracking-tight">R$ 0,00</span>
+                </div>
+                <div class="flex items-center gap-3 pointer-events-none select-none bg-green-50/80 px-4 py-2.5 rounded-xl border border-green-100 shadow-sm">
+                    <span class="text-sm sm:text-base font-bold text-success-green tracking-wide">Finalizar</span>
+                    <div class="bg-gradient-to-br from-success-green to-green-600 text-white text-xs font-black rounded-lg w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center shadow-md">
+                        <i class="fas fa-check"></i>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- MODAL DE RASTREIO (CLIENTE) -->
+    <div id="modal-rastreio" class="modal-wrapper flex items-center justify-center p-4 z-[10080]">
+        <div class="modal-overlay" onclick="fecharModal('modal-rastreio')"></div>
+        <div class="modal-content pb-0 bg-[#f3f4f6] w-full sm:w-[480px] rounded-[2.5rem] pt-6 sm:pt-7 shadow-2xl max-h-[90dvh] flex flex-col relative overflow-hidden">
+            
+            <div class="flex justify-between items-center mb-2 px-6 shrink-0 w-full relative z-20">
+                <div class="flex flex-col text-left">
+                    <h2 class="text-2xl sm:text-3xl font-display tracking-wide uppercase italic gradient-text pb-1 -ml-0.5" style="transform: skewX(-8deg);">Seu Pedido</h2>
+                    <p class="text-[10px] sm:text-xs text-gray-500 font-bold uppercase tracking-wider" id="rastreio-status-texto">Acompanhe em tempo real</p>
+                </div>
+                <button type="button" onclick="fecharModal('modal-rastreio')" class="text-gray-400 hover:text-gray-800 bg-transparent text-xl w-8 h-8 flex items-center justify-center transition z-20"><i class="fas fa-times"></i></button>
+            </div>
+
+            <!-- CONTAINER VAZIO (NENHUM PEDIDO) -->
+            <div id="rastreio-vazio" class="hidden flex-col items-center justify-center flex-1 px-6 pb-10 mt-10">
+                <div class="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center mb-4 text-gray-400 shadow-inner">
+                    <i class="fas fa-box-open text-4xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">Nenhum pedido rolando</h3>
+                <p class="text-sm text-gray-500 mb-8 text-center px-4">Você ainda não fez nenhum pedido hoje ou ele já foi entregue.</p>
+                <button onclick="fecharModal('modal-rastreio')" class="w-full gradient-bg text-white font-bold py-4 rounded-2xl shadow-lg hover:opacity-90 transition active:scale-95 text-base flex justify-center items-center gap-2">
+                    <i class="fas fa-hamburger"></i> Fazer Meu Pedido
+                </button>
+            </div>
+
+            <!-- CONTAINER ATIVO (COM PEDIDO) -->
+            <div id="rastreio-ativo" class="flex-col flex-1 flex overflow-hidden relative">
+                <!-- ABAS DE PEDIDOS (Aparece se houver mais de um) -->
+                <div id="rastreio-tabs" class="flex gap-2 overflow-x-auto px-6 mb-2 hidden custom-scroll shrink-0 pb-2"></div>
+
+                <div class="overflow-y-auto custom-scroll flex-1 px-6 pb-36 relative">
+                    <!-- TIMELINE DA ENTREGA -->
+                    <div class="relative pl-4 border-l-2 border-gray-100 ml-4 space-y-8 my-6" id="rastreio-timeline">
+                        <!-- Javascript injects steps here -->
+                    </div>
+
+                    <!-- RESUMO ESTILO CUPOM FISCAL -->
+                    <div class="mt-8 mb-4 mx-2">
+                        <div class="w-full h-3 bg-repeat-x" style="background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMCIgaGVpZ2h0PSIxMCI+PHBvbHlnb24gcG9pbnRzPSIwLDEwIDUsMCAxMCwxMCIgZmlsbD0iI2ZkZmJmNyIvPjwvc3ZnPg==');"></div>
+                        <div class="bg-[#fdfbf7] px-5 py-4 shadow-sm font-mono text-gray-700 flex flex-col">
+                            
+                            <div class="text-center border-b-2 border-dashed border-gray-300 pb-3 mb-3">
+                                <h4 class="text-base font-bold uppercase tracking-widest text-black">InstaLanches</h4>
+                                <p class="text-[10px] uppercase mt-0.5 font-bold">Cupom de Pedido</p>
+                            </div>
+                            
+                            <div class="flex justify-between items-center mb-3 text-xs font-bold border-b-2 border-dashed border-gray-300 pb-3">
+                                <span class="uppercase">Previsão de Entrega:</span>
+                                <span class="font-black text-sm text-black" id="rastreio-previsao-hora">--:--</span>
+                            </div>
+
+                            <div class="pt-1 mb-3 border-b-2 border-dashed border-gray-300 pb-3">
+                                <div class="flex justify-between text-[10px] uppercase font-bold mb-2 text-gray-400">
+                                    <span>QTD DESCRIÇÃO</span>
+                                    <span>VALOR</span>
+                                </div>
+                                <div id="rastreio-resumo-itens" class="space-y-1">
+                                    <!-- JS Injects Items -->
+                                    <div class="text-xs font-bold text-gray-800 uppercase leading-tight text-center">Carregando itens...</div>
+                                </div>
+                            </div>
+
+                            <!-- TOTAIS E PAGAMENTO -->
+                            <div class="space-y-1 mb-3 border-b-2 border-dashed border-gray-300 pb-3">
+                                <div class="flex justify-between text-xs font-bold text-gray-600">
+                                    <span class="uppercase">Subtotal</span>
+                                    <span id="rastreio-subtotal">--</span>
+                                </div>
+                                <div class="flex justify-between text-xs font-bold text-gray-600">
+                                    <span class="uppercase">Taxa de Entrega</span>
+                                    <span id="rastreio-taxa">--</span>
+                                </div>
+                                <div class="flex justify-between text-sm font-black text-black mt-2 pt-1">
+                                    <span class="uppercase">Total</span>
+                                    <span id="rastreio-total">--</span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex justify-between text-xs font-bold text-gray-600 mb-3">
+                                <span class="uppercase">Pagamento</span>
+                                <span id="rastreio-pagamento" class="uppercase">--</span>
+                            </div>
+
+                            <div class="border-t-2 border-dashed border-gray-300 pt-3 text-center">
+                                <p class="text-[10px] uppercase font-bold text-black">Obrigado pela preferência!</p>
+                            </div>
+                        </div>
+                        <div class="w-full h-3 bg-repeat-x" style="background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMCIgaGVpZ2h0PSIxMCI+PHBvbHlnb24gcG9pbnRzPSIwLDAgNSwxMCAxMCwwIiBmaWxsPSIjZmRmYmY3Ii8+PC9zdmc+');"></div>
+                    </div>
+
+                </div>
+                
+                <!-- DOCK DO BOTÃO DE ATUALIZAR -->
+                <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-[#f3f4f6] via-[#f3f4f6]/95 to-transparent pt-8 px-4 flex justify-center z-30" style="padding-bottom: calc(10vh + 16px + env(safe-area-inset-bottom));">
+                    <div class="relative flex items-center justify-center bg-white/95 backdrop-blur-xl rounded-2xl p-4 sm:p-5 shadow-[0_20px_40px_rgba(0,0,0,0.15)] border border-gray-200/50 pointer-events-auto w-full max-w-[340px] cursor-pointer active:scale-95 transition-transform" onclick="carregarRastreio()">
+                        <span class="text-sm sm:text-base font-black text-gray-800 tracking-wide flex items-center gap-2">
+                            <i class="fas fa-sync-alt text-insta-pink"></i> Atualizar Status
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Loja Fechada -->
+    <div id="modal-loja-fechada" class="modal-wrapper flex items-end sm:items-center justify-center">
+        <div class="modal-overlay" onclick="fecharModal('modal-loja-fechada')"></div>
+        <div class="modal-content pb-safe-modal bg-white w-full sm:w-[430px] rounded-t-[2.5rem] sm:rounded-[2.2rem] p-6 sm:p-7 shadow-2xl border border-insta-pink/10">
+            <div class="mx-auto w-20 h-20 rounded-full bg-gradient-to-br from-insta-pink/10 via-white to-insta-orange/20 border-4 border-white shadow-lg flex items-center justify-center -mt-16 mb-4">
+                <i class="fas fa-store-slash text-3xl text-insta-pink opacity-80"></i>
+            </div>
+            <div class="text-center">
+                <p class="text-[11px] uppercase tracking-[0.25em] text-gray-400 font-black mb-2">Atendimento</p>
+                <h3 id="titulo-loja-fechada" class="text-2xl font-bold text-gray-800">No momento estamos fechados</h3>
+                <p id="mensagem-loja-fechada" class="text-sm sm:text-base text-gray-500 leading-relaxed mt-4"></p>
+                <div class="mt-5 rounded-2xl bg-gradient-to-r from-insta-pink/5 via-insta-orange/10 to-insta-purple/5 border border-insta-pink/10 px-4 py-3">
+                    <p class="text-sm font-semibold text-gray-700" id="resumo-loja-fechada"></p>
+                </div>
+                <button onclick="fecharModal('modal-loja-fechada')" class="mt-6 w-full gradient-bg text-white font-bold py-3.5 rounded-2xl shadow-lg active:scale-95">Entendi 💖</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL LOGIN ADMIN MOBILE (RESTAURADO) -->
+    <div id="modal-admin-auth" class="modal-wrapper flex items-center justify-center p-4 z-[10090]">
+        <div class="modal-overlay" onclick="fecharModal('modal-admin-auth')"></div>
+        <div class="modal-content bg-white w-[95%] sm:w-[400px] rounded-[2rem] p-6 shadow-2xl flex flex-col relative">
+            <button onclick="fecharModal('modal-admin-auth')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-800 bg-gray-100 rounded-full w-8 h-8 flex items-center justify-center transition"><i class="fas fa-times"></i></button>
+            <div class="text-center mb-6">
+                <i class="fas fa-user-shield text-4xl text-insta-pink mb-3"></i>
+                <h3 class="text-xl font-bold text-gray-800">Acesso Restrito</h3>
+            </div>
+            <input type="password" id="senha-admin-mobile" placeholder="Senha do painel" class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl py-3 px-4 outline-none focus:border-insta-pink mb-4 text-center tracking-widest font-bold">
+            <button onclick="verificarSenhaAdminMobile()" class="w-full gradient-bg text-white font-bold py-3.5 rounded-xl shadow-lg active:scale-95">Aceder à Gestão</button>
+        </div>
+    </div>
+
+    <!-- MODAL ADMIN PANEL MOBILE (RESTAURADO EM FORMATO PÁGINA) -->
+    <div id="modal-admin-panel" class="modal-wrapper flex items-start sm:items-center justify-center p-0 sm:p-4 z-[10095]">
+        <div class="modal-overlay" onclick="fecharModal('modal-admin-panel')"></div>
+        <div class="modal-content pb-safe-modal bg-[#f3f4f6] w-full sm:w-[480px] h-[100dvh] sm:h-[90dvh] rounded-none sm:rounded-[2.5rem] flex flex-col relative overflow-hidden">
+            <div class="bg-white px-5 py-4 border-b border-gray-200 flex justify-between items-center shrink-0 shadow-sm z-10 pt-safe-top">
+                <h3 class="font-bold text-lg text-gray-800"><i class="fas fa-mobile-alt text-insta-pink mr-2"></i> Gestão Rápida</h3>
+                <div class="flex gap-4">
+                    <button onclick="carregarPedidosMobile()" class="text-gray-500 hover:text-insta-pink"><i class="fas fa-sync-alt text-lg"></i></button>
+                    <button onclick="fecharModal('modal-admin-panel')" class="text-gray-500 hover:text-gray-800"><i class="fas fa-times text-xl"></i></button>
+                </div>
+            </div>
+            <div class="flex-1 overflow-y-auto custom-scroll p-4 relative" id="mobile-admin-pedidos-lista">
+                <!-- Pedidos aqui -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL TECLADO VIRTUAL -->
+    <div id="virtual-input-overlay" class="fixed inset-0 z-[10090] hidden" style="z-index: 9999998 !important;">
+        <div id="virtual-overlay-bg" class="absolute inset-0 bg-black/60 backdrop-blur-sm opacity-0 transition-opacity duration-300 cursor-pointer" onclick="fecharTecladoVirtual()"></div>
+        
+        <div id="virtual-flying-container" class="fixed transition-all duration-300 ease-[cubic-bezier(0.2,1,0.3,1)] z-10 flex flex-col opacity-0 pointer-events-none">
+            <div class="flex justify-end mb-2">
+                <button type="button" onclick="fecharTecladoVirtual()" class="text-white bg-white/20 backdrop-blur-md border border-white/30 rounded-full w-8 h-8 flex items-center justify-center transition shadow-sm active:scale-95"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="virtual-input-field-container" class="w-full relative shadow-2xl rounded-2xl">
+            </div>
+            <div class="mt-3 shrink-0">
+                <button type="button" onclick="confirmarTecladoVirtual()" class="w-full gradient-bg text-white font-bold py-3.5 sm:py-4 rounded-2xl shadow-xl active:scale-95 transition flex items-center justify-center gap-2 text-base sm:text-lg border border-white/20">
+                    Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed z-[100000] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-2 sm:gap-3 opacity-0 pointer-events-none transition-all duration-300 scale-95 bg-gray-900/95 backdrop-blur-md text-white px-5 py-3.5 rounded-[2rem] shadow-[0_10px_25px_rgba(0,0,0,0.3)] border border-gray-700/50">
+        <i id="toast-icon" class="fas fa-check-circle text-success-green text-xl"></i>
+        <span id="toast-msg" class="font-bold text-xs sm:text-sm tracking-wide text-white">Ação realizada!</span>
+    </div>
+
+    <!-- ========================================================================================= -->
+    <!--                               JAVASCRIPT PRINCIPAL                                        -->
+    <!-- ========================================================================================= -->
+
+    <!-- LÓGICA DO ADMIN MOBILE -->
+    <script>
+        window.abrirAdminAuth = function(e) {
+            if(e) { e.preventDefault(); e.stopPropagation(); }
+            abrirModal('modal-admin-auth');
+        };
+
+        function verificarSenhaAdminMobile() {
+            const senha = document.getElementById('senha-admin-mobile').value;
+            if(senha === 'admin123') { 
+                fecharModal('modal-admin-auth');
+                document.getElementById('senha-admin-mobile').value = '';
+                abrirModal('modal-admin-panel');
+                carregarPedidosMobile();
+            } else {
+                showToast('Senha incorreta!', 'error');
+            }
+        }
+
+        function carregarPedidosMobile() {
+            const container = document.getElementById('mobile-admin-pedidos-lista');
+            container.innerHTML = '<div class="text-center py-10 text-gray-500"><i class="fas fa-circle-notch fa-spin text-3xl mb-3 text-insta-pink"></i><br>A procurar pedidos...</div>';
+            
+            if(isAppsScript() && google.script.run.obterPedidosAdmin) {
+                google.script.run.withSuccessHandler(dados => {
+                    renderizarPedidosMobile(dados || []);
+                }).withFailureHandler(() => {
+                    container.innerHTML = '<div class="text-center py-10 text-red-500 font-bold">Erro ao carregar os pedidos. Verifique se tem a função obterPedidosAdmin no seu script.</div>';
+                }).obterPedidosAdmin();
+            } else {
+                container.innerHTML = '<div class="text-center py-10 text-gray-400 font-bold"><i class="fas fa-info-circle text-4xl mb-2 text-gray-300"></i><br>O script não tem a função<br>obterPedidosAdmin.</div>';
+            }
+        }
+
+        function renderizarPedidosMobile(pedidos) {
+            const container = document.getElementById('mobile-admin-pedidos-lista');
+            if(!pedidos || pedidos.length === 0) {
+                container.innerHTML = '<div class="text-center py-10 text-gray-400 font-bold"><i class="fas fa-check-circle text-5xl mb-3 text-green-100"></i><br>Nenhum pedido pendente!</div>';
+                return;
+            }
+            
+            let html = '';
+            pedidos.forEach(p => {
+                const isDel = p.abaOrigem === 'DELIVERY';
+                const badge = isDel 
+                    ? `<span class="bg-blue-500 text-white text-[9px] px-2 py-0.5 rounded uppercase font-bold tracking-wider shadow-sm"><i class="fas fa-motorcycle"></i> Entregar</span>` 
+                    : `<span class="bg-purple-500 text-white text-[9px] px-2 py-0.5 rounded uppercase font-bold tracking-wider shadow-sm"><i class="fas fa-store"></i> Local</span>`;
+                
+                const whatsNum = p.whatsapp ? p.whatsapp.replace(/\D/g, '') : '';
+                let botoes = '';
+                
+                if(isDel) {
+                    botoes = `
+                        <button onclick="mudarStatusPedidoMobile(${p.linha}, 'Preparando', '${whatsNum}', '${p.nomeCliente}', '${p.abaOrigem}', this)" class="flex-1 py-2 text-[10px] font-bold rounded border bg-white text-gray-600 hover:bg-orange-50 shadow-sm ${p.status === 'Preparando' ? 'border-orange-400 text-orange-500' : 'border-gray-200'}">Prep.</button>
+                        <button onclick="mudarStatusPedidoMobile(${p.linha}, 'Saiu para entrega', '${whatsNum}', '${p.nomeCliente}', '${p.abaOrigem}', this)" class="flex-1 py-2 text-[10px] font-bold rounded border bg-white text-gray-600 hover:bg-blue-50 shadow-sm ${p.status === 'Saiu para entrega' ? 'border-blue-400 text-blue-500' : 'border-gray-200'}">Entregar</button>
+                        <button onclick="mudarStatusPedidoMobile(${p.linha}, 'Finalizado', '${whatsNum}', '${p.nomeCliente}', '${p.abaOrigem}', this)" class="flex-1 py-2 text-[10px] font-bold rounded border bg-white text-gray-600 hover:bg-green-50 shadow-sm border-gray-200">Finalizar</button>
+                    `;
+                } else {
+                    botoes = `
+                        <button onclick="mudarStatusPedidoMobile(${p.linha}, 'Preparando', '${whatsNum}', '${p.nomeCliente}', '${p.abaOrigem}', this)" class="flex-1 py-2 text-[10px] font-bold rounded border bg-white text-gray-600 hover:bg-orange-50 shadow-sm ${p.status === 'Preparando' ? 'border-orange-400 text-orange-500' : 'border-gray-200'}">Prep.</button>
+                        <button onclick="mudarStatusPedidoMobile(${p.linha}, 'Pronto', '${whatsNum}', '${p.nomeCliente}', '${p.abaOrigem}', this)" class="flex-1 py-2 text-[10px] font-bold rounded border bg-white text-gray-600 hover:bg-blue-50 shadow-sm ${p.status === 'Pronto' ? 'border-blue-400 text-blue-500' : 'border-gray-200'}">Pronto</button>
+                        <button onclick="mudarStatusPedidoMobile(${p.linha}, 'Finalizado', '${whatsNum}', '${p.nomeCliente}', '${p.abaOrigem}', this)" class="flex-1 py-2 text-[10px] font-bold rounded border bg-white text-gray-600 hover:bg-green-50 shadow-sm border-gray-200">Finalizar</button>
+                    `;
+                }
+
+                html += `
+                <div class="bg-white p-4 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.05)] border border-gray-100 flex flex-col gap-3 mb-3">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1 pr-2">
+                            <div class="flex items-center gap-2 mb-1">
+                                <h4 class="font-bold text-gray-800 text-sm truncate max-w-[150px]">${p.nomeCliente}</h4>
+                                ${badge}
+                            </div>
+                            <p class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest">${p.horaPedido} • <span class="text-insta-pink">${p.status}</span></p>
+                        </div>
+                        <a href="https://wa.me/${whatsNum}" target="_blank" class="w-8 h-8 rounded-full bg-green-50 text-success-green flex items-center justify-center shrink-0 shadow-sm border border-green-100"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 text-[11px] text-gray-700 whitespace-pre-wrap font-mono custom-scroll max-h-24 overflow-y-auto leading-snug">${p.item}</div>
+                    <div class="flex gap-2 mt-1 pt-1">
+                        ${botoes}
+                    </div>
+                </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function mudarStatusPedidoMobile(linha, status, whatsapp, nome, aba, btnElement) {
+            const oldHtml = btnElement.innerHTML;
+            btnElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            btnElement.disabled = true;
+
+            if(isAppsScript() && google.script.run.atualizarStatusPlanilha) {
+                google.script.run.withSuccessHandler(() => {
+                    showToast(status === 'Finalizado' ? 'Enviado para Gestão!' : 'Status Atualizado!');
+                    carregarPedidosMobile();
+                    if(whatsapp && status !== 'Finalizado') {
+                        if(confirm(`Avisar no WhatsApp de ${nome}?`)) {
+                            let numero = whatsapp.length <= 11 ? "55" + whatsapp : whatsapp;
+                            window.open(`https://wa.me/${numero}?text=${encodeURIComponent(`Olá, *${nome}*! O seu pedido mudou o estado para: *${status}*.`)}`, '_blank');
+                        }
+                    }
+                }).withFailureHandler(() => {
+                    showToast('Erro ao atualizar.', 'error');
+                    btnElement.innerHTML = oldHtml;
+                    btnElement.disabled = false;
+                }).atualizarStatusPlanilha(linha, status, '', aba);
+            } else {
+                showToast(`Teste Local: Status alterado para ${status}`);
+                btnElement.innerHTML = oldHtml;
+                btnElement.disabled = false;
+            }
+        }
+    </script>
+
+    <script>
+        let carrinho = []; 
+        let cardapioOriginal = []; 
+        let taxasOriginal = [];
+        let subtotalPreco = 0; 
+        let taxaPreco = 0;
+        let contadorNovosItens = {}; 
+        let configLojaGlob = { status: 'AUTO', mostrarBanner: true, textoBanner: '' };
+        let statusLoja = { aceitandoPedidos: true, bloqueadoManual: false, motivo: 'aberta', mensagemBanner: 'Aberto para pedidos', horario: { abre: 17, fecha: 23, diaFechado: 3, textoDiaFechado: 'Quarta-feira' } };
+        
+        let loopRastreio = null;
+
+        const TELEFONE_WHATSAPP = "5585991558671"; 
+
+        window.isModalOpen = false;
+        window.isFooterVisible = false;
+
+        let meuIdUsuario = localStorage.getItem('InstaLanches_UserID');
+        if (!meuIdUsuario) {
+            meuIdUsuario = 'cliente_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+            localStorage.setItem('InstaLanches_UserID', meuIdUsuario);
+        }
+
+        function atualizarVisibilidadeCarrinhoGlob() {
+            const barraCarrinho = document.getElementById('barra-flutuante-carrinho');
+            const cartModal = document.getElementById('cart-modal');
+            const isCartModalOpen = cartModal && cartModal.classList.contains('show');
+            const checkoutBar = document.getElementById('checkout-floating-bar');
+
+            if (barraCarrinho) {
+                if (carrinho.length === 0 || window.isModalOpen || window.isFooterVisible) {
+                    barraCarrinho.classList.add('translate-y-full');
+                    barraCarrinho.classList.remove('translate-y-0');
+                } else {
+                    barraCarrinho.classList.remove('translate-y-full');
+                    barraCarrinho.classList.add('translate-y-0');
+                }
+            }
+
+            if (checkoutBar && !isCartModalOpen) {
+                checkoutBar.classList.add('hidden');
+                checkoutBar.classList.add('translate-y-full');
+                checkoutBar.classList.remove('translate-y-0');
+            }
+        }
+        
+        const mapIconesCategorias = {
+            'hamburguer': 'https://res.cloudinary.com/de9bsqp2z/image/upload/v1773529854/4_symwgr.png',
+            'burguer': 'https://res.cloudinary.com/de9bsqp2z/image/upload/v1773529854/4_symwgr.png',
+            'espetinho': 'https://res.cloudinary.com/de9bsqp2z/image/upload/v1773529865/1_fkxedr.png',
+            'carne': 'https://res.cloudinary.com/de9bsqp2z/image/upload/v1773529865/1_fkxedr.png',
+            'frango': 'https://res.cloudinary.com/de9bsqp2z/image/upload/v1773529865/1_fkxedr.png',
+            'porcao': 'https://res.cloudinary.com/de9bsqp2z/image/upload/v1773543182/Por%C3%A7%C3%B5es_z9zhbr.png',
+            'porcoes': 'https://res.cloudinary.com/de9bsqp2z/image/upload/v1773543182/Por%C3%A7%C3%B5es_z9zhbr.png',
+            'batata': 'https://res.cloudinary.com/de9bsqp2z/image/upload/v1773543182/Por%C3%A7%C3%B5es_z9zhbr.png',
+            'prato': 'https://res.cloudinary.com/de9bsqp2z/image/upload/v1773534247/pratos_1_zjccts.png',
+            'refeicao': 'https://res.cloudinary.com/de9bsqp2z/image/upload/v1773534247/pratos_1_zjccts.png',
+            'lasanha': 'https://res.cloudinary.com/de9bsqp2z/image/upload/v1773534247/pratos_1_zjccts.png',
+            'pastel': 'https://res.cloudinary.com/de9bsqp2z/image/upload/v1773529842/3_yh0rpo.png',
+            'pasteis': 'https://res.cloudinary.com/de9bsqp2z/image/upload/v1773529842/3_yh0rpo.png',
+            'cerveja': 'https://res.cloudinary.com/de9bsqp2z/image/upload/v1773529864/5_sphdck.png',
+            'cervejas': 'https://res.cloudinary.com/de9bsqp2z/image/upload/v1773529864/5_sphdck.png',
+            'bebida': 'https://res.cloudinary.com/de9bsqp2z/image/upload/v1773529865/6_ul3jkg.png',
+            'bebidas': 'https://res.cloudinary.com/de9bsqp2z/image/upload/v1773529865/6_ul3jkg.png',
+            'suco': 'https://res.cloudinary.com/de9bsqp2z/image/upload/v1773529865/6_ul3jkg.png',
+            'refrigerante': 'https://res.cloudinary.com/de9bsqp2z/image/upload/v1773529865/6_ul3jkg.png'
+        };
+
+        const normalizarTexto = (str) => str ? str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : '';
+        const isAppsScript = () => typeof google !== 'undefined' && google.script && google.script.run;
+
+        function getIconeParaCategoria(categoria) {
+            const catLower = normalizarTexto(categoria);
+            for (const key in mapIconesCategorias) { if (catLower.includes(key)) return mapIconesCategorias[key]; }
+            return 'https://res.cloudinary.com/de9bsqp2z/image/upload/v1773529854/4_symwgr.png';
+        }
+
+        const dadosExemplo = [
+            { id: '1', categoria: 'Hambúrgueres', nome: 'X Tudão Completo', descricao: 'Pão, carne, queijo, frango, ovo, presunto, calabresa.', preco: 20.00, imagem: '' },
+            { id: '2', categoria: 'Porções', nome: 'Batata Frita Suprema', descricao: 'Com cheddar e bacon deliciosos e crocantes.', preco: 28.00, imagem: '' },
+            { id: '3', categoria: 'Bebidas', nome: 'Coca-Cola 2L', descricao: 'Bem gelada', preco: 12.00, imagem: '' }
+        ];
+
+        function obterStatusLocal() {
+            const horarioPadrao = { abre: 17, fecha: 23, diaFechado: 3, textoDiaFechado: 'Quarta-feira' };
+            try {
+                const configSalva = localStorage.getItem('InstaLanches_ConfigLoja');
+                if (configSalva) {
+                    const parsed = JSON.parse(configSalva);
+                    configLojaGlob.status = parsed.status || 'AUTO';
+                    configLojaGlob.mostrarBanner = parsed.mostrarBanner !== undefined ? parsed.mostrarBanner : true;
+                    configLojaGlob.textoBanner = parsed.textoBanner || '';
+                }
+
+                const agora = new Date();
+                const fechadoPorDia = agora.getDay() === horarioPadrao.diaFechado;
+                const fechadoPorHorario = agora.getHours() < horarioPadrao.abre || agora.getHours() >= horarioPadrao.fecha;
+                
+                let aceitandoPedidos = false;
+                let motivo = 'aberta';
+                let mensagemBanner = configLojaGlob.textoBanner || '';
+
+                if (configLojaGlob.status === 'FORCAR_ABERTO') {
+                    aceitandoPedidos = true;
+                    motivo = 'aberta';
+                } else if (configLojaGlob.status === 'FORCAR_FECHADO') {
+                    aceitandoPedidos = false;
+                    motivo = 'bloqueio_manual';
+                } else {
+                    if (fechadoPorDia) { aceitandoPedidos = false; motivo = 'dia_fechado'; }
+                    else if (fechadoPorHorario) { aceitandoPedidos = false; motivo = 'fora_do_horario'; }
+                    else { aceitandoPedidos = true; motivo = 'aberta'; }
+                }
+
+                return { aceitandoPedidos, bloqueadoManual: configLojaGlob.status === 'FORCAR_FECHADO', motivo, mensagemBanner, horario: horarioPadrao };
+            } catch (e) { return { aceitandoPedidos: true, bloqueadoManual: false, motivo: 'aberta', mensagemBanner: '', horario: horarioPadrao }; }
+        }
+
+        function carregarStatusLoja(callback) {
+            statusLoja = obterStatusLocal();
+            aplicarStatusLojaInterface();
+            if (typeof callback === 'function') callback();
+        }
+
+        function verificarPedidoAnterior() { 
+            if (localStorage.getItem('InstaLanches_UltimoPedido')) { 
+                document.getElementById('btn-repetir-pedido').classList.remove('hidden'); 
+            } 
+        }
+
+        function nomeDiaFechado(indice) {
+            const dias = ['Domingo', 'Segunda', 'Terça', 'Quarta-feira', 'Quinta', 'Sexta', 'Sábado'];
+            return dias[indice] || 'Dia indisponível';
+        }
+
+        function proximoDiaFuncionamento(diaAtual, diaFechado) {
+            for (let i = 1; i <= 7; i++) {
+                const dia = (diaAtual + i) % 7;
+                if (dia !== diaFechado) return dia;
+            }
+            return diaAtual;
+        }
+
+        function aplicarStatusLojaInterface() {
+            const statusBanner = document.getElementById('statusBanner');
+            const marqueeText = document.getElementById('marqueeText');
+            
+            const horario = statusLoja.horario || {};
+            const abre = horario.abre ?? 17;
+            const diaFechado = horario.diaFechado ?? 3;
+            
+            const aberto = !!statusLoja.aceitandoPedidos;
+            let textoBanner = configLojaGlob.textoBanner;
+
+            if (statusBanner) {
+                if (configLojaGlob.mostrarBanner) {
+                    statusBanner.style.display = 'flex';
+                    document.documentElement.style.setProperty('--banner-height', 'max(32px, calc(26px + env(safe-area-inset-top)))');
+                } else {
+                    statusBanner.style.display = 'none';
+                    document.documentElement.style.setProperty('--banner-height', '0px');
+                }
+            }
+
+            if (aberto) {
+                if (!textoBanner) textoBanner = '✨ ESTAMOS ABERTOS! FAÇA SEU PEDIDO AGORA 🍔🍟🥤 ✨';
+                if (statusBanner) statusBanner.style.background = 'linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)';
+                
+                document.querySelectorAll('[data-add-item]').forEach(btn => { 
+                    btn.disabled = false; 
+                    btn.classList.remove('opacity-60', 'cursor-not-allowed', 'pointer-events-none'); 
+                });
+            } else {
+                if (statusBanner) statusBanner.style.background = '#121212';
+                const agora = new Date();
+                const horaAtual = agora.getHours();
+                const diaAtual = agora.getDay();
+
+                if (!textoBanner) {
+                    if (statusLoja.motivo === 'bloqueio_manual') {
+                        textoBanner = '🔒 PAUSAMOS OS PEDIDOS TEMPORARIAMENTE. VOLTAMOS JÁ! ✨';
+                    } else if (statusLoja.motivo === 'dia_fechado') {
+                        const proxDia = proximoDiaFuncionamento(diaAtual, diaFechado);
+                        textoBanner = `😴 FECHADO • HOJE É NOSSO DIA DE DESCANSO! VOLTAMOS ${nomeDiaFechado(proxDia).toUpperCase()} ÀS ${String(abre).padStart(2, '0')}H 💖`;
+                    } else {
+                        if (horaAtual < abre) {
+                            textoBanner = `⏳ FECHADO • ABRIMOS ÀS ${String(abre).padStart(2, '0')}H! PREPARE SEU APETITE 🤤🍔`;
+                        } else {
+                            textoBanner = `🌙 FECHADO • ENCERRAMOS POR HOJE! VOLTAMOS AMANHÃ ÀS ${String(abre).padStart(2, '0')}H ✨`;
+                        }
+                    }
+                }
+
+                document.querySelectorAll('[data-add-item]').forEach(btn => { 
+                    btn.disabled = true; 
+                    btn.classList.add('opacity-60', 'cursor-not-allowed', 'pointer-events-none'); 
+                });
+            }
+
+            if (marqueeText) {
+                marqueeText.textContent = `${textoBanner} \u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0 ${textoBanner}`;
+            }
+            
+            atualizarVisibilidadeCarrinhoGlob();
+        }
+
+        function lojaAceitandoPedidos() { return !!statusLoja.aceitandoPedidos; }
+
+        function montarInterface(dados) {
+            cardapioOriginal = Array.isArray(dados) ? dados : [];
+            
+            const loader = document.getElementById('loader'); if (loader) loader.remove();
+            const cardapioLoading = document.getElementById('cardapio-loading'); if (cardapioLoading) cardapioLoading.remove();
+            
+            const categorias = [...new Set(cardapioOriginal.map(item => item.categoria))];
+            const navMenu = document.getElementById('menu-categorias'); const mainContainer = document.getElementById('container-cardapio');
+            navMenu.innerHTML = ''; mainContainer.innerHTML = '';
+
+            categorias.forEach((cat, index) => {
+                const sectionId = `sec-${normalizarTexto(cat).replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`;
+                navMenu.innerHTML += `<a href="#${sectionId}" class="nav-link text-gray-500 px-2.5 pb-3 text-sm sm:text-sm uppercase tracking-wider font-semibold shrink-0 ${index === 0 ? 'active' : ''}">${cat}</a>`;
+
+                const itensDaCategoria = cardapioOriginal.filter(item => item.categoria === cat);
+                let secaoHTML = `<section id="${sectionId}" class="mb-12 sm:mb-14 pt-4 animate-fade-in"><h2 class="text-2xl sm:text-2xl font-display text-gray-800 mb-5 sm:mb-6 flex items-center drop-shadow-sm pl-1 uppercase tracking-wider"><span class="w-2.5 h-6 gradient-bg mr-3 rounded-full"></span>${cat}</h2><div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">`;
+
+                itensDaCategoria.forEach(item => {
+                    secaoHTML += `
+                        <div class="group bg-white rounded-3xl p-4 sm:p-5 flex gap-4 sm:gap-5 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300 border border-gray-100/80 relative overflow-hidden transform hover:-translate-y-1">
+                            <div class="w-24 h-24 sm:w-28 sm:h-28 shrink-0 rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center border border-gray-200/50 shadow-inner relative z-10 group-hover:border-insta-orange/30 transition-colors">
+                                 <img class="categoria-img" src="${getIconeParaCategoria(item.categoria)}" alt="categoria">
+                            </div>
+                            <div class="flex flex-col flex-1 py-1 pr-1 relative z-10 min-w-0">
+                                <h3 class="font-bold text-gray-800 text-lg sm:text-base leading-tight mb-1 group-hover:text-insta-purple transition-colors break-words">${item.nome}</h3>
+                                <p class="text-gray-500 text-sm sm:text-xs line-clamp-3 sm:line-clamp-3 leading-relaxed mb-3 break-words">${item.descricao}</p>
+                                <div class="mt-auto flex items-center justify-between gap-3">
+                                    <span class="font-black text-insta-purple text-xl sm:text-lg tracking-tight shrink-0">R$ ${parseFloat(item.preco).toFixed(2).replace('.', ',')}</span>
+                                    <button onclick="tratarAdicaoItem('${item.id}')" data-add-item="${item.id}" class="bg-gray-900 text-white hover:bg-insta-pink rounded-xl w-10 h-10 sm:w-10 sm:h-10 flex items-center justify-center font-bold shadow-md hover:shadow-lg transition-all active:scale-95 shrink-0"><i class="fas fa-plus"></i></button>
+                                </div>
+                            </div>
+                        </div>`;
+                });
+                mainContainer.innerHTML += secaoHTML + `</div></section>`;
+            });
+            configurarNavegacao();
+            aplicarStatusLojaInterface();
+        }
+
+        function fecharTodosModais() { 
+            document.querySelectorAll('.modal-wrapper.show').forEach(modal => modal.classList.remove('show')); 
+            const cb = document.getElementById('checkout-floating-bar');
+            if(cb){ cb.classList.add('hidden'); cb.classList.add('translate-y-full'); cb.classList.remove('translate-y-0'); }
+            if (typeof isCheckoutReady !== 'undefined') isCheckoutReady = false;
+            
+            window.isModalOpen = false;
+            if(loopRastreio) clearInterval(loopRastreio);
+            if(typeof atualizarVisibilidadeCarrinhoGlob === 'function') atualizarVisibilidadeCarrinhoGlob();
+        }
+
+        function abrirModal(id) { 
+            const modal = document.getElementById(id); 
+            if (!modal) return; 
+            modal.classList.add('show'); 
+            if(id === 'cart-modal'){
+                if (typeof validarCheckout === 'function') validarCheckout();
+            }
+            if(id === 'modal-rastreio') {
+                carregarRastreio();
+                if(loopRastreio) clearInterval(loopRastreio);
+                loopRastreio = setInterval(carregarRastreioSilencioso, 5000); 
+            }
+            
+            window.isModalOpen = true;
+            if(typeof atualizarVisibilidadeCarrinhoGlob === 'function') atualizarVisibilidadeCarrinhoGlob();
+        }
+
+        function fecharModal(id) { 
+            const modal = document.getElementById(id); 
+            if (!modal) return; 
+            modal.classList.remove('show'); 
+            if (!document.querySelector('.modal-wrapper.show')) {
+                window.isModalOpen = false;
+            }
+            if(id === 'cart-modal'){
+                const cb = document.getElementById('checkout-floating-bar');
+                if(cb){ cb.classList.add('hidden'); cb.classList.add('translate-y-full'); cb.classList.remove('translate-y-0'); }
+                if (typeof isCheckoutReady !== 'undefined') isCheckoutReady = false;
+            }
+            if(id === 'modal-rastreio') {
+                if(loopRastreio) clearInterval(loopRastreio);
+            }
+            if(typeof atualizarVisibilidadeCarrinhoGlob === 'function') atualizarVisibilidadeCarrinhoGlob();
+        }
+
+        function configurarEventosGlobais() {
+            if (!document.body.dataset.globalEventsBound) {
+                document.body.dataset.globalEventsBound = 'true';
+                document.addEventListener('keydown', function(e) { if (e.key === 'Escape') fecharTodosModais(); });
+                
+                if (window.visualViewport) {
+                    window.visualViewport.addEventListener('resize', () => {
+                        if (inputAtivoParaTeclado) {
+                            const currentVh = window.visualViewport.height;
+                            const docVh = parseFloat(document.documentElement.style.getPropertyValue('--app-height') || window.innerHeight);
+                            if (currentVh > docVh * 0.85) {
+                                confirmarTecladoVirtual();
+                            }
+                        }
+                    });
+                }
+            }
+        }
+
+        // =========================================================================
+        // MÁGICA: TECLADO VIRTUAL DE SOBREPOSIÇÃO
+        // =========================================================================
+        let inputAtivoParaTeclado = null;
+        let rectOrigemTeclado = null;
+
+        function prepararInputsVirtuais() {
+            const isMobile = window.innerWidth <= 768 || ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+            if (!isMobile) return;
+
+            const inputs = document.querySelectorAll('input:not([type="radio"]):not([type="checkbox"]):not([type="hidden"]), textarea');
+            inputs.forEach(el => {
+                if (el.closest('#virtual-input-overlay')) return; 
+                
+                if(!el.dataset.virtualizado) {
+                    el.dataset.virtualizado = "true";
+                    el.setAttribute('readonly', 'true'); 
+                    el.classList.add('cursor-pointer');
+                    
+                    el.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        abrirTecladoVirtual(this);
+                    });
+                }
+            });
+        }
+
+        function abrirTecladoVirtual(elementoOrigem) {
+            inputAtivoParaTeclado = elementoOrigem;
+            rectOrigemTeclado = elementoOrigem.getBoundingClientRect();
+
+            const overlay = document.getElementById('virtual-input-overlay');
+            const bg = document.getElementById('virtual-overlay-bg');
+            const flyingContainer = document.getElementById('virtual-flying-container');
+            const fieldContainer = document.getElementById('virtual-input-field-container');
+
+            fieldContainer.innerHTML = '';
+            let novoInput;
+            const classesBase = "w-full bg-transparent text-white border border-white/40 rounded-2xl py-4 px-4 outline-none focus:border-insta-pink transition font-semibold text-lg placeholder-white/60";
+            
+            if (elementoOrigem.tagName === 'TEXTAREA') {
+                novoInput = document.createElement('textarea');
+                novoInput.className = classesBase + " h-28 resize-none";
+            } else {
+                novoInput = document.createElement('input');
+                novoInput.type = elementoOrigem.type;
+                if(elementoOrigem.step) novoInput.step = elementoOrigem.step;
+                novoInput.className = classesBase;
+            }
+            
+            novoInput.value = elementoOrigem.value;
+            let textoDica = elementoOrigem.placeholder || 'Digite aqui...';
+            const prevLabel = elementoOrigem.previousElementSibling;
+            if(prevLabel && prevLabel.tagName === 'LABEL') textoDica = prevLabel.innerText;
+            novoInput.placeholder = textoDica;
+
+            fieldContainer.appendChild(novoInput);
+
+            window.isModalOpen = true;
+            if(typeof atualizarVisibilidadeCarrinhoGlob === 'function') atualizarVisibilidadeCarrinhoGlob();
+
+            overlay.classList.remove('hidden');
+            flyingContainer.style.transition = 'none';
+            flyingContainer.style.top = `${rectOrigemTeclado.top}px`;
+            flyingContainer.style.left = `${rectOrigemTeclado.left}px`;
+            flyingContainer.style.width = `${rectOrigemTeclado.width}px`;
+            flyingContainer.style.opacity = '0';
+            flyingContainer.style.transform = 'scale(0.9)';
+            
+            void flyingContainer.offsetWidth;
+
+            bg.classList.remove('opacity-0');
+            bg.classList.add('opacity-100');
+            
+            flyingContainer.style.transition = 'all 0.35s cubic-bezier(0.2, 1.3, 0.3, 1)';
+            flyingContainer.style.opacity = '1';
+            flyingContainer.style.transform = 'scale(1)';
+            flyingContainer.style.pointerEvents = 'auto';
+            
+            const targetWidth = Math.min(window.innerWidth * 0.9, 450);
+            const targetLeft = (window.innerWidth - targetWidth) / 2;
+            const targetTop = window.innerHeight * 0.15; 
+            
+            flyingContainer.style.top = `${targetTop}px`;
+            flyingContainer.style.left = `${targetLeft}px`;
+            flyingContainer.style.width = `${targetWidth}px`;
+
+            setTimeout(() => {
+                novoInput.focus();
+                const len = novoInput.value.length;
+                if(novoInput.setSelectionRange) novoInput.setSelectionRange(len, len);
+            }, 350);
+
+            novoInput.addEventListener('keypress', function(e) {
+                if(e.key === 'Enter' && elementoOrigem.tagName !== 'TEXTAREA') {
+                    e.preventDefault();
+                    confirmarTecladoVirtual();
+                }
+            });
+
+            novoInput.addEventListener('blur', function() {
+                setTimeout(() => {
+                    if (inputAtivoParaTeclado && document.activeElement !== novoInput) {
+                        confirmarTecladoVirtual();
+                    }
+                }, 150); 
+            });
+        }
+
+        function confirmarTecladoVirtual() {
+            if(!inputAtivoParaTeclado) return;
+            const novoInput = document.getElementById('virtual-input-field-container').firstElementChild;
+            
+            inputAtivoParaTeclado.value = novoInput.value;
+            
+            inputAtivoParaTeclado.dispatchEvent(new Event('input', { bubbles: true }));
+            inputAtivoParaTeclado.dispatchEvent(new Event('change', { bubbles: true }));
+
+            fecharTecladoVirtual();
+        }
+
+        function fecharTecladoVirtual() {
+            if (!inputAtivoParaTeclado) return;
+            
+            const overlay = document.getElementById('virtual-input-overlay');
+            const bg = document.getElementById('virtual-overlay-bg');
+            const flyingContainer = document.getElementById('virtual-flying-container');
+            const novoInput = document.getElementById('virtual-input-field-container').firstElementChild;
+
+            if(novoInput) novoInput.blur();
+
+            rectOrigemTeclado = inputAtivoParaTeclado.getBoundingClientRect();
+
+            bg.classList.remove('opacity-100');
+            bg.classList.add('opacity-0');
+            
+            flyingContainer.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+            flyingContainer.style.opacity = '0';
+            flyingContainer.style.transform = 'scale(0.9)';
+            flyingContainer.style.top = `${rectOrigemTeclado.top}px`;
+            flyingContainer.style.left = `${rectOrigemTeclado.left}px`;
+            flyingContainer.style.width = `${rectOrigemTeclado.width}px`;
+            flyingContainer.style.pointerEvents = 'none';
+
+            // Correção mobile keyboard jump
+            window.scrollTo({ top: document.body.scrollTop, behavior: 'smooth' });
+
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+                inputAtivoParaTeclado = null;
+                
+                if (!document.querySelector('.modal-wrapper.show')) {
+                    window.isModalOpen = false;
+                }
+                if(typeof atualizarVisibilidadeCarrinhoGlob === 'function') atualizarVisibilidadeCarrinhoGlob();
+            }, 300);
+        }
+
+        function tratarAdicaoItem(id) {
+            const produto = cardapioOriginal.find(p => p.id === id);
+            if (!produto) return;
+            
+            if (normalizarTexto(produto.categoria).includes('hamburguer') || normalizarTexto(produto.categoria).includes('burguer')) {
+                document.getElementById('opcoes-nome-produto').textContent = produto.nome; 
+                document.getElementById('opcoes-id-produto').value = produto.id; 
+                
+                const radios = document.getElementsByName('tipo_pao');
+                if(radios.length > 0) radios[0].checked = true;
+
+                abrirModal('modal-opcoes');
+            } else { 
+                adicionarAoCarrinho(produto, null); 
+            }
+        }
+
+        function confirmarOpcoesEAdicionar() {
+            const produtoBase = cardapioOriginal.find(p => p.id === document.getElementById('opcoes-id-produto').value);
+            if (!produtoBase) return;
+
+            let opcaoEscolhida = ""; 
+            let precoAdicional = 0;
+
+            document.getElementsByName('tipo_pao').forEach(r => { 
+                if(r.checked) {
+                    opcaoEscolhida = r.value;
+                    precoAdicional = parseFloat(r.getAttribute('data-adicional')) || 0;
+                }
+            });
+
+            const produtoModificado = { 
+                ...produtoBase, 
+                id: produtoBase.id + '_' + opcaoEscolhida.replace(/\s/g, ''),
+                nome: `${produtoBase.nome} (${opcaoEscolhida})`,
+                preco: parseFloat(produtoBase.preco) + precoAdicional
+            };
+
+            adicionarAoCarrinho(produtoModificado, null); 
+            fecharModal('modal-opcoes');
+        }
+
+        function showToast(msg, tipo = 'success') {
+            const toast = document.getElementById('toast'); const icon = document.getElementById('toast-icon');
+            document.getElementById('toast-msg').textContent = msg; icon.className = tipo === 'success' ? 'fas fa-check-circle text-success-green text-xl' : 'fas fa-info-circle text-blue-400 text-xl';
+            toast.classList.remove('opacity-0', 'scale-95', 'pointer-events-none'); toast.classList.add('opacity-100', 'scale-100');
+            setTimeout(() => { toast.classList.remove('opacity-100', 'scale-100'); toast.classList.add('opacity-0', 'scale-95', 'pointer-events-none'); }, 3000);
+        }
+
+        function adicionarAoCarrinho(produto, opcao) {
+            const cartId = opcao ? `${produto.id}_${opcao}` : produto.id;
+            const existente = carrinho.find(item => item.cartId === cartId);
+            if (existente) { existente.quantidade++; } else { carrinho.push({ ...produto, cartId: cartId, quantidade: 1, opcaoEscolhida: opcao }); }
+            atualizarCarrinho(); 
+            showToast(`${produto.nome} foi adicionado!`);
+
+            const cartBtn = document.getElementById('barra-flutuante-carrinho');
+            if(cartBtn) {
+                cartBtn.classList.remove('translate-y-full');
+                void cartBtn.offsetWidth; 
+            }
+        }
+
+        function atualizarCarrinho() {
+            const container = document.getElementById('cart-items');
+            document.getElementById('cart-count').textContent = carrinho.reduce((s, i) => s + i.quantidade, 0);
+            
+            if (carrinho.length === 0) {
+                container.innerHTML = '<div class="text-center py-8 opacity-50"><p class="font-bold text-gray-500 text-sm">O carrinho está vazio</p></div>'; subtotalPreco = 0;
+            } else {
+                container.innerHTML = ''; subtotalPreco = 0;
+                carrinho.forEach((item, index) => {
+                    subtotalPreco += (parseFloat(item.preco) * item.quantidade);
+                    const opcaoHTML = item.opcaoEscolhida ? `<span class="block text-[10px] text-insta-orange bg-orange-50 px-2 py-1 rounded-md mt-1 w-fit border border-orange-100 font-bold uppercase tracking-wider">${item.opcaoEscolhida}</span>` : '';
+                    container.innerHTML += `
+                        <div class="flex justify-between items-center bg-white p-3 sm:p-4 rounded-2xl border border-gray-100 shadow-sm relative overflow-hidden">
+                            <div class="flex-1 pr-3"><h4 class="font-bold text-gray-800 text-sm leading-tight">${item.nome}</h4>${opcaoHTML}<p class="text-insta-purple font-black text-sm mt-1">R$ ${parseFloat(item.preco).toFixed(2).replace('.', ',')}</p></div>
+                            <div class="flex items-center gap-2 bg-gray-50 px-1.5 py-1.5 rounded-xl border border-gray-200"><button onclick="alterarQuantidade(${index}, -1)" class="text-gray-400 hover:text-red-500 w-7 h-7 flex items-center justify-center bg-white rounded-lg"><i class="fas fa-minus"></i></button><span class="font-black text-sm w-4 text-center text-gray-800">${item.quantidade}</span><button onclick="alterarQuantidade(${index}, 1)" class="text-insta-pink hover:text-white hover:bg-insta-pink w-7 h-7 flex items-center justify-center bg-white rounded-lg"><i class="fas fa-plus"></i></button></div>
+                        </div>`;
+                });
+            }
+            calcularTotal();
+            if(typeof atualizarVisibilidadeCarrinhoGlob === 'function') atualizarVisibilidadeCarrinhoGlob();
+        }
+
+        function alterarQuantidade(index, mudanca) { carrinho[index].quantidade += mudanca; if (carrinho[index].quantidade <= 0) carrinho.splice(index, 1); atualizarCarrinho(); }
+        
+        function calcularTotal() {
+            const tipo = document.getElementById('tipo-pedido')?.value;
+            taxaPreco = 0;
+            if (tipo === 'entrega') {
+                const select = document.getElementById('bairro-select');
+                if (select && select.selectedIndex > 0) {
+                    const taxaVal = select.options[select.selectedIndex].getAttribute('data-taxa');
+                    if (taxaVal) taxaPreco = parseFloat(taxaVal) || 0;
+                }
+            }
+            const total = subtotalPreco + taxaPreco;
+            
+            const cSub = document.getElementById('cart-subtotal'); if(cSub) cSub.textContent = `R$ ${subtotalPreco.toFixed(2).replace('.', ',')}`;
+            const cTax = document.getElementById('cart-taxa'); if(cTax) cTax.textContent = `R$ ${taxaPreco.toFixed(2).replace('.', ',')}`;
+            const cTot = document.getElementById('cart-total'); if(cTot) cTot.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+            const fTot = document.getElementById('floating-total'); if(fTot) fTot.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+            const fTotCheckout = document.getElementById('cart-total-floating'); if(fTotCheckout) fTotCheckout.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+            
+            if (typeof validarCheckout === 'function') validarCheckout();
+        }
+
+        function mudarTipoPedido() {
+            const tipo = document.getElementById('tipo-pedido').value;
+            const areaEntregaResumo = document.getElementById('area-entrega-resumo');
+            const areaMesa = document.getElementById('area-mesa');
+            
+            if (tipo === 'entrega') {
+                if(areaEntregaResumo) areaEntregaResumo.classList.remove('hidden');
+                if(areaMesa) areaMesa.classList.add('hidden');
+            } else if (tipo === 'mesa') {
+                if(areaEntregaResumo) areaEntregaResumo.classList.add('hidden');
+                if(areaMesa) areaMesa.classList.remove('hidden');
+                taxaPreco = 0;
+            } else {
+                if(areaEntregaResumo) areaEntregaResumo.classList.add('hidden');
+                if(areaMesa) areaMesa.classList.add('hidden');
+                taxaPreco = 0;
+            }
+            calcularTotal();
+        }
+
+        function toggleTroco() {
+            const pagamento = document.getElementById('pagamento').value;
+            const trocoContainer = document.getElementById('troco-container');
+            if (pagamento === 'Dinheiro') {
+                trocoContainer.classList.remove('hidden');
+            } else {
+                trocoContainer.classList.add('hidden');
+                document.getElementById('troco').value = '';
+            }
+        }
+
+        // =========================================================================
+        // PROCESSAR CHECKOUT E CRIAR CUPOM FISCAL
+        // =========================================================================
+        function processarCheckout(e) {
+            e.preventDefault();
+            if (carrinho.length === 0) return showToast('O seu carrinho está vazio', 'error');
+
+            const nome = document.getElementById('nome-cliente').value;
+            const whatsapp = document.getElementById('whatsapp-cliente').value.trim();
+            const tipoPedido = document.getElementById('tipo-pedido').value;
+            const pagamento = document.getElementById('pagamento').value;
+            let endereco = '';
+            let mesa = '';
+            
+            if (tipoPedido === 'entrega') {
+                const selectBairro = document.getElementById('bairro-select');
+                const bairro = selectBairro.options[selectBairro.selectedIndex]?.text.split(' - ')[0] || '';
+                const rua = document.getElementById('rua-input').value.trim();
+                const num = document.getElementById('numero-input').value.trim();
+                const ref = document.getElementById('referencia-input').value.trim();
+                
+                if(!bairro || !rua || !num || selectBairro.value === "") {
+                    return showToast('Preencha o seu endereço completo (Bairro, Rua e Número)!', 'error');
+                }
+                endereco = `${rua}, ${num} - ${bairro}. Ref: ${ref}`;
+            } else if (tipoPedido === 'mesa') {
+                mesa = `Mesa: ${document.getElementById('numero-mesa').value}`;
+            } else {
+                endereco = 'Retirada no local';
+            }
+
+            const total = subtotalPreco + taxaPreco;
+            const trocoPara = document.getElementById('troco').value;
+            const observacoes = trocoPara ? `Troco para R$ ${trocoPara}` : '';
+
+            let resumoItensCupom = "";
+            let msgWhatsapp = `🎉*NOVO PEDIDO*🎉\n\n*Cliente:* ${nome}\n*WhatsApp:* ${whatsapp}\n*Tipo:* ${tipoPedido.toUpperCase()}\n`;
+            if (tipoPedido === 'entrega') msgWhatsapp += `*Endereço:* ${endereco}\n\n`;
+            else if (tipoPedido === 'mesa') msgWhatsapp += `*Local:* ${mesa}\n\n`;
+            
+            msgWhatsapp += `*Itens:*\n`;
+            
+            carrinho.forEach(item => {
+                const op = item.opcaoEscolhida ? ` (${item.opcaoEscolhida})` : '';
+                const linhaPreco = `R$ ${(item.preco * item.quantidade).toFixed(2).replace('.', ',')}`;
+                msgWhatsapp += `${item.quantidade}x ${item.nome}${op} - ${linhaPreco}\n`;
+                resumoItensCupom += `${item.quantidade}x ${item.nome}${op} | ${linhaPreco}\n`; 
+            });
+
+            msgWhatsapp += `\n*Subtotal:* R$ ${subtotalPreco.toFixed(2).replace('.', ',')}\n*Taxa:* R$ ${taxaPreco.toFixed(2).replace('.', ',')}\n*TOTAL:* R$ ${total.toFixed(2).replace('.', ',')}\n\n*Pagamento:* ${pagamento}`;
+            if (trocoPara) msgWhatsapp += `\n*Troco para:* R$ ${trocoPara}`;
+
+            const url = `https://wa.me/${TELEFONE_WHATSAPP}?text=${encodeURIComponent(msgWhatsapp)}`;
+            
+            if (isAppsScript()) {
+                const agora = new Date();
+                const horaStr = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                const dataStr = agora.toLocaleDateString('pt-BR');
+                const previsaoDate = new Date(agora.getTime() + 60 * 60000); 
+                const previsaoStr = previsaoDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+                const pedidoCompleto = {
+                    idUsuario: meuIdUsuario,
+                    dataPedido: dataStr,
+                    horaPedido: horaStr,
+                    nome: nome,
+                    telefone: whatsapp,
+                    tipoPedido: tipoPedido,
+                    endereco: endereco,
+                    mesa: mesa,
+                    pagamento: pagamento,
+                    troco: trocoPara || '-',
+                    observacoes: observacoes || '-',
+                    taxaEntrega: taxaPreco,
+                    subtotal: subtotalPreco,
+                    total: total,
+                    itens: resumoItensCupom.trim(),
+                    previsao: previsaoStr,
+                    status: 'Recebido'
+                };
+                
+                if (google.script.run.enviarPedidoOficial) {
+                    google.script.run.withSuccessHandler(() => {
+                        document.getElementById('notif-dot').classList.remove('hidden');
+                        abrirModal('modal-rastreio');
+                    }).withFailureHandler(e => console.error("Erro ao registar pedido:", e)).enviarPedidoOficial(pedidoCompleto);
+                }
+            }
+
+            localStorage.setItem('InstaLanches_UltimoPedido', JSON.stringify(carrinho));
+            localStorage.setItem('InstaLanches_UltimoRecibo', JSON.stringify({
+                subtotal: subtotalPreco,
+                taxa: taxaPreco,
+                total: total,
+                pagamento: pagamento,
+                troco: trocoPara
+            }));
+            
+            document.getElementById('btn-repetir-pedido').classList.remove('hidden');
+
+            window.open(url, '_blank');
+            
+            carrinho = [];
+            atualizarCarrinho();
+            fecharModal('cart-modal');
+            showToast('Pedido enviado!');
+        }
+
+        function repetirUltimoPedido() {
+            const ultimo = localStorage.getItem('InstaLanches_UltimoPedido');
+            if (ultimo) {
+                carrinho = JSON.parse(ultimo);
+                atualizarCarrinho();
+                abrirModal('cart-modal');
+                showToast('Pedido recuperado com sucesso!');
+            }
+        }
+
+        let isClickScrolling = false;
+        let scrollTimeout;
+
+        function configurarNavegacao() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const navMenu = document.getElementById('menu-categorias');
+            const scrollArea = document.getElementById('main-scroll-area');
+
+            document.querySelectorAll('main section').forEach(sec => {
+                sec.style.scrollMarginTop = '15px'; 
+            });
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    isClickScrolling = true;
+                    
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const scrollPos = this.offsetLeft - (navMenu.clientWidth / 2) + (this.clientWidth / 2);
+                    navMenu.scrollTo({ left: scrollPos, behavior: 'smooth' });
+
+                    const targetEl = document.querySelector(this.getAttribute('href'));
+                    if (targetEl && scrollArea) {
+                        const topOffset = targetEl.getBoundingClientRect().top + scrollArea.scrollTop - scrollArea.getBoundingClientRect().top - 10; 
+                        scrollArea.scrollTo({ top: topOffset, behavior: 'smooth' });
+                    }
+                    
+                    clearTimeout(scrollTimeout);
+                    scrollTimeout = setTimeout(() => { isClickScrolling = false; }, 800);
+                });
+            });
+
+            const observer = new IntersectionObserver((entries) => {
+                if (isClickScrolling) return;
+                
+                let activeId = null;
+                let maxRatio = 0;
+                
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && entry.intersectionRatio > maxRatio) {
+                        maxRatio = entry.intersectionRatio;
+                        activeId = entry.target.id;
+                    }
+                });
+
+                if (activeId) {
+                    navLinks.forEach(link => {
+                        if (link.getAttribute('href').substring(1) === activeId) {
+                            if (!link.classList.contains('active')) {
+                                link.classList.add('active');
+                                const scrollPos = link.offsetLeft - (navMenu.clientWidth / 2) + (link.clientWidth / 2);
+                                navMenu.scrollTo({ left: scrollPos, behavior: 'smooth' });
+                            }
+                        } else {
+                            link.classList.remove('active');
+                        }
+                    });
+                }
+            }, { 
+                root: scrollArea,
+                rootMargin: `-10px 0px -80% 0px`,
+                threshold: [0, 0.1, 0.2, 0.5, 1.0]
+            });
+            
+            document.querySelectorAll('main section').forEach(sec => observer.observe(sec));
+        }
+
+        // =========================================================
+        // FUNÇÕES DE RASTREIO E CUPOM FISCAL 
+        // =========================================================
+        function mostrarRastreioVazio() {
+            const v = document.getElementById('rastreio-vazio');
+            const a = document.getElementById('rastreio-ativo');
+            if(v) { v.classList.remove('hidden'); v.classList.add('flex'); }
+            if(a) { a.classList.add('hidden'); a.classList.remove('flex'); }
+            document.getElementById('rastreio-status-texto').textContent = 'Nenhum pedido ativo';
+        }
+
+        function mostrarRastreioAtivo() {
+            const v = document.getElementById('rastreio-vazio');
+            const a = document.getElementById('rastreio-ativo');
+            if(v) { v.classList.add('hidden'); v.classList.remove('flex'); }
+            if(a) { a.classList.remove('hidden'); a.classList.add('flex'); }
+        }
+
+        function abrirRastreio() {
+            abrirModal('modal-rastreio');
+            carregarRastreio();
+        }
+
+        function carregarRastreio() {
+            const btnAtualizar = document.querySelector('#modal-rastreio .fa-sync-alt');
+            if(btnAtualizar) btnAtualizar.classList.add('fa-spin');
+
+            if (!isAppsScript()) {
+                setTimeout(() => {
+                    if(btnAtualizar) btnAtualizar.classList.remove('fa-spin');
+                    mostrarRastreioAtivo();
+                    renderizarCupomRastreio({
+                        status: 'Recebido',
+                        previsao: '23:45',
+                        item: '1x X Tudão Completo | R$ 20,00\n1x Coca-Cola 2L | R$ 12,00'
+                    });
+                }, 800);
+                return;
+            }
+
+            if (google.script.run.obterStatusDelivery) {
+                google.script.run.withSuccessHandler((pedido) => {
+                    if(btnAtualizar) btnAtualizar.classList.remove('fa-spin');
+                    if (pedido) {
+                        let pedidoFinal = pedido;
+                        if (Array.isArray(pedido)) pedidoFinal = pedido[0];
+                        if(pedidoFinal) {
+                            mostrarRastreioAtivo();
+                            renderizarCupomRastreio(pedidoFinal);
+                        } else {
+                            mostrarRastreioVazio();
+                        }
+                    } else {
+                        mostrarRastreioVazio();
+                    }
+                }).withFailureHandler((erro) => {
+                    if(btnAtualizar) btnAtualizar.classList.remove('fa-spin');
+                    showToast('Erro ao atualizar rastreio.', 'error');
+                }).obterStatusDelivery(meuIdUsuario);
+            }
+        }
+
+        function carregarRastreioSilencioso() {
+            if (!isAppsScript()) return;
+            if (google.script.run.obterStatusDelivery) {
+                google.script.run.withSuccessHandler((pedidos) => {
+                    if (pedidos && Array.isArray(pedidos) && pedidos.length > 0) {
+                        let mudou = false;
+                        if(pedidos.length !== pedidosRastreioCliente.length) mudou = true;
+                        else {
+                            for(let i=0; i<pedidos.length; i++) {
+                                if(pedidos[i].status !== pedidosRastreioCliente[i].status) mudou = true;
+                            }
+                        }
+                        pedidosRastreioCliente = pedidos;
+                        if (mudou) renderizarAbasRastreio();
+                    }
+                }).withFailureHandler((erro) => console.warn("Erro no rastreio silencioso:", erro)).obterStatusDelivery(meuIdUsuario);
+            }
+        }
+
+        function renderizarAbasRastreio() {
+            if (pedidosRastreioCliente.length === 0) {
+                mostrarRastreioVazio();
+                return;
+            }
+            mostrarRastreioAtivo();
+
+            const tabsContainer = document.getElementById('rastreio-tabs');
+            if (!tabsContainer) return;
+
+            if (pedidosRastreioCliente.length <= 1) {
+                tabsContainer.classList.add('hidden');
+            } else {
+                tabsContainer.classList.remove('hidden');
+                let html = '';
+                pedidosRastreioCliente.forEach((p, index) => {
+                    const isActive = index === abaRastreioAtual;
+                    const baseClass = "py-1.5 px-3 rounded-xl font-bold text-[11px] whitespace-nowrap transition-colors border cursor-pointer select-none uppercase tracking-wider";
+                    const activeClass = isActive ? "bg-insta-pink text-white border-insta-pink shadow-md" : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50";
+                    html += `<div onclick="mudarAbaRastreio(${index})" class="${baseClass} ${activeClass}"><i class="fas fa-receipt mr-1"></i> Pedido ${p.horaPedido}</div>`;
+                });
+                tabsContainer.innerHTML = html;
+            }
+
+            renderizarCupomRastreio(pedidosRastreioCliente[abaRastreioAtual]);
+        }
+
+        function mudarAbaRastreio(index) {
+            abaRastreioAtual = index;
+            renderizarAbasRastreio();
+        }
+
+        function renderizarCupomRastreio(pedido) {
+            const passos = ['Recebido', 'Preparando', 'Saiu para entrega', 'Entregue'];
+            let idxAtual = passos.indexOf(pedido.status);
+            if (idxAtual === -1) idxAtual = 0;
+
+            let timelineHTML = '';
+            passos.forEach((passo, i) => {
+                const ativo = i <= idxAtual;
+                const cor = ativo ? 'bg-success-green' : 'bg-gray-200';
+                const textoCor = ativo ? 'text-gray-800' : 'text-gray-400';
+                
+                let icone = '';
+                if(i===0) icone = 'fa-file-alt';
+                if(i===1) icone = 'fa-fire-burner';
+                if(i===2) icone = 'fa-motorcycle';
+                if(i===3) icone = 'fa-house-user';
+
+                timelineHTML += `
+                <div class="relative flex items-center gap-4">
+                    <div class="absolute -left-[25px] w-4 h-4 rounded-full ${cor} border-4 border-[#f3f4f6] flex items-center justify-center shadow-sm z-10 transition-colors duration-500"></div>
+                    <div class="w-8 h-8 rounded-full ${ativo ? 'bg-green-50 text-success-green' : 'bg-gray-50 text-gray-300'} flex items-center justify-center shadow-sm transition-colors duration-500">
+                        <i class="fas ${icone} text-sm"></i>
+                    </div>
+                    <div class="${textoCor} font-bold text-sm uppercase tracking-wider transition-colors duration-500">${passo}</div>
+                </div>
+                `;
+            });
+
+            const timelineContainer = document.getElementById('rastreio-timeline');
+            if (timelineContainer) timelineContainer.innerHTML = timelineHTML;
+
+            document.getElementById('rastreio-status-texto').textContent = `Status Atual: ${pedido.status}`;
+            document.getElementById('rastreio-previsao-hora').textContent = pedido.previsao || '--:--';
+
+            // Mágica para extrair e calcular os itens e preços do texto vindo da planilha
+            const linhasItens = (pedido.item || '').split('\n').filter(l => l.trim() !== '');
+            let itensHTML = '';
+            let subtotalCalculado = 0;
+
+            linhasItens.forEach(linha => {
+                const partes = linha.split('|');
+                const desc = partes[0].trim();
+                let precoStr = partes.length > 1 ? partes[1].trim() : '--';
+                
+                if (partes.length > 1) {
+                    const precoNum = parseFloat(precoStr.replace('R$', '').replace('.', '').replace(',', '.').trim());
+                    if (!isNaN(precoNum)) subtotalCalculado += precoNum;
+                }
+
+                itensHTML += `
+                <div class="flex justify-between items-start text-[11px] font-bold text-gray-800 leading-tight pb-1.5">
+                    <span class="flex-1 pr-2">${desc}</span>
+                    <span class="shrink-0 whitespace-nowrap">${precoStr}</span>
+                </div>`;
+            });
+
+            document.getElementById('rastreio-resumo-itens').innerHTML = itensHTML;
+
+            // Busca as taxas exatas que salvamos na hora do checkout
+            let reciboStr = localStorage.getItem('InstaLanches_UltimoRecibo');
+            let taxa = 0, total = subtotalCalculado, pagamento = pedido.pagamento || 'Não informado';
+            
+            if (reciboStr) {
+                try {
+                    const recibo = JSON.parse(reciboStr);
+                    const subLS = parseFloat(recibo.subtotal);
+                    taxa = parseFloat(recibo.taxa) || 0;
+                    total = parseFloat(recibo.total) || (subtotalCalculado + taxa);
+                    pagamento = recibo.pagamento || pagamento;
+                    
+                    if (!isNaN(subLS) && subLS > 0) subtotalCalculado = subLS;
+                } catch(e) {}
+            }
+
+            // Injeta os valores finais no cupom
+            document.getElementById('rastreio-subtotal').textContent = `R$ ${subtotalCalculado.toFixed(2).replace('.', ',')}`;
+            document.getElementById('rastreio-taxa').textContent = `R$ ${taxa.toFixed(2).replace('.', ',')}`;
+            document.getElementById('rastreio-total').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+            document.getElementById('rastreio-pagamento').textContent = pagamento;
+        }
+    </script>
+    <script>
+        function controlarCarrinhoFooter(){
+            const footer = document.querySelector('footer');
+            if(!footer) return;
+
+            const observer = new IntersectionObserver((entries)=>{
+                entries.forEach(entry=>{
+                    window.isFooterVisible = entry.isIntersecting;
+                    if(typeof atualizarVisibilidadeCarrinhoGlob === 'function') atualizarVisibilidadeCarrinhoGlob();
+                });
+            },{threshold:0.1});
+
+            observer.observe(footer);
+        }
+
+        window.addEventListener('load', ()=>{
+            controlarCarrinhoFooter();
+        });
+    </script>
+
+    <script>
+        function aplicarSVGsDepoisDeRender(){
+            const mapa = {
+                "hamb": "Hamburguer.svg",
+                "espet": "Espetinho.svg",
+                "pastel": "Patel.svg",
+                "por": "Porção.svg",
+                "beb": "Bebidas.svg",
+                "cerve": "Cerveja.svg"
+            };
+
+            document.querySelectorAll('#container-cardapio section').forEach(sec=>{
+                const titulo = (sec.querySelector('h2')?.innerText || '').toLowerCase();
+
+                let arquivo = null;
+                Object.keys(mapa).forEach(key=>{
+                if(titulo.includes(key)) arquivo = mapa[key];
+                });
+
+                if(!arquivo) return;
+
+                sec.querySelectorAll('i.fas').forEach(icon=>{
+                const img = document.createElement('img');
+                img.src = arquivo;
+                img.style.width = "48px";
+                img.style.height = "48px";
+                img.style.objectFit = "contain";
+                img.loading = "lazy";
+                icon.replaceWith(img);
+                });
+            });
+        }
+
+        window.addEventListener('load', ()=>{
+        setTimeout(aplicarSVGsDepoisDeRender, 800);
+        });
+    </script>
+
+    <script>
+        function mostrarLoaderCardapio(){
+            const c=document.querySelector('#container-cardapio');
+            if(!c) return;
+            if(!document.getElementById('cardapio-loading')){
+                c.innerHTML=`<div id="cardapio-loading">
+                <img src="https://res.cloudinary.com/de9bsqp2z/image/upload/v1773535880/omidas_tjylr6.gif">
+                <span>Carregando cardápio...</span>
+                </div>`;
+            }
+        }
+
+        function esconderLoaderCardapio(){
+            const l=document.getElementById('cardapio-loading');
+            if(l) l.remove();
+        }
+
+        function preencherSelectTaxas() {
+            const select = document.getElementById('bairro-select');
+            if(!select) return;
+            select.innerHTML = '<option value="" data-taxa="0">Selecione seu Bairro...</option>';
+            taxasOriginal.forEach(taxa => {
+                select.innerHTML += `<option value="${taxa.bairro}" data-taxa="${taxa.valor}">${taxa.bairro} - R$ ${parseFloat(taxa.valor).toFixed(2).replace('.', ',')}</option>`;
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            // ATIVA IMEDIATAMENTE O STATUS CORRETO DA LOJA
+            statusLoja = obterStatusLocal();
+            
+            // Tenta carregar do cache instantaneamente
+            const cacheCardapio = localStorage.getItem('InstaLanches_CardapioCache');
+            if (cacheCardapio) {
+                try {
+                    const dadosCached = JSON.parse(cacheCardapio);
+                    if (dadosCached && dadosCached.length > 0) montarInterface(dadosCached);
+                } catch(e) {}
+            } else {
+                mostrarLoaderCardapio();
+            }
+
+            // CARREGAMENTO MÁGICO DO GOOGLE SHEETS
+            if (isAppsScript()) {
+                if (google.script.run.obterConfiguracoes) {
+                    google.script.run.withSuccessHandler((config) => {
+                        if (config) {
+                            configLojaGlob.status = config.status;
+                            configLojaGlob.mostrarBanner = config.mostrarBanner;
+                            configLojaGlob.textoBanner = config.textoBanner;
+                            
+                            localStorage.setItem('InstaLanches_ConfigLoja', JSON.stringify(configLojaGlob));
+                            
+                            statusLoja = obterStatusLocal();
+                            aplicarStatusLojaInterface();
+                        }
+                    }).obterConfiguracoes();
+                }
+
+                if (google.script.run.obterTaxas) {
+                    google.script.run.withSuccessHandler((taxasNuvem) => {
+                        if (taxasNuvem && taxasNuvem.length > 0) {
+                            taxasOriginal = taxasNuvem;
+                        }
+                        preencherSelectTaxas();
+                    }).obterTaxas();
+                }
+
+                if (google.script.run.obterCardapio) {
+                    google.script.run.withSuccessHandler((dadosCardapio) => {
+                        if (dadosCardapio && dadosCardapio.length > 0) {
+                            // Atualiza a cache e a interface silenciosamente
+                            localStorage.setItem('InstaLanches_CardapioCache', JSON.stringify(dadosCardapio));
+                            montarInterface(dadosCardapio);
+                        } else {
+                            esconderLoaderCardapio();
+                            document.getElementById('container-cardapio').innerHTML = '<p class="text-center text-gray-500 py-10 font-bold">Nenhum item encontrado no cardápio.</p>';
+                        }
+                    }).withFailureHandler((erro) => {
+                        showToast('Erro ao carregar o cardápio!', 'error');
+                        esconderLoaderCardapio();
+                    }).obterCardapio();
+                }
+                
+                // Verifica o Rastreio silenciosamente
+                if (google.script.run.obterStatusDelivery) {
+                    google.script.run.withSuccessHandler((pedidos) => {
+                        let lista = [];
+                        if (pedidos) {
+                            if (Array.isArray(pedidos)) lista = pedidos;
+                            else if (typeof pedidos === 'object' && Object.keys(pedidos).length > 0) lista = [pedidos];
+                        }
+                        const temAtivo = lista.some(p => p && p.status !== 'Entregue' && p.status !== 'Finalizado');
+                        if (temAtivo) {
+                            document.getElementById('notif-dot').classList.remove('hidden');
+                        }
+                    }).obterStatusDelivery(meuIdUsuario);
+                }
+
+            } else {
+                taxasOriginal = [
+                    { id: 'taxa_1', bairro: 'Barra Nova', valor: 7.00 },
+                    { id: 'taxa_2', bairro: 'Estrada Velha', valor: 7.00 }
+                ];
+                preencherSelectTaxas();
+                setTimeout(() => { montarInterface(dadosExemplo); }, 800);
+            }
+
+            const formCheckout = document.getElementById('checkout-form');
+            if (formCheckout) {
+                formCheckout.addEventListener('input', validarCheckout);
+                formCheckout.addEventListener('change', validarCheckout);
+            }
+            
+            const target = document.querySelector('#container-cardapio');
+            if(!target) return;
+
+            const obs = new MutationObserver(() => {
+                if(target.querySelectorAll('.group').length > 0){
+                    esconderLoaderCardapio();
+                    obs.disconnect();
+                }
+            });
+
+            obs.observe(target,{childList:true,subtree:true});
+            setTimeout(prepararInputsVirtuais, 1000); 
+        });
+    </script>
+
+    <script>
+        // =========================================================
+        // VALIDAÇÃO E ANIMAÇÃO DE COMEMORAÇÃO DO CHECKOUT
+        // =========================================================
+        let isCheckoutReady = false;
+
+        function validarCheckout() {
+            const nome = document.getElementById('nome-cliente')?.value.trim();
+            const tipoPedido = document.getElementById('tipo-pedido')?.value;
+            const pagamento = document.getElementById('pagamento')?.value;
+            let enderecoOk = false;
+
+            if (tipoPedido === 'entrega') {
+                const selectBairro = document.getElementById('bairro-select');
+                const bairroOk = selectBairro && selectBairro.selectedIndex > 0;
+                const rua = document.getElementById('rua-input')?.value.trim();
+                const num = document.getElementById('numero-input')?.value.trim();
+                enderecoOk = !!(bairroOk && rua && num);
+            } else if (tipoPedido === 'mesa') {
+                const mesa = document.getElementById('numero-mesa')?.value.trim();
+                enderecoOk = !!mesa;
+            } else if (tipoPedido === 'retirada') {
+                enderecoOk = true;
+            }
+
+            const cartModal = document.getElementById('cart-modal');
+            const isCartModalOpen = cartModal && cartModal.classList.contains('show');
+
+            const tudoPreenchido = nome && tipoPedido && pagamento && enderecoOk && carrinho.length > 0 && isCartModalOpen;
+            const cb = document.getElementById('checkout-floating-bar');
+            const btnFinalizar = document.getElementById('btn-finalizar');
+
+            if (!cb || !btnFinalizar) return;
+
+            if (tudoPreenchido) {
+                if (!isCheckoutReady) {
+                    isCheckoutReady = true;
+                    cb.classList.remove('hidden');
+                    cb.classList.remove('translate-y-full');
+                    cb.classList.add('translate-y-0');
+                    btnFinalizar.classList.add('btn-checkout-ready');
+                    
+                    if (typeof confetti === 'function') {
+                        confetti({
+                            particleCount: 150,
+                            spread: 80,
+                            origin: { y: 0.85 },
+                            colors: ['#28a745', '#38ef7d', '#d6249f', '#fbad50', '#ffffff'],
+                            zIndex: 10016
+                        });
+                    }
+                }
+            } else {
+                isCheckoutReady = false;
+                cb.classList.add('translate-y-full');
+                cb.classList.remove('translate-y-0');
+                btnFinalizar.classList.remove('btn-checkout-ready');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const formCheckout = document.getElementById('checkout-form');
+            if (formCheckout) {
+                formCheckout.addEventListener('input', validarCheckout);
+                formCheckout.addEventListener('change', validarCheckout);
+            }
+        });
+    </script>
+
+    <script>
+        // =========================================================
+        // LÓGICA DE ARRASTAR O BOTÃO DO CARRINHO (ESTILINGUE)
+        // =========================================================
+        function initDraggableCart() {
+            const dragHandle = document.getElementById('cart-draggable-btn');
+            if (!dragHandle) return;
+
+            let isDragging = false;
+            let startY;
+            let dy = 0;
+            let wasDragged = false; 
+            
+            let maxUp = 0;
+            let maxDown = 0;
+
+            const dragStart = (e) => {
+                isDragging = true;
+                wasDragged = false;
+                
+                const telaLivre = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+                maxUp = telaLivre * -0.025; 
+                maxDown = telaLivre * 0.05; 
+
+                startY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+                
+                dragHandle.style.transition = 'none';
+                dragHandle.classList.add('cursor-grabbing');
+                dragHandle.classList.remove('cursor-grab');
+            };
+
+            const drag = (e) => {
+                if (!isDragging) return;
+                
+                const currentY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+                let rawDy = currentY - startY;
+
+                if (Math.abs(rawDy) > 15) {
+                    wasDragged = true;
+                    if(e.cancelable) e.preventDefault(); 
+                }
+
+                if (rawDy < maxUp) {
+                    dy = maxUp + (rawDy - maxUp) * 0.3;
+                } else if (rawDy > maxDown) {
+                    dy = maxDown + (rawDy - maxDown) * 0.3;
+                } else {
+                    dy = rawDy;
+                }
+
+                dragHandle.style.transform = `translateY(${dy}px)`;
+            };
+
+            const dragEnd = () => {
+                if (!isDragging) return;
+                isDragging = false;
+                
+                dragHandle.classList.remove('cursor-grabbing');
+                dragHandle.classList.add('cursor-grab');
+
+                dragHandle.style.transition = 'transform 0.5s cubic-bezier(0.2, 1.3, 0.3, 1)';
+                dragHandle.style.transform = `translateY(0px)`;
+                
+                dy = 0; 
+            };
+
+            dragHandle.addEventListener('click', (e) => {
+                if (wasDragged) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return;
+                }
+                abrirModal('cart-modal');
+            });
+
+            dragHandle.addEventListener('mousedown', dragStart);
+            document.addEventListener('mousemove', drag, { passive: false });
+            document.addEventListener('mouseup', dragEnd);
+
+            dragHandle.addEventListener('touchstart', dragStart, { passive: true });
+            document.addEventListener('touchmove', drag, { passive: false });
+            document.addEventListener('touchmove', drag, { passive: false });
+            document.addEventListener('touchend', dragEnd);
+            document.addEventListener('touchcancel', dragEnd);
+        }
+
+        window.addEventListener('load', () => {
+            setTimeout(initDraggableCart, 300);
+        });
+    </script>
+</body>
+</html>
