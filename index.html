@@ -4,6 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <!-- COMANDOS ANTI-CACHE (Obriga o telemóvel a ler o código mais recente) -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
     <meta name="theme-color" content="#d6249f">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -554,6 +560,10 @@
                             </label>
                         </div>
                     </div>
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                        <h4 class="font-bold text-gray-800 mb-3"><i class="fas fa-bullhorn text-insta-purple mr-2"></i> Letreiro Dinâmico</h4>
+                        <textarea id="admin-banner-loja" rows="2" placeholder="Ex: Hoje temos promoção de X-Tudo! Deixe em branco para mensagem padrão." class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 outline-none focus:border-insta-pink text-sm resize-none"></textarea>
+                    </div>
                     <button onclick="salvarConfiguracoesLoja(this)" class="w-full gradient-bg text-white font-bold py-4 rounded-xl shadow-md active:scale-95 flex items-center justify-center gap-2"><i class="fas fa-save"></i> Guardar Alterações</button>
                 </div>
 
@@ -671,7 +681,6 @@
         // ---------------------------------------------------------
         async function carregarConfiguracoesSupabase() {
             try {
-                // .order('id') garante que ele pegue sempre a linha certa, não importando a ordem no DB
                 const { data, error } = await supabaseClient.from('configuracoes').select('*').order('id', { ascending: true }).limit(1);
                 if (error && error.code !== '42P01') throw error; 
                 
@@ -683,11 +692,13 @@
                     configLojaGlob.mostrarBanner = false; 
                     configLojaGlob.textoBanner = '';
                     
-                    // CACHE LOCAL ELIMINADO AQUI: O sistema agora baseia-se 100% na verdade vinda do Supabase em tempo real!
                     statusLoja = calcularStatusLoja();
                     aplicarStatusLojaInterface();
                 }
-            } catch (err) { console.error("Aviso Configurações:", err); }
+            } catch (err) { 
+                console.error("Aviso Configurações:", err);
+                alert("Erro configuração: " + err.message);
+            }
         }
 
         async function carregarTaxasSupabase() {
@@ -696,7 +707,10 @@
                 if (error && error.code !== '42P01') throw error;
                 if (data && data.length > 0) { taxasOriginal = data; } else { taxasOriginal = [{ id: 'taxa_1', bairro: 'Taxa Padrão', taxa: 5.00 }]; }
                 preencherSelectTaxas();
-            } catch (err) { taxasOriginal = [{ id: 'taxa_1', bairro: 'Taxa Padrão', taxa: 5.00 }]; preencherSelectTaxas(); }
+            } catch (err) { 
+                taxasOriginal = [{ id: 'taxa_1', bairro: 'Taxa Padrão', taxa: 5.00 }]; 
+                preencherSelectTaxas(); 
+            }
         }
 
         async function carregarCardapioSupabase() {
@@ -812,7 +826,6 @@
             let novoStatus = 'AUTO'; document.getElementsByName('admin_loja_status').forEach(r => { if(r.checked) novoStatus = r.value; });
             
             try {
-                // Adicionado ordenação para assegurar que sempre atualiza o registro ID 1
                 const { data: existente } = await supabaseClient.from('configuracoes').select('id').order('id', { ascending: true }).limit(1);
                 let isAberto = true; let isManual = false;
                 if (novoStatus === 'FORCAR_ABERTO') { isAberto = true; isManual = true; } else if (novoStatus === 'FORCAR_FECHADO') { isAberto = false; isManual = true; }
@@ -824,8 +837,10 @@
 
                 if(error) throw error;
                 showToast('Loja atualizada com sucesso!'); carregarConfiguracoesSupabase(); 
-            } catch(e) { showToast('Erro Supabase: ' + (e.message || 'Falha ao guardar'), 'error'); } 
-            finally { btn.innerHTML = originalHtml; btn.disabled = false; }
+            } catch(e) { 
+                alert("Erro ao salvar loja: " + e.message);
+                showToast('Erro Supabase: ' + (e.message || 'Falha ao guardar'), 'error'); 
+            } finally { btn.innerHTML = originalHtml; btn.disabled = false; }
         }
 
         async function carregarAdminCardapio() {
@@ -847,7 +862,10 @@
                     });
                 }
                 container.innerHTML = html;
-            } catch(e) { container.innerHTML = `<p class="text-center text-red-500 font-bold p-4">Erro ao carregar cardápio</p>`; }
+            } catch(e) { 
+                alert("Erro admin cardápio: " + e.message);
+                container.innerHTML = `<p class="text-center text-red-500 font-bold p-4">Erro ao carregar cardápio</p>`; 
+            }
         }
 
         async function carregarAdminTaxas() {
@@ -870,27 +888,22 @@
                     });
                 }
                 container.innerHTML = html;
-            } catch(e) { container.innerHTML = `<p class="text-center text-red-500 font-bold p-4">Erro ao carregar taxas</p>`; }
+            } catch(e) { 
+                alert("Erro admin taxas: " + e.message);
+                container.innerHTML = `<p class="text-center text-red-500 font-bold p-4">Erro ao carregar taxas</p>`; 
+            }
         }
 
         async function adicionarTaxaAdmin(btn) {
-            const bairro = document.getElementById('nova-taxa-bairro').value.trim(); 
-            const valor = document.getElementById('nova-taxa-valor').value;
+            const bairro = document.getElementById('nova-taxa-bairro').value.trim(); const valor = document.getElementById('nova-taxa-valor').value;
             if(!bairro || !valor) return showToast('Preencha o bairro e o valor!', 'error');
-            
-            const originalHtml = btn.innerHTML; 
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; 
-            btn.disabled = true;
+            const originalHtml = btn.innerHTML; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; btn.disabled = true;
 
             try {
                 const { error } = await supabaseClient.from('taxas_entrega').insert([{ bairro: bairro, taxa: parseFloat(valor), ativo: true }]);
                 if(error) throw error;
-                
-                showToast('Taxa adicionada com sucesso!'); 
-                document.getElementById('nova-taxa-bairro').value = ''; 
-                document.getElementById('nova-taxa-valor').value = '';
-                carregarAdminTaxas(); 
-                carregarTaxasSupabase(); 
+                showToast('Taxa adicionada com sucesso!'); document.getElementById('nova-taxa-bairro').value = ''; document.getElementById('nova-taxa-valor').value = '';
+                carregarAdminTaxas(); carregarTaxasSupabase(); 
             } catch(e) { showToast('Erro Supabase: ' + (e.message || 'Falha ao adicionar'), 'error'); } 
             finally { btn.innerHTML = originalHtml; btn.disabled = false; }
         }
@@ -898,50 +911,20 @@
         async function deletarTaxaAdmin(id) {
             if(!confirm('Tem certeza que deseja apagar esta taxa?')) return;
             try {
-                const { error } = await supabaseClient.from('taxas_entrega').delete().eq('id', id); 
-                if(error) throw error;
-                
-                showToast('Taxa apagada!'); 
-                carregarAdminTaxas(); 
-                carregarTaxasSupabase();
+                const { error } = await supabaseClient.from('taxas_entrega').delete().eq('id', id); if(error) throw error;
+                showToast('Taxa apagada!'); carregarAdminTaxas(); carregarTaxasSupabase();
             } catch(e) { showToast('Erro: ' + (e.message || 'Falha ao apagar'), 'error'); }
         }
 
         async function carregarPedidosMobile() {
             const container = document.getElementById('mobile-admin-pedidos-lista');
             container.innerHTML = '<div class="text-center py-10 text-gray-500"><i class="fas fa-circle-notch fa-spin text-3xl mb-3 text-insta-pink"></i><br>Buscando pedidos...</div>';
-            
             try {
-                // Buscamos os pedidos base (MÉTODO ULTRA SEGURO, imune a erros de Foreign Key mal formatada)
-                const { data: pedidos, error } = await supabaseClient
-                    .from('pedidos')
-                    .select('*')
-                    .neq('status', 'Finalizado')
-                    .neq('status', 'Entregue')
-                    .order('id', { ascending: false });
-                    
+                const { data: pedidos, error } = await supabaseClient.from('pedidos').select('*, pedido_itens(*)').neq('status', 'Finalizado').neq('status', 'Entregue').order('id', { ascending: false });
                 if (error) throw error;
-                
-                // Em seguida, se houver pedidos, puxamos os itens
-                if(pedidos && pedidos.length > 0) {
-                    const ids = pedidos.map(p => p.id);
-                    const { data: itens, error: erroItens } = await supabaseClient
-                        .from('pedido_itens')
-                        .select('*')
-                        .in('pedido_id', ids);
-                        
-                    if(!erroItens && itens) {
-                        pedidos.forEach(p => { 
-                            p.pedido_itens = itens.filter(i => i.pedido_id === p.id); 
-                        });
-                    } else {
-                        // Se falhar os itens, devolvemos array vazio para não quebrar a tela
-                        pedidos.forEach(p => { p.pedido_itens = []; });
-                    }
-                }
-                
                 renderizarPedidosMobile(pedidos || []);
             } catch (err) { 
+                alert("Erro buscar pedidos: " + err.message);
                 container.innerHTML = `<div class="text-center py-10 text-red-500 font-bold">Erro: ${err.message || 'ao carregar pedidos.'}</div>`; 
             }
         }
@@ -988,17 +971,12 @@
         }
 
         async function mudarStatusPedidoMobile(idPedido, novoStatus, whatsapp, nome, btnElement) {
-            const oldHtml = btnElement.innerHTML; 
-            btnElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; 
-            btnElement.disabled = true;
-            
+            const oldHtml = btnElement.innerHTML; btnElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; btnElement.disabled = true;
             try {
                 const { error } = await supabaseClient.from('pedidos').update({ status: novoStatus }).eq('id', idPedido);
                 if (error) throw error;
-                
                 showToast(novoStatus.includes('Finalizado') || novoStatus.includes('Entregue') ? 'Enviado para Gestão!' : 'Status Atualizado!');
                 carregarPedidosMobile(); 
-                
                 if(whatsapp && !novoStatus.includes('Finalizado') && !novoStatus.includes('Entregue') && confirm(`Avisar no WhatsApp de ${nome}?`)) {
                     let numero = whatsapp.length <= 11 ? "55" + whatsapp : whatsapp;
                     window.open(`https://wa.me/${numero}?text=${encodeURIComponent(`Olá, *${nome}*! O seu pedido mudou o estado para: *${novoStatus}*.`)}`, '_blank');
@@ -1319,7 +1297,7 @@
         }
 
         // ---------------------------------------------------------
-        // 6. RASTREIO DE PEDIDOS
+        // 6. RASTREIO DE PEDIDOS E HISTÓRICO
         // ---------------------------------------------------------
         function mostrarRastreioVazio() {
             const v = document.getElementById('rastreio-vazio'); const a = document.getElementById('rastreio-ativo');
@@ -1341,24 +1319,16 @@
             if(btnAtualizar) btnAtualizar.classList.add('fa-spin');
 
             try {
-                // MÉTODO MANUAL INFALÍVEL
-                const { data: pedidos, error } = await supabaseClient.from('pedidos').select('*').eq('idUsuario', meuIdUsuario).order('id', { ascending: false });
+                const { data: pedidos, error } = await supabaseClient.from('pedidos').select('*, pedido_itens(*)').eq('idUsuario', meuIdUsuario).order('id', { ascending: false });
                 if (error) throw error;
 
                 if (pedidos && pedidos.length > 0) {
-                    const ids = pedidos.map(p => p.id);
-                    const { data: itens, error: erroItens } = await supabaseClient.from('pedido_itens').select('*').in('pedido_id', ids);
-                    if (!erroItens && itens) {
-                        pedidos.forEach(p => { p.pedido_itens = itens.filter(i => i.pedido_id === p.id); });
-                    } else {
-                        pedidos.forEach(p => { p.pedido_itens = []; });
-                    }
-
                     pedidosRastreioCliente = pedidos; abaRastreioAtual = 0; renderizarAbasRastreio();
                 } else { mostrarRastreioVazio(); }
             } catch (err) {
                 console.error(err);
-                showToast('Erro ao atualizar rastreio', 'error'); mostrarRastreioVazio();
+                alert("Erro ao atualizar rastreio: " + err.message);
+                mostrarRastreioVazio();
             } finally {
                 if(btnAtualizar) btnAtualizar.classList.remove('fa-spin');
             }
@@ -1366,15 +1336,8 @@
 
         async function carregarRastreioSilencioso() {
             try {
-                const { data: pedidos, error } = await supabaseClient.from('pedidos').select('*').eq('idUsuario', meuIdUsuario).order('id', { ascending: false });
+                const { data: pedidos, error } = await supabaseClient.from('pedidos').select('*, pedido_itens(*)').eq('idUsuario', meuIdUsuario).order('id', { ascending: false });
                 if (!error && pedidos && pedidos.length > 0) {
-                    
-                    const ids = pedidos.map(p => p.id);
-                    const { data: itens } = await supabaseClient.from('pedido_itens').select('*').in('pedido_id', ids);
-                    if(itens) {
-                        pedidos.forEach(p => { p.pedido_itens = itens.filter(i => i.pedido_id === p.id); });
-                    }
-
                     let mudou = false;
                     if(pedidos.length !== pedidosRastreioCliente.length) mudou = true;
                     else { for(let i=0; i<pedidos.length; i++) { if(pedidos[i].status !== pedidosRastreioCliente[i].status) mudou = true; } }
