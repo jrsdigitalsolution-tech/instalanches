@@ -899,11 +899,11 @@
                 // 1. Procurar se já existe alguma configuração guardada
                 const { data: existente, error: errSelect } = await supabaseClient.from('configuracoes').select('id').limit(1);
 
-                // O payload usa as colunas exatamente como você provavelmente as criou no Supabase
+                // O payload ajustado para letras minúsculas (padrão Postgres)
                 const configPayload = {
                     status: novoStatus,
-                    mostrarBanner: true,
-                    textoBanner: novoBanner
+                    mostrarbanner: true,
+                    textobanner: novoBanner
                 };
 
                 let error = null;
