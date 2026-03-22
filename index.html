@@ -699,9 +699,16 @@
                 
                 if (data && data.length > 0) {
                     const config = data[0];
-                    configLojaGlob.status = config.status || 'AUTO';
-                    configLojaGlob.mostrarBanner = config.mostrarBanner !== false && config.mostrarbanner !== false; // Lida com o nome da coluna se tiver ficado minúsculo
-                    configLojaGlob.textoBanner = config.textoBanner || config.textobanner || '';
+                    
+                    // Lógica adaptada para as suas colunas exatas: 'aberto' e 'modo_manual'
+                    if (config.modo_manual === true) {
+                        configLojaGlob.status = config.aberto ? 'FORCAR_ABERTO' : 'FORCAR_FECHADO';
+                    } else {
+                        configLojaGlob.status = 'AUTO';
+                    }
+                    
+                    configLojaGlob.mostrarBanner = false; // Desativado pois não há coluna na sua tabela
+                    configLojaGlob.textoBanner = '';
                     
                     localStorage.setItem('InstaLanches_ConfigLoja', JSON.stringify(configLojaGlob));
                     statusLoja = obterStatusLocal();
@@ -712,11 +719,11 @@
 
         async function carregarTaxasSupabase() {
             try {
-                const { data, error } = await supabaseClient.from('taxas_entrega').select('*').order('bairro');
+                const { data, error } = await supabaseClient.from('taxas_entrega').select('*');
                 if (error && error.code !== '42P01') throw error;
                 
                 if (data && data.length > 0) {
-                    taxasOriginal = data;
+                    taxasOriginal = data.sort((a,b) => (a.bairro || '').localeCompare(b.bairro || ''));
                 } else {
                     taxasOriginal = [{ id: 'taxa_1', bairro: 'Taxa Padrão', taxa: 5.00 }];
                 }
@@ -735,8 +742,9 @@
                 if (error) throw error;
 
                 if (data && data.length > 0) {
-                    localStorage.setItem('InstaLanches_CardapioCache', JSON.stringify(data));
-                    montarInterface(data);
+                    const dadosOrdenados = data.sort((a,b) => (a.categoria || '').localeCompare(b.categoria || ''));
+                    localStorage.setItem('InstaLanches_CardapioCache', JSON.stringify(dadosOrdenados));
+                    montarInterface(dadosOrdenados);
                 } else {
                     esconderLoaderCardapio();
                     document.getElementById('container-cardapio').innerHTML = '<p class="text-center text-gray-500 py-10 font-bold">Ainda não há produtos cadastrados no cardápio.</p>';
@@ -899,21 +907,24 @@
                 // 1. Procurar se já existe alguma configuração guardada
                 const { data: existente, error: errSelect } = await supabaseClient.from('configuracoes').select('id').limit(1);
 
-                // O payload ajustado para letras minúsculas (padrão Postgres)
+                // Payload ajustado APENAS para as colunas que existem na sua tabela
+                let isAberto = true;
+                let isManual = false;
+                
+                if (novoStatus === 'FORCAR_ABERTO') { isAberto = true; isManual = true; }
+                else if (novoStatus === 'FORCAR_FECHADO') { isAberto = false; isManual = true; }
+
                 const configPayload = {
-                    status: novoStatus,
-                    mostrarbanner: true,
-                    textobanner: novoBanner
+                    aberto: isAberto,
+                    modo_manual: isManual
                 };
 
                 let error = null;
 
                 if (existente && existente.length > 0) {
-                    // Atualiza a configuração existente
                     const res = await supabaseClient.from('configuracoes').update(configPayload).eq('id', existente[0].id);
                     error = res.error;
                 } else {
-                    // Insere uma nova configuração, porque a tabela está vazia
                     const res = await supabaseClient.from('configuracoes').insert([configPayload]);
                     error = res.error;
                 }
@@ -923,7 +934,6 @@
                 carregarConfiguracoesSupabase(); 
             } catch(e) {
                 console.error("Erro Configurações:", e);
-                // Esta mensagem diz-lhe EXATAMENTE o erro da Base de Dados!
                 showToast('Erro Supabase: ' + (e.message || 'Verifique as colunas na tabela configuracoes'), 'error');
             } finally {
                 btn.innerHTML = originalHtml;
@@ -935,12 +945,13 @@
             const container = document.getElementById('admin-lista-cardapio');
             container.innerHTML = '<div class="text-center p-8"><i class="fas fa-circle-notch fa-spin text-3xl text-insta-pink mb-2"></i><br><span class="text-sm text-gray-500">Buscando produtos...</span></div>';
             try {
-                const { data, error } = await supabaseClient.from('produto').select('*').order('categoria');
+                const { data, error } = await supabaseClient.from('produto').select('*');
                 if(error) throw error;
                 let html = '';
                 if(!data || data.length === 0) { html = '<div class="text-center bg-white p-6 rounded-2xl border border-gray-100"><p class="text-gray-400 font-bold">Nenhum produto cadastrado.</p></div>'; } 
                 else {
-                    data.forEach(p => {
+                    const dadosOrdenados = data.sort((a,b) => (a.categoria || '').localeCompare(b.categoria || ''));
+                    dadosOrdenados.forEach(p => {
                         html += `
                         <div class="bg-white p-4 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.03)] border border-gray-100 flex justify-between items-center gap-3">
                             <div class="flex-1 min-w-0">
@@ -961,13 +972,14 @@
             const container = document.getElementById('admin-lista-taxas');
             container.innerHTML = '<div class="text-center p-8"><i class="fas fa-circle-notch fa-spin text-3xl text-insta-pink mb-2"></i><br><span class="text-sm text-gray-500">Buscando taxas...</span></div>';
             try {
-                const { data, error } = await supabaseClient.from('taxas_entrega').select('*').order('bairro');
+                const { data, error } = await supabaseClient.from('taxas_entrega').select('*');
                 if(error) throw error;
                 let html = '';
                 if(!data || data.length === 0) { html = '<div class="text-center bg-white p-6 rounded-2xl border border-gray-100"><p class="text-gray-400 font-bold text-sm">Nenhuma taxa cadastrada.</p></div>'; } 
                 else {
-                    data.forEach(t => {
-                        const valorTaxa = t.taxa !== undefined ? t.taxa : t.valor; // Flexibilidade para o nome da coluna
+                    const dadosOrdenados = data.sort((a,b) => (a.bairro || '').localeCompare(b.bairro || ''));
+                    dadosOrdenados.forEach(t => {
+                        const valorTaxa = t.taxa !== undefined ? t.taxa : t.valor; 
                         html += `
                         <div class="bg-white p-4 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.03)] border border-gray-100 flex justify-between items-center group">
                             <span class="font-bold text-sm text-gray-700 uppercase tracking-wide flex-1 pr-2">${t.bairro}</span>
@@ -992,7 +1004,6 @@
             btn.disabled = true;
 
             try {
-                // Inserindo na tabela usando as colunas que estão na sua foto
                 const { error } = await supabaseClient.from('taxas_entrega').insert([{ bairro: bairro, taxa: parseFloat(valor), ativo: true }]);
                 if(error) throw error;
                 
@@ -1002,7 +1013,7 @@
                 carregarAdminTaxas(); carregarTaxasSupabase(); 
             } catch(e) { 
                 console.error("Erro ao adicionar taxa:", e);
-                showToast('Erro Supabase: ' + (e.message || 'Verifique as colunas na tabela taxas_entrega'), 'error'); 
+                showToast('Erro Supabase: ' + (e.message || 'Falha ao adicionar'), 'error'); 
             } finally {
                 btn.innerHTML = originalHtml; btn.disabled = false;
             }
