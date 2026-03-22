@@ -101,9 +101,9 @@
             .modal-wrapper { padding: 0 !important; align-items: flex-start !important; height: var(--app-height, 100dvh) !important; }
             .modal-content { width: 100% !important; height: 100% !important; max-height: 100% !important; border-radius: 0 !important; display: flex; flex-direction: column; padding-top: max(1.5rem, env(safe-area-inset-top)) !important; justify-content: flex-start; }
             .modal-content > button.absolute { top: max(1.25rem, env(safe-area-inset-top)) !important; right: 1.25rem !important; }
-            #modal-add-item.modal-wrapper, #modal-loja-fechada.modal-wrapper, #modal-opcoes.modal-wrapper, #modal-admin-auth.modal-wrapper { padding: 1rem !important; align-items: center !important; justify-content: center !important;}
-            #modal-add-item .modal-content, #modal-loja-fechada .modal-content, #modal-opcoes .modal-content, #modal-admin-auth .modal-content { width: 95% !important; height: auto !important; max-height: 90dvh !important; border-radius: 2rem !important; padding-top: 1.5rem !important; margin: auto; justify-content: flex-start !important; display: flex; flex-direction: column; }
-            #modal-add-item .modal-content > button.absolute, #modal-loja-fechada .modal-content > button.absolute, #modal-opcoes .modal-content > button.absolute, #modal-admin-auth .modal-content > button.absolute { top: 1.25rem !important; right: 1.25rem !important; }
+            #modal-loja-fechada.modal-wrapper, #modal-opcoes.modal-wrapper, #modal-admin-auth.modal-wrapper { padding: 1rem !important; align-items: center !important; justify-content: center !important;}
+            #modal-loja-fechada .modal-content, #modal-opcoes .modal-content, #modal-admin-auth .modal-content { width: 95% !important; height: auto !important; max-height: 90dvh !important; border-radius: 2rem !important; padding-top: 1.5rem !important; margin: auto; justify-content: flex-start !important; display: flex; flex-direction: column; }
+            #modal-loja-fechada .modal-content > button.absolute, #modal-opcoes .modal-content > button.absolute, #modal-admin-auth .modal-content > button.absolute { top: 1.25rem !important; right: 1.25rem !important; }
             #modal-admin-panel .modal-content { width: 100% !important; height: 100% !important; max-height: 100% !important; border-radius: 0 !important; padding-top: max(1.5rem, env(safe-area-inset-top)) !important; margin: 0; justify-content: flex-start !important; display: flex; flex-direction: column; }
         }
         
@@ -122,7 +122,7 @@
             #container-cardapio section > div.grid > div.group { padding: 1rem !important; gap: 1rem !important; border-radius: 1.6rem !important; }
         }
 
-        @keyframes slideUpFadeBar { 0% { opacity: 0; transform: translate(-50%, 80px) scale(0.8); } 60% { opacity: 1; transform: translate(-50%, -15px) scale(1.05); } 100% { opacity: 1; transform: translate(-50%, 0) scale(1); } }
+        @keyframes slideUpFadeBar { 0% { opacity: 0; transform: translate(-50%, 80px) scale(0.8); } 60% { opacity: 1; transform: translate(-50%, -5px) scale(1.05); } 100% { opacity: 1; transform: translate(-50%, 0) scale(1); } }
         .show-checkout-bar { display: flex !important; animation: slideUpFadeBar 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         
         @keyframes party-glow-pulse { 0% { transform: scale(1) translateX(-50%); left: 50%; } 50% { transform: scale(1.03) translateX(-50%); left: 50%; } 100% { transform: scale(1) translateX(-50%); left: 50%; } }
@@ -183,11 +183,8 @@
 
     <div id="main-scroll-area" class="custom-scroll relative w-full">
         
-        <!-- O botão de repetir pedido foi movido para os modais de rastreio -->
-
         <main class="max-w-5xl mx-auto px-4 py-4 mt-2 pb-8 w-full" id="container-cardapio"></main>
 
-        <!-- Ajuste fino de padding no footer para acompanhar os novos botões flutuantes (3vh em vez de 10vh) -->
         <footer class="relative w-full" style="background:#0b0b0b;color:white;text-align:center;font-family:Poppins; padding: 30px 16px calc(110px + 3vh + env(safe-area-inset-bottom));">
             <img src="https://res.cloudinary.com/de9bsqp2z/image/upload/v1773272375/logo_insta_lanches_instagram_transparente_rk9lxq.png" style="width:80px;margin:auto;opacity:.95;filter:drop-shadow(0 5px 12px rgba(0,0,0,.5));">
             <div style="margin-top:12px;font-size:13px;color:#cbd5e1;">📍 R. Rio de Janeiro, 295 • Caucaia - CE</div>
@@ -205,7 +202,6 @@
 
     <!-- DOCK UNIVERSAL E MODAIS -->
     <div id="barra-flutuante-carrinho" class="fixed bottom-0 left-0 w-full z-[10015] pointer-events-none transform translate-y-full transition-transform duration-500 ease-out flex flex-col justify-end">
-        <!-- Alterado de 10vh para 3vh para deixar 10% mais para baixo -->
         <div class="w-full bg-gradient-to-t from-[#f8f9fa] via-[#f8f9fa]/95 to-transparent pt-8 px-4 flex justify-center" style="padding-bottom: calc(3vh + 16px + env(safe-area-inset-bottom)); pointer-events: none;">
             <div id="cart-draggable-btn" class="relative flex items-center justify-between bg-white/90 backdrop-blur-xl rounded-2xl p-4 sm:p-5 shadow-[0_20px_40px_rgba(0,0,0,0.15)] border border-gray-200/50 pointer-events-auto w-full max-w-[340px] cursor-grab active:cursor-grabbing transition-transform">
                 <div class="flex flex-col text-left leading-none pointer-events-none select-none">
@@ -273,7 +269,6 @@
                 <button type="button" onclick="fecharModal('cart-modal')" class="text-gray-400 hover:text-gray-800 bg-transparent text-xl w-8 h-8 flex items-center justify-center transition z-20"><i class="fas fa-times"></i></button>
             </div>
 
-            <!-- Adicionado pb-48 (ao invés de 36) para garantir que o conteúdo não fique escondido sob os botões -->
             <div class="overflow-y-auto custom-scroll flex-1 pr-1 pb-48 relative">
 
                 <div class="bg-white rounded-[1.5rem] p-4 shadow-sm border border-gray-100/80 mb-4 mt-2 flex flex-col">
@@ -373,7 +368,6 @@
     </div>
     
     <div id="checkout-floating-bar" class="fixed bottom-0 left-0 w-full z-[10070] pointer-events-none transform translate-y-full transition-transform duration-500 ease-out flex flex-col justify-end hidden">
-        <!-- Alterado de 10vh para 3vh para deixar 10% mais para baixo -->
         <div class="w-full bg-gradient-to-t from-[#f3f4f6] via-[#f3f4f6]/95 to-transparent pt-8 px-4 flex justify-center" style="padding-bottom: calc(3vh + 16px + env(safe-area-inset-bottom)); pointer-events: none;">
             <div id="btn-finalizar" class="relative flex items-center justify-between bg-white/95 backdrop-blur-xl rounded-2xl p-4 sm:p-5 shadow-[0_20px_40px_rgba(0,0,0,0.15)] border border-gray-200/50 pointer-events-auto w-full max-w-[340px] cursor-pointer active:scale-95 transition-transform" onclick="document.getElementById('btn-submit-hidden').click()">
                 <div class="flex flex-col text-left leading-none pointer-events-none select-none">
@@ -402,7 +396,6 @@
                 <button type="button" onclick="fecharModal('modal-rastreio')" class="text-gray-400 hover:text-gray-800 bg-transparent text-xl w-8 h-8 flex items-center justify-center transition z-20"><i class="fas fa-times"></i></button>
             </div>
 
-            <!-- TELA VAZIA DO RASTREIO -->
             <div id="rastreio-vazio" class="hidden flex-col items-center justify-center flex-1 px-6 pb-10 mt-10">
                 <div class="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center mb-4 text-gray-400 shadow-inner">
                     <i class="fas fa-box-open text-4xl"></i>
@@ -412,16 +405,13 @@
                 <button onclick="fecharModal('modal-rastreio')" class="w-full gradient-bg text-white font-bold py-4 rounded-2xl shadow-lg hover:opacity-90 transition active:scale-95 text-base flex justify-center items-center gap-2 mb-3">
                     <i class="fas fa-hamburger"></i> Fazer Meu Pedido
                 </button>
-                <!-- Botão de Repetir Pedido Grande (Quando vazio) -->
                 <button id="btn-repetir-vazio" onclick="repetirUltimoPedido()" class="hidden w-full bg-gradient-to-r from-gray-800 to-gray-900 text-white font-semibold py-4 rounded-2xl shadow-lg justify-center items-center gap-2 hover:opacity-90 transition active:scale-95 text-base">
                     <i class="fas fa-redo"></i> Repetir Último Pedido
                 </button>
             </div>
 
-            <!-- TELA ATIVA DO RASTREIO -->
             <div id="rastreio-ativo" class="flex-col flex-1 flex overflow-hidden relative">
                 <div id="rastreio-tabs" class="flex gap-2 overflow-x-auto px-6 mb-2 hidden custom-scroll shrink-0 pb-2"></div>
-                <!-- Adicionado pb-48 para não sobrepor aos botões abaixo -->
                 <div class="overflow-y-auto custom-scroll flex-1 px-6 pb-48 relative">
                     <div class="relative pl-4 border-l-2 border-gray-100 ml-4 space-y-8 my-6" id="rastreio-timeline"></div>
                     <div class="mt-8 mb-4 mx-2">
@@ -453,7 +443,6 @@
                         <div class="w-full h-3 bg-repeat-x" style="background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMCIgaGVpZ2h0PSIxMCI+PHBvbHlnb24gcG9pbnRzPSIwLDAgNSwxMCAxMCwwIiBmaWxsPSIjZmRmYmY3Ii8+PC9zdmc+');"></div>
                     </div>
                 </div>
-                <!-- Rodapé do Rastreio com botão pequeno de Repetir -->
                 <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-[#f3f4f6] via-[#f3f4f6]/95 to-transparent pt-8 px-4 flex flex-col justify-end items-center z-30 gap-2.5" style="padding-bottom: calc(3vh + 16px + env(safe-area-inset-bottom));">
                     <button id="btn-repetir-ativo" onclick="repetirUltimoPedido()" class="hidden relative items-center justify-center bg-gray-800 text-white rounded-2xl p-3.5 shadow-md pointer-events-auto w-full max-w-[340px] cursor-pointer active:scale-95 transition-transform text-sm font-bold border border-gray-700">
                         <i class="fas fa-redo mr-2"></i> Repetir Último Pedido
@@ -650,7 +639,7 @@
             'agua': 'https://res.cloudinary.com/de9bsqp2z/image/upload/v1773529865/6_ul3jkg.png'
         };
 
-        const normalizarTexto = (str) => str ? str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : '';
+        const normalizarTexto = (str) => str ? String(str).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : '';
         
         function getIconeParaCategoria(categoria) {
             const catLower = normalizarTexto(categoria);
@@ -704,8 +693,8 @@
                 if (error) throw error;
 
                 if (data && data.length > 0) {
+                    safeStorage.setItem('InstaLanches_CardapioCacheV3', JSON.stringify(data));
                     montarInterface(data);
-                    safeStorage.setItem('InstaLanches_CardapioCache', JSON.stringify(data));
                 } else {
                     esconderLoaderCardapio();
                     document.getElementById('container-cardapio').innerHTML = '<p class="text-center text-gray-500 py-10 font-bold">Ainda não há produtos cadastrados no cardápio.</p>';
@@ -975,7 +964,6 @@
             finally { if(btnElement) { btnElement.innerHTML = oldHtml; btnElement.disabled = false; } }
         }
 
-        // LÓGICA DE ORDENAÇÃO E CATEGORIAS ATUALIZADA (Bebidas no final)
         function montarInterface(dados) {
             cardapioOriginal = Array.isArray(dados) ? dados : [];
             const cardapioLoading = document.getElementById('cardapio-loading'); if (cardapioLoading) cardapioLoading.remove();
@@ -985,8 +973,9 @@
             const categorias = [...new Set(cardapioOriginal.map(item => item.categoria || 'Diversos'))].sort((a, b) => {
                 const aLower = normalizarTexto(a);
                 const bLower = normalizarTexto(b);
-                const isABebida = aLower.includes('bebida') || aLower.includes('cerveja') || aLower.includes('suco') || aLower.includes('refrigerante') || aLower.includes('agua');
-                const isBBebida = bLower.includes('bebida') || bLower.includes('cerveja') || bLower.includes('suco') || bLower.includes('refrigerante') || bLower.includes('agua');
+                const palavrasBebida = ['bebida', 'cerveja', 'suco', 'refrigerante', 'agua'];
+                const isABebida = palavrasBebida.some(p => aLower.includes(p));
+                const isBBebida = palavrasBebida.some(p => bLower.includes(p));
                 
                 if (isABebida && !isBBebida) return 1; 
                 if (!isABebida && isBBebida) return -1; 
@@ -1205,15 +1194,11 @@
             const btnAtivo = document.getElementById('btn-repetir-ativo');
             
             if(temPedido) {
-                if(btnVazio) btnVazio.classList.remove('hidden');
-                if(btnAtivo) btnAtivo.classList.remove('hidden');
-                if(btnVazio) btnVazio.classList.add('flex');
-                if(btnAtivo) btnAtivo.classList.add('flex');
+                if(btnVazio) { btnVazio.classList.remove('hidden'); btnVazio.classList.add('flex'); }
+                if(btnAtivo) { btnAtivo.classList.remove('hidden'); btnAtivo.classList.add('flex'); }
             } else {
-                if(btnVazio) btnVazio.classList.add('hidden');
-                if(btnAtivo) btnAtivo.classList.add('hidden');
-                if(btnVazio) btnVazio.classList.remove('flex');
-                if(btnAtivo) btnAtivo.classList.remove('flex');
+                if(btnVazio) { btnVazio.classList.add('hidden'); btnVazio.classList.remove('flex'); }
+                if(btnAtivo) { btnAtivo.classList.add('hidden'); btnAtivo.classList.remove('flex'); }
             }
         }
 
@@ -1492,7 +1477,7 @@
             const modal = document.getElementById(id); if (!modal) return; 
             modal.classList.add('show'); 
             if(id === 'cart-modal') validarCheckout();
-            if(id === 'modal-rastreio') { carregarRastreio(); if(loopRastreio) clearInterval(loopRastreio); loopRastreio = setInterval(carregarRastreioSilencioso, 5000); atualizarBotoesRepetirPedido(); }
+            if(id === 'modal-rastreio') { carregarRastreio(); if(loopRastreio) clearInterval(loopRastreio); loopRastreio = setInterval(carregarRastreioSilencioso, 5000); }
             window.isModalOpen = true; atualizarVisibilidadeCarrinhoGlob();
         }
 
@@ -1596,7 +1581,7 @@
 
         document.addEventListener("DOMContentLoaded", () => {
             statusLoja = calcularStatusLoja();
-            const cacheCardapio = safeStorage.getItem('InstaLanches_CardapioCacheV2');
+            const cacheCardapio = safeStorage.getItem('InstaLanches_CardapioCacheV3');
             if (cacheCardapio) { try { const dadosCached = JSON.parse(cacheCardapio); if (dadosCached && dadosCached.length > 0) montarInterface(dadosCached); } catch(e) {} } 
             else { mostrarLoaderCardapio(); }
 
@@ -1605,6 +1590,7 @@
             carregarCardapioSupabase();
             atualizarBotoesRepetirPedido();
 
+            // Notificação silenciosa baseada nos IDs locais
             setTimeout(async () => {
                 try {
                     let meusPedidosIds = JSON.parse(safeStorage.getItem('Insta_Ids_Pedidos_Locais') || '[]');
