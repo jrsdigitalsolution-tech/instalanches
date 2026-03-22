@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
-    <!-- COMANDOS ANTI-CACHE (Obriga o telemóvel a ler o código mais recente) -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -15,7 +14,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>InstaLanches - Cardápio Premium</title>
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
     
@@ -34,17 +32,12 @@
                     animation: {
                         'fade-in': 'fadeIn 0.4s ease-out forwards',
                         'slide-up': 'slideUp 0.4s ease-out',
-                    },
-                    keyframes: {
-                        fadeIn: { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
-                        slideUp: { '0%': { opacity: '0', transform: 'translateY(20px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } }
                     }
                 }
             }
         }
     </script>
     
-    <!-- MÁGICA DO APP SHELL -->
     <script>
         function setAppHeight() {
             document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
@@ -54,7 +47,6 @@
         setAppHeight();
     </script>
 
-    <!-- Google Fonts & FontAwesome -->
     <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -66,19 +58,21 @@
             margin: 0; 
             padding: 0;
             width: 100%;
-            min-height: 100vh;
-            overflow-x: hidden;
-            overflow-y: auto;
-            overscroll-behavior: none;
+            /* COMPORTAMENTO NATIVO RESTAURADO AQUI */
             background-color: #f8f9fa;
             background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='#d6249f' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
             -webkit-tap-highlight-color: transparent;
         }
-        
-        #container-cardapio {
-            display: block !important;
-            min-height: 300px;
+
+        #main-scroll-area {
+            /* CONTAINER LIVRE PARA NÃO QUEBRAR A ROLAGEM */
+            position: relative;
+            margin-top: var(--top-offset);
+            width: 100%;
+            display: block;
         }
+        
+        #container-cardapio { display: block !important; min-height: 300px; }
 
         .glass-header { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
         .gradient-bg { background: linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
@@ -150,13 +144,10 @@
 
         #statusBanner { position: fixed !important; top: 0 !important; left: 0 !important; width: 100% !important; z-index: 10000 !important; height: var(--banner-height); }
         #main-header { position: fixed !important; top: var(--banner-height) !important; left: 0 !important; width: 100% !important; z-index: 9999 !important; height: var(--header-height); }
-        #main-scroll-area { position: relative !important; margin-top: var(--top-offset) !important; width: 100% !important; min-height: 100vh !important; overflow-y: auto !important; overflow-x: hidden !important; -webkit-overflow-scrolling: touch !important; display: block !important; }
     </style>
 
-    <!-- Importação do Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
-    <!-- Configuração do Supabase (A Ponte) -->
     <script>
         const supabaseClient = window.supabase.createClient(
             'https://omjaecifdhrlgmmehweq.supabase.co',
@@ -164,7 +155,7 @@
         );
     </script>
 </head>
-<body class="text-gray-800 font-sans bg-[#f8f9fa] relative w-full">
+<body class="text-gray-800 font-sans relative w-full">
     
     <div id="statusBanner" style="background:#121212;color:white;padding-top: max(6px, env(safe-area-inset-top)); padding-bottom: 6px; font-size:14px;overflow:hidden;display:flex;align-items:center;">
         <div id="marqueeText" class="marquee-animation" style="font-weight:bold; letter-spacing:1px; text-transform:uppercase;">
@@ -188,7 +179,7 @@
         <nav class="nav-scroll overflow-x-auto whitespace-nowrap px-4 py-2 sm:py-2.5 flex gap-4 sm:gap-6 max-w-5xl mx-auto" id="menu-categorias"></nav>
     </header>
 
-    <div id="main-scroll-area" class="custom-scroll relative w-full">
+    <div id="main-scroll-area">
         
         <div id="btn-repetir-pedido" class="hidden max-w-5xl mx-auto px-4 mt-6 animate-slide-up">
             <button onclick="repetirUltimoPedido()" class="w-full sm:w-auto sm:px-8 sm:mx-auto bg-gradient-to-r from-gray-800 to-gray-900 text-white font-semibold py-3.5 rounded-2xl shadow-lg flex items-center justify-center gap-3 hover:shadow-xl transition transform hover:-translate-y-1 border border-gray-700">
@@ -432,7 +423,7 @@
                                 <p class="text-[10px] uppercase mt-0.5 font-bold">Cupom de Pedido</p>
                             </div>
                             <div class="flex justify-between items-center mb-3 text-xs font-bold border-b-2 border-dashed border-gray-300 pb-3">
-                                <span class="uppercase">Previsão de Entrega:</span>
+                                <span class="uppercase">Data e Hora:</span>
                                 <span class="font-black text-sm text-black" id="rastreio-previsao-hora">--:--</span>
                             </div>
                             <div class="pt-1 mb-3 border-b-2 border-dashed border-gray-300 pb-3">
@@ -506,7 +497,6 @@
                 </div>
             </div>
             
-            <!-- ABAS DE NAVEGAÇÃO ADMIN -->
             <div class="flex overflow-x-auto bg-white border-b border-gray-200 shrink-0 custom-scroll px-2 shadow-sm relative z-10" id="admin-tabs">
                 <button onclick="mudarAbaAdmin('admin-pedidos', this)" class="admin-tab-btn active flex-1 py-3 px-2 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-insta-pink border-b-2 border-insta-pink whitespace-nowrap"><i class="fas fa-receipt mr-1"></i> Pedidos</button>
                 <button onclick="mudarAbaAdmin('admin-loja', this)" class="admin-tab-btn flex-1 py-3 px-2 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-400 border-b-2 border-transparent hover:text-gray-600 whitespace-nowrap"><i class="fas fa-store mr-1"></i> Loja</button>
@@ -516,18 +506,15 @@
 
             <div class="flex-1 overflow-y-auto custom-scroll relative bg-[#f3f4f6]">
                 
-                <!-- ABA PEDIDOS -->
                 <div id="admin-pedidos" class="admin-tab-content p-4 block">
                     <div class="flex justify-between items-center mb-3 px-1">
                         <h4 class="font-bold text-gray-700 uppercase tracking-wider text-xs">Acompanhamento</h4>
                         <button onclick="carregarPedidosMobile()" class="text-insta-pink text-sm font-bold bg-white px-3 py-1 rounded-full shadow-sm border border-gray-100"><i class="fas fa-sync-alt"></i> Atualizar</button>
                     </div>
                     <div id="mobile-admin-pedidos-lista">
-                        <!-- Pedidos aqui -->
                     </div>
                 </div>
 
-                <!-- ABA LOJA -->
                 <div id="admin-loja" class="admin-tab-content p-4 hidden space-y-4">
                     <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
                         <h4 class="font-bold text-gray-800 mb-4"><i class="fas fa-door-open text-insta-orange mr-2"></i> Status de Funcionamento</h4>
@@ -565,7 +552,6 @@
                     <button onclick="salvarConfiguracoesLoja(this)" class="w-full gradient-bg text-white font-bold py-4 rounded-xl shadow-md active:scale-95 flex items-center justify-center gap-2"><i class="fas fa-save"></i> Guardar Alterações</button>
                 </div>
 
-                <!-- ABA CARDÁPIO -->
                 <div id="admin-cardapio" class="admin-tab-content p-4 hidden">
                     <div class="bg-blue-50 border border-blue-100 p-4 rounded-2xl mb-4 text-xs text-blue-800 flex items-start gap-3">
                         <i class="fas fa-info-circle mt-0.5 text-blue-500 text-lg"></i> 
@@ -576,11 +562,9 @@
                         <button onclick="carregarAdminCardapio()" class="text-insta-pink text-sm font-bold bg-white px-3 py-1 rounded-full shadow-sm border border-gray-100"><i class="fas fa-sync-alt"></i> Atualizar</button>
                     </div>
                     <div id="admin-lista-cardapio" class="space-y-3">
-                        <!-- Itens do cardapio -->
                     </div>
                 </div>
 
-                <!-- ABA TAXAS -->
                 <div id="admin-taxas" class="admin-tab-content p-4 hidden">
                     <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-5">
                         <h4 class="font-bold text-gray-800 mb-3 text-sm"><i class="fas fa-plus-circle text-success-green mr-2"></i> Adicionar Nova Taxa</h4>
@@ -592,7 +576,6 @@
                     </div>
                     <h4 class="font-bold text-gray-700 uppercase tracking-wider text-xs mb-3 px-1">Bairros e Taxas Atuais</h4>
                     <div id="admin-lista-taxas" class="space-y-3">
-                        <!-- Taxas aqui -->
                     </div>
                 </div>
 
@@ -606,15 +589,7 @@
         <span id="toast-msg" class="font-bold text-xs sm:text-sm tracking-wide text-white break-words">Ação realizada!</span>
     </div>
 
-    <!-- ========================================================================================= -->
-    <!--                               JAVASCRIPT PRINCIPAL                                        -->
-    <!-- ========================================================================================= -->
     <script>
-        // ---------------------------------------------------------
-        // 1. VARIÁVEIS GLOBAIS E ESTADO
-        // ---------------------------------------------------------
-        
-        // Wrapper seguro para LocalStorage (Impede que navegadores móveis travem o site inteiro na aba anônima)
         const safeStorage = {
             getItem: function(key) { try { return localStorage.getItem(key); } catch(e) { return null; } },
             setItem: function(key, val) { try { localStorage.setItem(key, val); } catch(e) {} },
@@ -638,12 +613,6 @@
         window.isModalOpen = false;
         window.isFooterVisible = false;
         let isCheckoutReady = false;
-
-        let meuIdUsuario = safeStorage.getItem('InstaLanches_UserID');
-        if (!meuIdUsuario) {
-            meuIdUsuario = 'cliente_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
-            safeStorage.setItem('InstaLanches_UserID', meuIdUsuario);
-        }
 
         const mapIconesCategorias = {
             'hamburguer': 'https://res.cloudinary.com/de9bsqp2z/image/upload/v1773529854/4_symwgr.png',
@@ -682,9 +651,6 @@
             setTimeout(() => { toast.classList.remove('opacity-100', 'scale-100'); toast.classList.add('opacity-0', 'scale-95', 'pointer-events-none'); }, 4000);
         }
 
-        // ---------------------------------------------------------
-        // 2. COMUNICAÇÃO COM O SUPABASE
-        // ---------------------------------------------------------
         async function carregarConfiguracoesSupabase() {
             try {
                 const { data, error } = await supabaseClient.from('configuracoes').select('*').order('id', { ascending: true }).limit(1);
@@ -702,10 +668,7 @@
                     statusLoja = calcularStatusLoja();
                     aplicarStatusLojaInterface();
                 }
-            } catch (err) { 
-                console.error("Aviso Configurações:", err);
-                showToast("Aviso: Falha ao ler loja. " + err.message, 'error');
-            }
+            } catch (err) { }
         }
 
         async function carregarTaxasSupabase() {
@@ -736,13 +699,10 @@
                 }
             } catch (err) { 
                 esconderLoaderCardapio(); 
-                document.getElementById('container-cardapio').innerHTML = `<div class="text-center p-8"><i class="fas fa-exclamation-triangle text-4xl text-red-400 mb-3"></i><p class="text-red-500 font-bold">Erro ao carregar o cardápio!</p><p class="text-xs text-gray-500 mt-2">${err.message || 'Verifique a sua internet e as permissões do banco de dados.'}</p></div>`;
+                document.getElementById('container-cardapio').innerHTML = `<div class="text-center p-8"><i class="fas fa-exclamation-triangle text-4xl text-red-400 mb-3"></i><p class="text-red-500 font-bold">Erro ao carregar o cardápio!</p><p class="text-xs text-gray-500 mt-2">${err.message || 'Verifique a sua internet.'}</p></div>`;
             }
         }
 
-        // ---------------------------------------------------------
-        // 3. LÓGICA DE FUNCIONAMENTO (ABERTO/FECHADO)
-        // ---------------------------------------------------------
         function calcularStatusLoja() {
             const horarioPadrao = { abre: 17, fecha: 23, diaFechado: 3, textoDiaFechado: 'Quarta-feira' };
             const agora = new Date();
@@ -770,10 +730,7 @@
         function aplicarStatusLojaInterface() {
             const statusBanner = document.getElementById('statusBanner');
             const marqueeText = document.getElementById('marqueeText');
-            const dias = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
-            const horario = statusLoja.horario || {}; 
-            const abre = horario.abre !== undefined ? horario.abre : 17; 
-            const diaFechado = horario.diaFechado !== undefined ? horario.diaFechado : 3;
+            const abre = statusLoja.horario.abre !== undefined ? statusLoja.horario.abre : 17; 
             const aberto = !!statusLoja.aceitandoPedidos; let textoBanner = configLojaGlob.textoBanner;
 
             if (statusBanner) {
@@ -787,7 +744,7 @@
                 document.querySelectorAll('[data-add-item]').forEach(btn => { btn.disabled = false; btn.classList.remove('opacity-60', 'cursor-not-allowed', 'pointer-events-none'); });
             } else {
                 if (statusBanner) statusBanner.style.background = '#121212';
-                const agora = new Date(); const horaAtual = agora.getHours(); const diaAtual = agora.getDay();
+                const agora = new Date(); const horaAtual = agora.getHours();
                 if (!textoBanner) {
                     if (statusLoja.motivo === 'bloqueio_manual') { textoBanner = '🔒 PAUSAMOS OS PEDIDOS TEMPORARIAMENTE. VOLTAMOS JÁ! ✨'; } 
                     else {
@@ -802,9 +759,6 @@
             atualizarVisibilidadeCarrinhoGlob();
         }
 
-        // ---------------------------------------------------------
-        // 4. ADMINISTRAÇÃO E GESTÃO
-        // ---------------------------------------------------------
         window.abrirAdminAuth = function(e) { if(e) { e.preventDefault(); e.stopPropagation(); } abrirModal('modal-admin-auth'); };
 
         function verificarSenhaAdminMobile() {
@@ -847,7 +801,6 @@
                 if(error) throw error;
                 showToast('Loja atualizada com sucesso!'); carregarConfiguracoesSupabase(); 
             } catch(e) { 
-                alert("Erro ao salvar loja: " + e.message);
                 showToast('Erro Supabase: ' + (e.message || 'Falha ao guardar'), 'error'); 
             } finally { btn.innerHTML = originalHtml; btn.disabled = false; }
         }
@@ -872,7 +825,6 @@
                 }
                 container.innerHTML = html;
             } catch(e) { 
-                alert("Erro admin cardápio: " + e.message);
                 container.innerHTML = `<p class="text-center text-red-500 font-bold p-4">Erro ao carregar cardápio</p>`; 
             }
         }
@@ -898,7 +850,6 @@
                 }
                 container.innerHTML = html;
             } catch(e) { 
-                alert("Erro admin taxas: " + e.message);
                 container.innerHTML = `<p class="text-center text-red-500 font-bold p-4">Erro ao carregar taxas</p>`; 
             }
         }
@@ -929,11 +880,9 @@
             const container = document.getElementById('mobile-admin-pedidos-lista');
             container.innerHTML = '<div class="text-center py-10 text-gray-500"><i class="fas fa-circle-notch fa-spin text-3xl mb-3 text-insta-pink"></i><br>Buscando pedidos...</div>';
             try {
-                // FALLBACK INTELIGENTE: Lê a tabela 'itens_do_pedido' conforme imagem enviada
                 let { data: pedidos, error } = await supabaseClient.from('pedidos').select('*, itens_do_pedido(*)').neq('status', 'Finalizado').neq('status', 'Entregue').order('id', { ascending: false });
                 
                 if (error && error.code === 'PGRST200') {
-                    console.warn("Relacionamento FK não encontrado pelo Supabase. Ativando Modo de Segurança...");
                     const resP = await supabaseClient.from('pedidos').select('*').neq('status', 'Finalizado').neq('status', 'Entregue').order('id', { ascending: false });
                     pedidos = resP.data;
                     if(pedidos && pedidos.length > 0) {
@@ -964,9 +913,9 @@
                 const badge = isDel ? `<span class="bg-blue-500 text-white text-[9px] px-2 py-0.5 rounded uppercase font-bold tracking-wider shadow-sm"><i class="fas fa-motorcycle"></i> Entregar</span>` : `<span class="bg-purple-500 text-white text-[9px] px-2 py-0.5 rounded uppercase font-bold tracking-wider shadow-sm"><i class="fas fa-store"></i> Local</span>`;
                 const whatsNum = p.whatsapp ? p.whatsapp.replace(/\D/g, '') : '';
                 
-                // Mapeamento Inteligente: Aceita o nome da coluna antiga ou da nova
-                const nomeCliente = p.nome_do_cliente || p.nome_cliente || 'Cliente';
-                const horaPedidoStr = p.hora_pedido || p.horaPedido || (p.criado_em ? new Date(p.criado_em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '');
+                // NOME CORRIGIDO AQUI PARA O PAINEL LER DA IMAGEM
+                const nomeCliente = p.nome_cliente || 'Cliente';
+                const horaPedidoStr = p.created_at ? new Date(p.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : 'Novo';
 
                 let botoes = isDel ? 
                     `<button onclick="mudarStatusPedidoMobile(${p.id}, 'Preparando', '${whatsNum}', '${nomeCliente}', this)" class="flex-1 py-2 text-[10px] font-bold rounded border bg-white text-gray-600 hover:bg-orange-50 shadow-sm ${p.status === 'Preparando' ? 'border-orange-400 text-orange-500' : 'border-gray-200'}">Prep.</button>
@@ -977,7 +926,7 @@
                      <button onclick="mudarStatusPedidoMobile(${p.id}, 'Finalizado', '${whatsNum}', '${nomeCliente}', this)" class="flex-1 py-2 text-[10px] font-bold rounded border bg-white text-gray-600 hover:bg-green-50 shadow-sm border-gray-200">Finalizar</button>`;
 
                 let strItens = '';
-                const itensArray = p.itens_do_pedido || p.pedido_itens;
+                const itensArray = p.itens_do_pedido || [];
                 if(itensArray && Array.isArray(itensArray)) {
                     strItens = itensArray.map(i => `${i.quantidade}x ${i.nome_do_produto || i.produto_nome}`).join('\n');
                 }
@@ -1014,12 +963,8 @@
             finally { if(btnElement) { btnElement.innerHTML = oldHtml; btnElement.disabled = false; } }
         }
 
-        // ---------------------------------------------------------
-        // 5. INTERFACE DO UTILIZADOR E CARRINHO (SÓ DELIVERY E RETIRADA)
-        // ---------------------------------------------------------
         function montarInterface(dados) {
             cardapioOriginal = Array.isArray(dados) ? dados : [];
-            const loader = document.getElementById('loader'); if (loader) loader.remove();
             const cardapioLoading = document.getElementById('cardapio-loading'); if (cardapioLoading) cardapioLoading.remove();
             const navMenu = document.getElementById('menu-categorias'); const mainContainer = document.getElementById('container-cardapio');
             navMenu.innerHTML = ''; mainContainer.innerHTML = '';
@@ -1264,37 +1209,28 @@
             let taxaPagamento = pagamento === 'Cartão' ? (subtotalPreco + taxaPreco) * 0.05 : 0; 
             const totalFinal = Math.ceil(subtotalPreco + taxaPreco + taxaPagamento);
             const trocoPara = document.getElementById('troco').value;
-            const observacoes = trocoPara ? `Troco para R$ ${trocoPara}` : '';
 
-            const agora = new Date();
-            const previsaoDate = new Date(agora.getTime() + 60 * 60000); 
-
-            // ALINHAMENTO SNAKE_CASE: Adaptando para os nomes do Supabase
+            // PAYLOAD TOTALMENTE LIMPO E SEGURO (MANDANDO APENAS O QUE ESTÁ NA SUA IMAGEM)
             const pedidoCompleto = {
-                id_usuario: meuIdUsuario, 
-                nome_do_cliente: nome, 
+                nome_cliente: nome, 
                 whatsapp: whatsapp, 
                 tipo: tipoPedido, 
                 endereco: endereco, 
                 bairro: bairroNome, 
                 pagamento: pagamento, 
                 precisa_troco: !!trocoPara, 
-                troco_para: trocoPara ? parseFloat(trocoPara) : 0,
+                troco_para: trocoPara ? parseFloat(trocoPara) : null,
                 subtotal: subtotalPreco, 
                 taxa_entrega: taxaPreco, 
                 taxa_pagamento: taxaPagamento, 
                 total: totalFinal, 
-                status: 'Pendente',
-                // O Supabase irá criar o 'criado_em' automaticamente!
-                previsao: previsaoDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-                observacoes: observacoes || '-'
+                status: 'Pendente'
             };
             
             try {
                 const { data: pData, error } = await supabaseClient.from('pedidos').insert([pedidoCompleto]).select('id').single();
                 if (error) throw error;
 
-                // Envia para a tabela correta do seu print: itens_do_pedido
                 const pItens = carrinho.map(item => ({
                     pedido_id: pData.id,
                     nome_do_produto: item.nome + (item.opcaoEscolhida ? ` (${item.opcaoEscolhida})` : ''),
@@ -1302,6 +1238,11 @@
                     preco: item.preco
                 }));
                 await supabaseClient.from('itens_do_pedido').insert(pItens);
+
+                // NOVA FORMA DE RASTREIO (SALVANDO NO CELULAR PARA NÃO DAR ERRO NO BANCO)
+                let meusPedidosLocal = JSON.parse(safeStorage.getItem('Insta_Ids_Pedidos_Locais') || '[]');
+                meusPedidosLocal.push(pData.id);
+                safeStorage.setItem('Insta_Ids_Pedidos_Locais', JSON.stringify(meusPedidosLocal));
 
                 document.getElementById('notif-dot').classList.remove('hidden');
                 safeStorage.setItem('InstaLanches_UltimoPedido', JSON.stringify(carrinho));
@@ -1322,7 +1263,7 @@
                 showToast('Pedido enviado com sucesso!');
                 setTimeout(() => { abrirModal('modal-rastreio'); }, 500);
             } catch(err) {
-                console.error("Erro ao salvar:", err); showToast('Erro: ' + (err.message || 'Falha ao enviar'), 'error');
+                console.error("Erro ao salvar:", err); showToast('Erro Supabase: Verifique as colunas do banco', 'error');
             } finally {
                 btnFinalizar.style.pointerEvents = 'auto'; btnFinalizar.style.opacity = '1';
             }
@@ -1333,9 +1274,6 @@
             if (ultimo) { carrinho = JSON.parse(ultimo); atualizarCarrinho(); abrirModal('cart-modal'); showToast('Pedido recuperado!'); }
         }
 
-        // ---------------------------------------------------------
-        // 6. RASTREIO DE PEDIDOS E HISTÓRICO
-        // ---------------------------------------------------------
         function mostrarRastreioVazio() {
             const v = document.getElementById('rastreio-vazio'); const a = document.getElementById('rastreio-ativo');
             if(v) { v.classList.remove('hidden'); v.classList.add('flex'); }
@@ -1356,11 +1294,14 @@
             if(btnAtualizar) btnAtualizar.classList.add('fa-spin');
 
             try {
-                // FALLBACK INTELIGENTE (PGRST200): Impede que o Rastreio trave se a Foreign Key falhar. Lê itens_do_pedido.
-                let { data: pedidos, error } = await supabaseClient.from('pedidos').select('*, itens_do_pedido(*)').eq('id_usuario', meuIdUsuario).order('id', { ascending: false });
+                // RASTREIO INTELIGENTE (Puxa os IDs salvos no aparelho)
+                let meusPedidosIds = JSON.parse(safeStorage.getItem('Insta_Ids_Pedidos_Locais') || '[]');
+                if (meusPedidosIds.length === 0) { mostrarRastreioVazio(); return; }
+
+                let { data: pedidos, error } = await supabaseClient.from('pedidos').select('*, itens_do_pedido(*)').in('id', meusPedidosIds).order('id', { ascending: false });
                 
                 if (error && error.code === 'PGRST200') {
-                    const resP = await supabaseClient.from('pedidos').select('*').eq('id_usuario', meuIdUsuario).order('id', { ascending: false });
+                    const resP = await supabaseClient.from('pedidos').select('*').in('id', meusPedidosIds).order('id', { ascending: false });
                     pedidos = resP.data;
                     if(pedidos && pedidos.length > 0) {
                         const ids = pedidos.map(p => p.id);
@@ -1376,8 +1317,6 @@
                     pedidosRastreioCliente = pedidos; abaRastreioAtual = 0; renderizarAbasRastreio();
                 } else { mostrarRastreioVazio(); }
             } catch (err) {
-                console.error(err);
-                showToast("Erro rastreio: " + err.message, 'error');
                 mostrarRastreioVazio();
             } finally {
                 if(btnAtualizar) btnAtualizar.classList.remove('fa-spin');
@@ -1386,10 +1325,13 @@
 
         async function carregarRastreioSilencioso() {
             try {
-                let { data: pedidos, error } = await supabaseClient.from('pedidos').select('*, itens_do_pedido(*)').eq('id_usuario', meuIdUsuario).order('id', { ascending: false });
+                let meusPedidosIds = JSON.parse(safeStorage.getItem('Insta_Ids_Pedidos_Locais') || '[]');
+                if (meusPedidosIds.length === 0) return;
+
+                let { data: pedidos, error } = await supabaseClient.from('pedidos').select('*, itens_do_pedido(*)').in('id', meusPedidosIds).order('id', { ascending: false });
                 
                 if (error && error.code === 'PGRST200') {
-                    const resP = await supabaseClient.from('pedidos').select('*').eq('id_usuario', meuIdUsuario).order('id', { ascending: false });
+                    const resP = await supabaseClient.from('pedidos').select('*').in('id', meusPedidosIds).order('id', { ascending: false });
                     pedidos = resP.data;
                     if(pedidos && pedidos.length > 0) {
                         const ids = pedidos.map(p => p.id);
@@ -1422,7 +1364,7 @@
                     const isActive = index === abaRastreioAtual;
                     const baseClass = "py-1.5 px-3 rounded-xl font-bold text-[11px] whitespace-nowrap transition-colors border cursor-pointer select-none uppercase tracking-wider";
                     const activeClass = isActive ? "bg-insta-pink text-white border-insta-pink shadow-md" : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50";
-                    const horaFormatada = p.hora_pedido || p.horaPedido || (p.criado_em ? new Date(p.criado_em).toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}) : 'Novo');
+                    const horaFormatada = p.created_at ? new Date(p.created_at).toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}) : 'Recente';
                     html += `<div onclick="mudarAbaRastreio(${index})" class="${baseClass} ${activeClass}"><i class="fas fa-receipt mr-1"></i> Pedido ${horaFormatada}</div>`;
                 });
                 tabsContainer.innerHTML = html;
@@ -1460,10 +1402,12 @@
             });
             document.getElementById('rastreio-timeline').innerHTML = timelineHTML;
             document.getElementById('rastreio-status-texto').textContent = `Status Atual: ${pedido.status}`;
-            document.getElementById('rastreio-previsao-hora').textContent = pedido.previsao || '--:--';
+            
+            const txtPrevisao = pedido.created_at ? new Date(new Date(pedido.created_at).getTime() + 60 * 60000).toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}) : '--:--';
+            document.getElementById('rastreio-previsao-hora').textContent = txtPrevisao;
 
             let strItens = '';
-            const itensArray = pedido.itens_do_pedido || pedido.pedido_itens;
+            const itensArray = pedido.itens_do_pedido || [];
             if(itensArray && Array.isArray(itensArray)) {
                 itensArray.forEach(i => {
                     const nomeProduto = i.nome_do_produto || i.produto_nome;
@@ -1478,9 +1422,6 @@
             document.getElementById('rastreio-pagamento').textContent = pedido.pagamento || 'Não informado';
         }
 
-        // ---------------------------------------------------------
-        // 7. COMPORTAMENTOS VISUAIS E EVENTOS DE JANELA
-        // ---------------------------------------------------------
         function atualizarVisibilidadeCarrinhoGlob() {
             const barraCarrinho = document.getElementById('barra-flutuante-carrinho');
             const cartModal = document.getElementById('cart-modal');
@@ -1537,33 +1478,42 @@
         function esconderLoaderCardapio(){ const l=document.getElementById('cardapio-loading'); if(l) l.remove(); }
 
         let isClickScrolling = false; let scrollTimeout;
+        
+        // ROLAGEM NATIVA RESTAURADA
         function configurarNavegacao() {
             const navLinks = document.querySelectorAll('.nav-link');
             const navMenu = document.getElementById('menu-categorias');
-            const scrollArea = document.getElementById('main-scroll-area');
-
-            document.querySelectorAll('main section').forEach(sec => { sec.style.scrollMarginTop = '15px'; });
 
             navLinks.forEach(link => {
                 link.addEventListener('click', function(e) {
                     e.preventDefault(); isClickScrolling = true;
                     navLinks.forEach(l => l.classList.remove('active')); this.classList.add('active');
+                    
                     const scrollPos = this.offsetLeft - (navMenu.clientWidth / 2) + (this.clientWidth / 2);
                     navMenu.scrollTo({ left: scrollPos, behavior: 'smooth' });
 
                     const targetEl = document.querySelector(this.getAttribute('href'));
-                    if (targetEl && scrollArea) {
-                        const topOffset = targetEl.getBoundingClientRect().top + scrollArea.scrollTop - scrollArea.getBoundingClientRect().top - 10; 
-                        scrollArea.scrollTo({ top: topOffset, behavior: 'smooth' });
+                    if (targetEl) {
+                        const headerOffset = 135; // Altura do cabeçalho fixo aprox
+                        const elementPosition = targetEl.getBoundingClientRect().top;
+                        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+                        window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
                     }
                     clearTimeout(scrollTimeout); scrollTimeout = setTimeout(() => { isClickScrolling = false; }, 800);
                 });
             });
 
+            // Usando o comportamento de janela (window) padrão
             const observer = new IntersectionObserver((entries) => {
                 if (isClickScrolling) return;
                 let activeId = null; let maxRatio = 0;
-                entries.forEach(entry => { if (entry.isIntersecting && entry.intersectionRatio > maxRatio) { maxRatio = entry.intersectionRatio; activeId = entry.target.id; } });
+                entries.forEach(entry => { 
+                    if (entry.isIntersecting && entry.intersectionRatio > maxRatio) { 
+                        maxRatio = entry.intersectionRatio; 
+                        activeId = entry.target.id; 
+                    } 
+                });
                 if (activeId) {
                     navLinks.forEach(link => {
                         if (link.getAttribute('href').substring(1) === activeId) {
@@ -1575,7 +1525,8 @@
                         } else { link.classList.remove('active'); }
                     });
                 }
-            }, { root: scrollArea, rootMargin: `-10px 0px -80% 0px`, threshold: [0, 0.1, 0.2, 0.5, 1.0] });
+            }, { rootMargin: `-140px 0px -60% 0px`, threshold: [0, 0.1, 0.2, 0.5] }); // Sem amarrar o root
+            
             document.querySelectorAll('main section').forEach(sec => observer.observe(sec));
         }
 
@@ -1611,9 +1562,6 @@
             dragHandle.addEventListener('touchstart', dragStart, { passive: true }); document.addEventListener('touchmove', drag, { passive: false }); document.addEventListener('touchmove', drag, { passive: false }); document.addEventListener('touchend', dragEnd); document.addEventListener('touchcancel', dragEnd);
         }
 
-        // ---------------------------------------------------------
-        // 8. INICIALIZAÇÃO DA PÁGINA (START)
-        // ---------------------------------------------------------
         document.addEventListener("DOMContentLoaded", () => {
             statusLoja = calcularStatusLoja();
             const cacheCardapio = safeStorage.getItem('InstaLanches_CardapioCache');
@@ -1624,12 +1572,16 @@
             carregarTaxasSupabase();
             carregarCardapioSupabase();
 
+            // Notificação silenciosa baseada nos IDs locais
             setTimeout(async () => {
                 try {
-                    const { data } = await supabaseClient.from('pedidos').select('status').eq('id_usuario', meuIdUsuario);
-                    if(data) {
-                        const temAtivo = data.some(p => p.status !== 'Entregue' && p.status !== 'Finalizado');
-                        if (temAtivo) document.getElementById('notif-dot').classList.remove('hidden');
+                    let meusPedidosIds = JSON.parse(safeStorage.getItem('Insta_Ids_Pedidos_Locais') || '[]');
+                    if(meusPedidosIds.length > 0) {
+                        const { data } = await supabaseClient.from('pedidos').select('status').in('id', meusPedidosIds);
+                        if(data) {
+                            const temAtivo = data.some(p => p.status !== 'Entregue' && p.status !== 'Finalizado');
+                            if (temAtivo) document.getElementById('notif-dot').classList.remove('hidden');
+                        }
                     }
                 } catch(e) {}
             }, 2000);
