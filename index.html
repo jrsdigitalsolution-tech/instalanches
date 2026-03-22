@@ -2144,5 +2144,21 @@ function teste() {
 </script>
 
 <button onclick="teste()">TESTE</button>
+<script>
+window.addEventListener('load', async () => {
+  const supabase = window.supabase.createClient(
+    'https://omjaecifdhrlgmmehweq.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tamFlY2lmZGhybGdtbWVod2VxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMzQ1NzYsImV4cCI6MjA4OTcxMDU3Nn0.xsQ0HFYJpZ0twCUOhtTFc0AoY7HC7aCOJ0lbX1NuPmk'
+  );
+
+  const { data, error } = await supabase.from('pedidos').select('*');
+
+  if (error) {
+    alert('ERRO: ' + error.message);
+  } else {
+    alert('SUPABASE FUNCIONANDO');
+  }
+});
+</script>
 </body>
 </html>
