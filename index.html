@@ -560,10 +560,6 @@
                             </label>
                         </div>
                     </div>
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-                        <h4 class="font-bold text-gray-800 mb-3"><i class="fas fa-bullhorn text-insta-purple mr-2"></i> Letreiro Dinâmico</h4>
-                        <textarea id="admin-banner-loja" rows="2" placeholder="Ex: Hoje temos promoção de X-Tudo! Deixe em branco para mensagem padrão." class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 outline-none focus:border-insta-pink text-sm resize-none"></textarea>
-                    </div>
                     <button onclick="salvarConfiguracoesLoja(this)" class="w-full gradient-bg text-white font-bold py-4 rounded-xl shadow-md active:scale-95 flex items-center justify-center gap-2"><i class="fas fa-save"></i> Guardar Alterações</button>
                 </div>
 
@@ -615,6 +611,14 @@
         // ---------------------------------------------------------
         // 1. VARIÁVEIS GLOBAIS E ESTADO
         // ---------------------------------------------------------
+        
+        // Wrapper seguro para LocalStorage (Impede que navegadores móveis travem o site inteiro na aba anônima)
+        const safeStorage = {
+            getItem: function(key) { try { return localStorage.getItem(key); } catch(e) { return null; } },
+            setItem: function(key, val) { try { localStorage.setItem(key, val); } catch(e) {} },
+            removeItem: function(key) { try { localStorage.removeItem(key); } catch(e) {} }
+        };
+
         let carrinho = []; 
         let cardapioOriginal = []; 
         let taxasOriginal = [];
@@ -633,10 +637,10 @@
         window.isFooterVisible = false;
         let isCheckoutReady = false;
 
-        let meuIdUsuario = localStorage.getItem('InstaLanches_UserID');
+        let meuIdUsuario = safeStorage.getItem('InstaLanches_UserID');
         if (!meuIdUsuario) {
             meuIdUsuario = 'cliente_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
-            localStorage.setItem('InstaLanches_UserID', meuIdUsuario);
+            safeStorage.setItem('InstaLanches_UserID', meuIdUsuario);
         }
 
         const mapIconesCategorias = {
@@ -692,12 +696,13 @@
                     configLojaGlob.mostrarBanner = false; 
                     configLojaGlob.textoBanner = '';
                     
+                    safeStorage.setItem('InstaLanches_ConfigLoja', JSON.stringify(configLojaGlob));
                     statusLoja = calcularStatusLoja();
                     aplicarStatusLojaInterface();
                 }
             } catch (err) { 
                 console.error("Aviso Configurações:", err);
-                alert("Erro configuração: " + err.message);
+                showToast("Aviso: Falha ao ler loja. " + err.message, 'error');
             }
         }
 
@@ -721,13 +726,16 @@
 
                 if (data && data.length > 0) {
                     const dadosOrdenados = data.sort((a,b) => (a.categoria || '').localeCompare(b.categoria || ''));
-                    localStorage.setItem('InstaLanches_CardapioCache', JSON.stringify(dadosOrdenados));
+                    safeStorage.setItem('InstaLanches_CardapioCache', JSON.stringify(dadosOrdenados));
                     montarInterface(dadosOrdenados);
                 } else {
                     esconderLoaderCardapio();
                     document.getElementById('container-cardapio').innerHTML = '<p class="text-center text-gray-500 py-10 font-bold">Ainda não há produtos cadastrados no cardápio.</p>';
                 }
-            } catch (err) { esconderLoaderCardapio(); }
+            } catch (err) { 
+                esconderLoaderCardapio(); 
+                document.getElementById('container-cardapio').innerHTML = `<div class="text-center p-8"><i class="fas fa-exclamation-triangle text-4xl text-red-400 mb-3"></i><p class="text-red-500 font-bold">Erro ao carregar o cardápio!</p><p class="text-xs text-gray-500 mt-2">${err.message || 'Verifique a sua internet e as permissões do banco de dados.'}</p></div>`;
+            }
         }
 
         // ---------------------------------------------------------
@@ -838,7 +846,6 @@
                 if(error) throw error;
                 showToast('Loja atualizada com sucesso!'); carregarConfiguracoesSupabase(); 
             } catch(e) { 
-                alert("Erro ao salvar loja: " + e.message);
                 showToast('Erro Supabase: ' + (e.message || 'Falha ao guardar'), 'error'); 
             } finally { btn.innerHTML = originalHtml; btn.disabled = false; }
         }
@@ -863,7 +870,7 @@
                 }
                 container.innerHTML = html;
             } catch(e) { 
-                alert("Erro admin cardápio: " + e.message);
+                showToast("Erro cardápio admin: " + e.message, 'error');
                 container.innerHTML = `<p class="text-center text-red-500 font-bold p-4">Erro ao carregar cardápio</p>`; 
             }
         }
@@ -889,7 +896,7 @@
                 }
                 container.innerHTML = html;
             } catch(e) { 
-                alert("Erro admin taxas: " + e.message);
+                showToast("Erro taxas admin: " + e.message, 'error');
                 container.innerHTML = `<p class="text-center text-red-500 font-bold p-4">Erro ao carregar taxas</p>`; 
             }
         }
@@ -920,11 +927,25 @@
             const container = document.getElementById('mobile-admin-pedidos-lista');
             container.innerHTML = '<div class="text-center py-10 text-gray-500"><i class="fas fa-circle-notch fa-spin text-3xl mb-3 text-insta-pink"></i><br>Buscando pedidos...</div>';
             try {
-                const { data: pedidos, error } = await supabaseClient.from('pedidos').select('*, pedido_itens(*)').neq('status', 'Finalizado').neq('status', 'Entregue').order('id', { ascending: false });
+                // FALLBACK INTELIGENTE (PGRST200): Se a Foreign Key no Supabase estiver com erro de cache, o site não trava!
+                let { data: pedidos, error } = await supabaseClient.from('pedidos').select('*, pedido_itens(*)').neq('status', 'Finalizado').neq('status', 'Entregue').order('id', { ascending: false });
+                
+                if (error && error.code === 'PGRST200') {
+                    console.warn("Relacionamento FK não encontrado pelo Supabase. Ativando Modo de Segurança...");
+                    const resP = await supabaseClient.from('pedidos').select('*').neq('status', 'Finalizado').neq('status', 'Entregue').order('id', { ascending: false });
+                    pedidos = resP.data;
+                    if(pedidos && pedidos.length > 0) {
+                        const ids = pedidos.map(p => p.id);
+                        const resI = await supabaseClient.from('pedido_itens').select('*').in('pedido_id', ids);
+                        if (resI.data) pedidos.forEach(p => p.pedido_itens = resI.data.filter(i => i.pedido_id === p.id));
+                    }
+                    error = resP.error;
+                }
+
                 if (error) throw error;
                 renderizarPedidosMobile(pedidos || []);
             } catch (err) { 
-                alert("Erro buscar pedidos: " + err.message);
+                showToast("Erro buscar pedidos: " + err.message, 'error');
                 container.innerHTML = `<div class="text-center py-10 text-red-500 font-bold">Erro: ${err.message || 'ao carregar pedidos.'}</div>`; 
             }
         }
@@ -1267,7 +1288,7 @@
                 await supabaseClient.from('pedido_itens').insert(pItens);
 
                 document.getElementById('notif-dot').classList.remove('hidden');
-                localStorage.setItem('InstaLanches_UltimoPedido', JSON.stringify(carrinho));
+                safeStorage.setItem('InstaLanches_UltimoPedido', JSON.stringify(carrinho));
                 document.getElementById('btn-repetir-pedido').classList.remove('hidden');
                 
                 let msgWhatsapp = `🎉*NOVO PEDIDO*🎉\n\n*Cliente:* ${nome}\n*WhatsApp:* ${whatsapp}\n*Tipo:* ${tipoPedido.toUpperCase()}\n`;
@@ -1292,7 +1313,7 @@
         }
 
         function repetirUltimoPedido() {
-            const ultimo = localStorage.getItem('InstaLanches_UltimoPedido');
+            const ultimo = safeStorage.getItem('InstaLanches_UltimoPedido');
             if (ultimo) { carrinho = JSON.parse(ultimo); atualizarCarrinho(); abrirModal('cart-modal'); showToast('Pedido recuperado!'); }
         }
 
@@ -1319,7 +1340,20 @@
             if(btnAtualizar) btnAtualizar.classList.add('fa-spin');
 
             try {
-                const { data: pedidos, error } = await supabaseClient.from('pedidos').select('*, pedido_itens(*)').eq('idUsuario', meuIdUsuario).order('id', { ascending: false });
+                // FALLBACK INTELIGENTE (PGRST200): Impede que o Rastreio trave se a Foreign Key falhar.
+                let { data: pedidos, error } = await supabaseClient.from('pedidos').select('*, pedido_itens(*)').eq('idUsuario', meuIdUsuario).order('id', { ascending: false });
+                
+                if (error && error.code === 'PGRST200') {
+                    const resP = await supabaseClient.from('pedidos').select('*').eq('idUsuario', meuIdUsuario).order('id', { ascending: false });
+                    pedidos = resP.data;
+                    if(pedidos && pedidos.length > 0) {
+                        const ids = pedidos.map(p => p.id);
+                        const resI = await supabaseClient.from('pedido_itens').select('*').in('pedido_id', ids);
+                        if(resI.data) pedidos.forEach(p => p.pedido_itens = resI.data.filter(i => i.pedido_id === p.id));
+                    }
+                    error = resP.error;
+                }
+
                 if (error) throw error;
 
                 if (pedidos && pedidos.length > 0) {
@@ -1327,7 +1361,7 @@
                 } else { mostrarRastreioVazio(); }
             } catch (err) {
                 console.error(err);
-                alert("Erro ao atualizar rastreio: " + err.message);
+                showToast("Erro rastreio: " + err.message, 'error');
                 mostrarRastreioVazio();
             } finally {
                 if(btnAtualizar) btnAtualizar.classList.remove('fa-spin');
@@ -1336,7 +1370,19 @@
 
         async function carregarRastreioSilencioso() {
             try {
-                const { data: pedidos, error } = await supabaseClient.from('pedidos').select('*, pedido_itens(*)').eq('idUsuario', meuIdUsuario).order('id', { ascending: false });
+                let { data: pedidos, error } = await supabaseClient.from('pedidos').select('*, pedido_itens(*)').eq('idUsuario', meuIdUsuario).order('id', { ascending: false });
+                
+                if (error && error.code === 'PGRST200') {
+                    const resP = await supabaseClient.from('pedidos').select('*').eq('idUsuario', meuIdUsuario).order('id', { ascending: false });
+                    pedidos = resP.data;
+                    if(pedidos && pedidos.length > 0) {
+                        const ids = pedidos.map(p => p.id);
+                        const resI = await supabaseClient.from('pedido_itens').select('*').in('pedido_id', ids);
+                        if(resI.data) pedidos.forEach(p => p.pedido_itens = resI.data.filter(i => i.pedido_id === p.id));
+                    }
+                    error = resP.error;
+                }
+
                 if (!error && pedidos && pedidos.length > 0) {
                     let mudou = false;
                     if(pedidos.length !== pedidosRastreioCliente.length) mudou = true;
@@ -1551,7 +1597,7 @@
         // ---------------------------------------------------------
         document.addEventListener("DOMContentLoaded", () => {
             statusLoja = calcularStatusLoja();
-            const cacheCardapio = localStorage.getItem('InstaLanches_CardapioCache');
+            const cacheCardapio = safeStorage.getItem('InstaLanches_CardapioCache');
             if (cacheCardapio) { try { const dadosCached = JSON.parse(cacheCardapio); if (dadosCached && dadosCached.length > 0) montarInterface(dadosCached); } catch(e) {} } 
             else { mostrarLoaderCardapio(); }
 
