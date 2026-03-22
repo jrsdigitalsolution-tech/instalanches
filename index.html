@@ -771,7 +771,9 @@
             const statusBanner = document.getElementById('statusBanner');
             const marqueeText = document.getElementById('marqueeText');
             const dias = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
-            const horario = statusLoja.horario || {}; const abre = horario.abre ?? 17; const diaFechado = horario.diaFechado ?? 3;
+            const horario = statusLoja.horario || {}; 
+            const abre = horario.abre !== undefined ? horario.abre : 17; 
+            const diaFechado = horario.diaFechado !== undefined ? horario.diaFechado : 3;
             const aberto = !!statusLoja.aceitandoPedidos; let textoBanner = configLojaGlob.textoBanner;
 
             if (statusBanner) {
@@ -788,10 +790,11 @@
                 const agora = new Date(); const horaAtual = agora.getHours(); const diaAtual = agora.getDay();
                 if (!textoBanner) {
                     if (statusLoja.motivo === 'bloqueio_manual') { textoBanner = '🔒 PAUSAMOS OS PEDIDOS TEMPORARIAMENTE. VOLTAMOS JÁ! ✨'; } 
-                    else if (statusLoja.motivo === 'dia_fechado') {
-                        const proxDia = proximoDiaFuncionamento(diaAtual, diaFechado);
-                        textoBanner = `😴 FECHADO • HOJE É NOSSO DIA DE DESCANSO! VOLTAMOS ${(dias[proxDia]).toUpperCase()} ÀS ${String(abre).padStart(2, '0')}H 💖`;
-                    } else {
+                if (data && data.length > 0) {
+                    const dadosOrdenados = data.sort((a,b) => String(a.categoria || 'Diversos').localeCompare(String(b.categoria || 'Diversos')));
+                    safeStorage.setItem('InstaLanches_CardapioCache', JSON.stringify(dadosOrdenados));
+                    montarInterface(dadosOrdenados);
+                } else {
                         if (horaAtual < abre) { textoBanner = `⏳ FECHADO • ABRIMOS ÀS ${String(abre).padStart(2, '0')}H! PREPARE SEU APETITE 🤤🍔`; } 
                         else { textoBanner = `🌙 FECHADO • ENCERRAMOS POR HOJE! VOLTAMOS AMANHÃ ÀS ${String(abre).padStart(2, '0')}H ✨`; }
                     }
@@ -1019,7 +1022,7 @@
             const navMenu = document.getElementById('menu-categorias'); const mainContainer = document.getElementById('container-cardapio');
             navMenu.innerHTML = ''; mainContainer.innerHTML = '';
 
-            const categorias = [...new Set(cardapioOriginal.map(item => item.categoria))].sort((a, b) => a.localeCompare(b));
+            const categorias = [...new Set(cardapioOriginal.map(item => item.categoria || 'Diversos'))].sort((a, b) => String(a).localeCompare(String(b)));
             
             categorias.forEach((cat, index) => {
                 const sectionId = `sec-${normalizarTexto(cat).replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`;
@@ -1117,7 +1120,9 @@
         function alterarQuantidade(index, mudanca) { carrinho[index].quantidade += mudanca; if (carrinho[index].quantidade <= 0) carrinho.splice(index, 1); atualizarCarrinho(); }
         
         function calcularTotal() {
-            const tipo = document.getElementById('tipo-pedido')?.value; taxaPreco = 0;
+            const elTipo = document.getElementById('tipo-pedido');
+            const tipo = elTipo ? elTipo.value : ''; 
+            taxaPreco = 0;
             if (tipo === 'entrega') {
                 const select = document.getElementById('bairro-select');
                 if (select && select.selectedIndex > 0) {
@@ -1126,7 +1131,8 @@
                 }
             }
             
-            const pagamento = document.getElementById('pagamento')?.value;
+            const elPag = document.getElementById('pagamento');
+            const pagamento = elPag ? elPag.value : '';
             let taxaPagamento = 0;
             
             if (pagamento === 'Cartão') {
@@ -1179,7 +1185,8 @@
         }
 
         function validarCheckout() {
-            const tipoPedido = document.getElementById('tipo-pedido')?.value;
+            const elTipoPed = document.getElementById('tipo-pedido');
+            const tipoPedido = elTipoPed ? elTipoPed.value : '';
             const cartModal = document.getElementById('cart-modal');
             const isCartModalOpen = cartModal && cartModal.classList.contains('show');
             const cb = document.getElementById('checkout-floating-bar');
@@ -1188,15 +1195,19 @@
 
             if (!cb || !btnFinalizar) return;
 
-            const nome = document.getElementById('nome-cliente')?.value.trim();
-            const pagamento = document.getElementById('pagamento')?.value;
+            const elNome = document.getElementById('nome-cliente');
+            const nome = elNome ? elNome.value.trim() : '';
+            const elPag = document.getElementById('pagamento');
+            const pagamento = elPag ? elPag.value : '';
             let enderecoOk = false;
 
             if (tipoPedido === 'entrega') {
                 const selectBairro = document.getElementById('bairro-select');
                 const bairroOk = selectBairro && selectBairro.selectedIndex > 0;
-                const rua = document.getElementById('rua-input')?.value.trim();
-                const num = document.getElementById('numero-input')?.value.trim();
+                const elRua = document.getElementById('rua-input');
+                const rua = elRua ? elRua.value.trim() : '';
+                const elNum = document.getElementById('numero-input');
+                const num = elNum ? elNum.value.trim() : '';
                 enderecoOk = !!(bairroOk && rua && num);
             } else if (tipoPedido === 'retirada') { 
                 enderecoOk = true; 
@@ -1234,7 +1245,7 @@
             
             if (tipoPedido === 'entrega') {
                 const selectBairro = document.getElementById('bairro-select');
-                bairroNome = selectBairro.options[selectBairro.selectedIndex]?.text.split(' - ')[0] || '';
+                bairroNome = (selectBairro.options[selectBairro.selectedIndex] && selectBairro.options[selectBairro.selectedIndex].text) ? selectBairro.options[selectBairro.selectedIndex].text.split(' - ')[0] : '';
                 const rua = document.getElementById('rua-input').value.trim();
                 const num = document.getElementById('numero-input').value.trim();
                 const ref = document.getElementById('referencia-input').value.trim();
