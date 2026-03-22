@@ -230,7 +230,16 @@
 
     </style>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Importação do Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Configuração do Supabase (Movida para o topo!) -->
+    <script>
+        const supabaseClient = window.supabase.createClient(
+            'https://omjaecifdhrlgmmehweq.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tamFlY2lmZGhybGdtbWVod2VxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMzQ1NzYsImV4cCI6MjA4OTcxMDU3Nn0.xsQ0HFYJpZ0twCUOhtTFc0AoY7HC7aCOJ0lbX1NuPmk'
+        );
+    </script>
 </head>
 <body class="text-gray-800 font-sans bg-[#f8f9fa] relative w-full">
     
@@ -880,6 +889,34 @@
             { id: '2', categoria: 'Porções', nome: 'Batata Frita Suprema', descricao: 'Com cheddar e bacon deliciosos e crocantes.', preco: 28.00, imagem: '' },
             { id: '3', categoria: 'Bebidas', nome: 'Coca-Cola 2L', descricao: 'Bem gelada', preco: 12.00, imagem: '' }
         ];
+
+        // NOVA FUNÇÃO: Busca os dados na tabela 'produto' do Supabase
+        async function carregarCardapioSupabase() {
+            mostrarLoaderCardapio();
+            try {
+                // Vai na tabela "produto" e pega todas as colunas
+                const { data, error } = await supabaseClient
+                    .from('produto')
+                    .select('*');
+
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    // Guarda uma cópia no celular do cliente para carregar mais rápido da próxima vez
+                    localStorage.setItem('InstaLanches_CardapioCache', JSON.stringify(data));
+                    // Desenha o cardápio na tela
+                    montarInterface(data);
+                } else {
+                    esconderLoaderCardapio();
+                    document.getElementById('container-cardapio').innerHTML = '<p class="text-center text-gray-500 py-10 font-bold">Ainda não há produtos cadastrados no cardápio.</p>';
+                }
+            } catch (err) {
+                console.error("Erro ao carregar do Supabase:", err);
+                showToast("Erro ao conectar. Carregando cardápio de segurança.", "error");
+                // Plano B: Se o banco falhar, carrega os dados de exemplo para a tela não ficar em branco
+                montarInterface(dadosExemplo);
+            }
+        }
 
         function obterStatusLocal() {
             const horarioPadrao = { abre: 17, fecha: 23, diaFechado: 3, textoDiaFechado: 'Quarta-feira' };
@@ -1914,7 +1951,9 @@
                     { id: 'taxa_2', bairro: 'Estrada Velha', valor: 7.00 }
                 ];
                 preencherSelectTaxas();
-                setTimeout(() => { montarInterface(dadosExemplo); }, 800);
+                
+                // NOVO: Aqui chamamos a função para pegar os produtos do Supabase!
+                carregarCardapioSupabase();
             }
 
             const formCheckout = document.getElementById('checkout-form');
@@ -2097,13 +2136,5 @@
             setTimeout(initDraggableCart, 300);
         });
     </script>
-
-<script>
-// Mudamos de "const supabase =" para "const supabaseClient =" para não dar conflito com o nome da biblioteca!
-const supabaseClient = window.supabase.createClient(
-  'https://omjaecifdhrlgmmehweq.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tamFlY2lmZGhybGdtbWVod2VxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMzQ1NzYsImV4cCI6MjA4OTcxMDU3Nn0.xsQ0HFYJpZ0twCUOhtTFc0AoY7HC7aCOJ0lbX1NuPmk'
-);
-</script>
 </body>
 </html>
