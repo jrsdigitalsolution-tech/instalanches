@@ -2,7 +2,7 @@
 <html lang="pt-BR" class="scroll-smooth">
 
 <!-- ===== AREA 1: CONFIGURAÇÕES GERAIS (meta, fonts, tailwind, estilos globais) ===== -->
-    <head>
+<head>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -2131,27 +2131,12 @@
             setTimeout(initDraggableCart, 300);
         });
     </script>
+
 <script>
-async function testeSupabase() {
-  const { data, error } = await supabase.from('pedidos').select('*')
-
-  if (error) {
-    alert('Erro: ' + error.message)
-  } else {
-    alert('Conectou com sucesso!')
-    console.log(data)
-  }
-}
-</script>
-
-<button onclick="testeSupabase()" style="position:fixed;top:10px;right:10px;z-index:99999">
-  TESTE
-</button>
-    <script>
   const supabaseUrl = 'https://omjaecifdhrlgmmehweq.supabase.co'
   const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tamFlY2lmZGhybGdtbWVod2VxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMzQ1NzYsImV4cCI6MjA4OTcxMDU3Nn0.xsQ0HFYJpZ0twCUOhtTFc0AoY7HC7aCOJ0lbX1NuPmk'
-
   const supabase = window.supabase.createClient(supabaseUrl, supabaseKey)
 </script>
+
 </body>
 </html>
