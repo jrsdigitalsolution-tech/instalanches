@@ -790,11 +790,7 @@
                 const agora = new Date(); const horaAtual = agora.getHours(); const diaAtual = agora.getDay();
                 if (!textoBanner) {
                     if (statusLoja.motivo === 'bloqueio_manual') { textoBanner = '🔒 PAUSAMOS OS PEDIDOS TEMPORARIAMENTE. VOLTAMOS JÁ! ✨'; } 
-                if (data && data.length > 0) {
-                    const dadosOrdenados = data.sort((a,b) => String(a.categoria || 'Diversos').localeCompare(String(b.categoria || 'Diversos')));
-                    safeStorage.setItem('InstaLanches_CardapioCache', JSON.stringify(dadosOrdenados));
-                    montarInterface(dadosOrdenados);
-                } else {
+                    else {
                         if (horaAtual < abre) { textoBanner = `⏳ FECHADO • ABRIMOS ÀS ${String(abre).padStart(2, '0')}H! PREPARE SEU APETITE 🤤🍔`; } 
                         else { textoBanner = `🌙 FECHADO • ENCERRAMOS POR HOJE! VOLTAMOS AMANHÃ ÀS ${String(abre).padStart(2, '0')}H ✨`; }
                     }
@@ -933,8 +929,8 @@
             const container = document.getElementById('mobile-admin-pedidos-lista');
             container.innerHTML = '<div class="text-center py-10 text-gray-500"><i class="fas fa-circle-notch fa-spin text-3xl mb-3 text-insta-pink"></i><br>Buscando pedidos...</div>';
             try {
-                // FALLBACK INTELIGENTE (PGRST200): Se a Foreign Key no Supabase estiver com erro de cache, o site não trava!
-                let { data: pedidos, error } = await supabaseClient.from('pedidos').select('*, pedido_itens(*)').neq('status', 'Finalizado').neq('status', 'Entregue').order('id', { ascending: false });
+                // FALLBACK INTELIGENTE: Lê a tabela 'itens_do_pedido' conforme imagem enviada
+                let { data: pedidos, error } = await supabaseClient.from('pedidos').select('*, itens_do_pedido(*)').neq('status', 'Finalizado').neq('status', 'Entregue').order('id', { ascending: false });
                 
                 if (error && error.code === 'PGRST200') {
                     console.warn("Relacionamento FK não encontrado pelo Supabase. Ativando Modo de Segurança...");
@@ -942,8 +938,8 @@
                     pedidos = resP.data;
                     if(pedidos && pedidos.length > 0) {
                         const ids = pedidos.map(p => p.id);
-                        const resI = await supabaseClient.from('pedido_itens').select('*').in('pedido_id', ids);
-                        if (resI.data) pedidos.forEach(p => p.pedido_itens = resI.data.filter(i => i.pedido_id === p.id));
+                        const resI = await supabaseClient.from('itens_do_pedido').select('*').in('pedido_id', ids);
+                        if (resI.data) pedidos.forEach(p => p.itens_do_pedido = resI.data.filter(i => i.pedido_id === p.id));
                     }
                     error = resP.error;
                 }
@@ -967,25 +963,31 @@
                 const isDel = p.tipo === 'entrega';
                 const badge = isDel ? `<span class="bg-blue-500 text-white text-[9px] px-2 py-0.5 rounded uppercase font-bold tracking-wider shadow-sm"><i class="fas fa-motorcycle"></i> Entregar</span>` : `<span class="bg-purple-500 text-white text-[9px] px-2 py-0.5 rounded uppercase font-bold tracking-wider shadow-sm"><i class="fas fa-store"></i> Local</span>`;
                 const whatsNum = p.whatsapp ? p.whatsapp.replace(/\D/g, '') : '';
+                
+                // Mapeamento Inteligente: Aceita o nome da coluna antiga ou da nova
+                const nomeCliente = p.nome_do_cliente || p.nome_cliente || 'Cliente';
+                const horaPedidoStr = p.hora_pedido || p.horaPedido || (p.criado_em ? new Date(p.criado_em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '');
+
                 let botoes = isDel ? 
-                    `<button onclick="mudarStatusPedidoMobile(${p.id}, 'Preparando', '${whatsNum}', '${p.nome_cliente}', this)" class="flex-1 py-2 text-[10px] font-bold rounded border bg-white text-gray-600 hover:bg-orange-50 shadow-sm ${p.status === 'Preparando' ? 'border-orange-400 text-orange-500' : 'border-gray-200'}">Prep.</button>
-                     <button onclick="mudarStatusPedidoMobile(${p.id}, 'Saiu para entrega', '${whatsNum}', '${p.nome_cliente}', this)" class="flex-1 py-2 text-[10px] font-bold rounded border bg-white text-gray-600 hover:bg-blue-50 shadow-sm ${p.status === 'Saiu para entrega' ? 'border-blue-400 text-blue-500' : 'border-gray-200'}">Entregar</button>
-                     <button onclick="mudarStatusPedidoMobile(${p.id}, 'Entregue', '${whatsNum}', '${p.nome_cliente}', this)" class="flex-1 py-2 text-[10px] font-bold rounded border bg-white text-gray-600 hover:bg-green-50 shadow-sm border-gray-200">Finalizar</button>` : 
-                    `<button onclick="mudarStatusPedidoMobile(${p.id}, 'Preparando', '${whatsNum}', '${p.nome_cliente}', this)" class="flex-1 py-2 text-[10px] font-bold rounded border bg-white text-gray-600 hover:bg-orange-50 shadow-sm ${p.status === 'Preparando' ? 'border-orange-400 text-orange-500' : 'border-gray-200'}">Prep.</button>
-                     <button onclick="mudarStatusPedidoMobile(${p.id}, 'Pronto', '${whatsNum}', '${p.nome_cliente}', this)" class="flex-1 py-2 text-[10px] font-bold rounded border bg-white text-gray-600 hover:bg-blue-50 shadow-sm ${p.status === 'Pronto' ? 'border-blue-400 text-blue-500' : 'border-gray-200'}">Pronto</button>
-                     <button onclick="mudarStatusPedidoMobile(${p.id}, 'Finalizado', '${whatsNum}', '${p.nome_cliente}', this)" class="flex-1 py-2 text-[10px] font-bold rounded border bg-white text-gray-600 hover:bg-green-50 shadow-sm border-gray-200">Finalizar</button>`;
+                    `<button onclick="mudarStatusPedidoMobile(${p.id}, 'Preparando', '${whatsNum}', '${nomeCliente}', this)" class="flex-1 py-2 text-[10px] font-bold rounded border bg-white text-gray-600 hover:bg-orange-50 shadow-sm ${p.status === 'Preparando' ? 'border-orange-400 text-orange-500' : 'border-gray-200'}">Prep.</button>
+                     <button onclick="mudarStatusPedidoMobile(${p.id}, 'Saiu para entrega', '${whatsNum}', '${nomeCliente}', this)" class="flex-1 py-2 text-[10px] font-bold rounded border bg-white text-gray-600 hover:bg-blue-50 shadow-sm ${p.status === 'Saiu para entrega' ? 'border-blue-400 text-blue-500' : 'border-gray-200'}">Entregar</button>
+                     <button onclick="mudarStatusPedidoMobile(${p.id}, 'Entregue', '${whatsNum}', '${nomeCliente}', this)" class="flex-1 py-2 text-[10px] font-bold rounded border bg-white text-gray-600 hover:bg-green-50 shadow-sm border-gray-200">Finalizar</button>` : 
+                    `<button onclick="mudarStatusPedidoMobile(${p.id}, 'Preparando', '${whatsNum}', '${nomeCliente}', this)" class="flex-1 py-2 text-[10px] font-bold rounded border bg-white text-gray-600 hover:bg-orange-50 shadow-sm ${p.status === 'Preparando' ? 'border-orange-400 text-orange-500' : 'border-gray-200'}">Prep.</button>
+                     <button onclick="mudarStatusPedidoMobile(${p.id}, 'Pronto', '${whatsNum}', '${nomeCliente}', this)" class="flex-1 py-2 text-[10px] font-bold rounded border bg-white text-gray-600 hover:bg-blue-50 shadow-sm ${p.status === 'Pronto' ? 'border-blue-400 text-blue-500' : 'border-gray-200'}">Pronto</button>
+                     <button onclick="mudarStatusPedidoMobile(${p.id}, 'Finalizado', '${whatsNum}', '${nomeCliente}', this)" class="flex-1 py-2 text-[10px] font-bold rounded border bg-white text-gray-600 hover:bg-green-50 shadow-sm border-gray-200">Finalizar</button>`;
 
                 let strItens = '';
-                if(p.pedido_itens && Array.isArray(p.pedido_itens)) {
-                    strItens = p.pedido_itens.map(i => `${i.quantidade}x ${i.produto_nome}`).join('\n');
+                const itensArray = p.itens_do_pedido || p.pedido_itens;
+                if(itensArray && Array.isArray(itensArray)) {
+                    strItens = itensArray.map(i => `${i.quantidade}x ${i.nome_do_produto || i.produto_nome}`).join('\n');
                 }
 
                 html += `
                 <div class="bg-white p-4 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.05)] border border-gray-100 flex flex-col gap-3 mb-3">
                     <div class="flex justify-between items-start">
                         <div class="flex-1 pr-2">
-                            <div class="flex items-center gap-2 mb-1"><h4 class="font-bold text-gray-800 text-sm truncate max-w-[150px]">${p.nome_cliente}</h4>${badge}</div>
-                            <p class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest">${p.horaPedido || ''} • <span class="text-insta-pink">${p.status}</span></p>
+                            <div class="flex items-center gap-2 mb-1"><h4 class="font-bold text-gray-800 text-sm truncate max-w-[150px]">${nomeCliente}</h4>${badge}</div>
+                            <p class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest">${horaPedidoStr} • <span class="text-insta-pink">${p.status}</span></p>
                             <p class="text-[10px] text-gray-500 mt-1">${p.endereco || p.bairro}</p>
                         </div>
                         <a href="https://wa.me/${whatsNum}" target="_blank" class="w-8 h-8 rounded-full bg-green-50 text-success-green flex items-center justify-center shrink-0 shadow-sm border border-green-100"><i class="fab fa-whatsapp"></i></a>
@@ -1267,9 +1269,10 @@
             const agora = new Date();
             const previsaoDate = new Date(agora.getTime() + 60 * 60000); 
 
+            // ALINHAMENTO SNAKE_CASE: Adaptando para os nomes do Supabase
             const pedidoCompleto = {
-                idUsuario: meuIdUsuario, 
-                nome_cliente: nome, 
+                id_usuario: meuIdUsuario, 
+                nome_do_cliente: nome, 
                 whatsapp: whatsapp, 
                 tipo: tipoPedido, 
                 endereco: endereco, 
@@ -1282,24 +1285,23 @@
                 taxa_pagamento: taxaPagamento, 
                 total: totalFinal, 
                 status: 'Pendente',
-                horaPedido: agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-                dataPedido: agora.toLocaleDateString('pt-BR'),
+                // O Supabase irá criar o 'criado_em' automaticamente!
                 previsao: previsaoDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-                observacoes: observacoes || '-',
-                mesa_numero: null
+                observacoes: observacoes || '-'
             };
             
             try {
                 const { data: pData, error } = await supabaseClient.from('pedidos').insert([pedidoCompleto]).select('id').single();
                 if (error) throw error;
 
+                // Envia para a tabela correta do seu print: itens_do_pedido
                 const pItens = carrinho.map(item => ({
                     pedido_id: pData.id,
-                    produto_nome: item.nome + (item.opcaoEscolhida ? ` (${item.opcaoEscolhida})` : ''),
+                    nome_do_produto: item.nome + (item.opcaoEscolhida ? ` (${item.opcaoEscolhida})` : ''),
                     quantidade: item.quantidade,
                     preco: item.preco
                 }));
-                await supabaseClient.from('pedido_itens').insert(pItens);
+                await supabaseClient.from('itens_do_pedido').insert(pItens);
 
                 document.getElementById('notif-dot').classList.remove('hidden');
                 safeStorage.setItem('InstaLanches_UltimoPedido', JSON.stringify(carrinho));
@@ -1308,7 +1310,7 @@
                 let msgWhatsapp = `🎉*NOVO PEDIDO*🎉\n\n*Cliente:* ${nome}\n*WhatsApp:* ${whatsapp}\n*Tipo:* ${tipoPedido.toUpperCase()}\n`;
                 if (tipoPedido === 'entrega') msgWhatsapp += `*Endereço:* ${endereco} - ${bairroNome}\n\n`; 
                 msgWhatsapp += `*Itens:*\n`;
-                pItens.forEach(i => { msgWhatsapp += `${i.quantidade}x ${i.produto_nome} - R$ ${(i.preco * i.quantidade).toFixed(2).replace('.', ',')}\n`; });
+                pItens.forEach(i => { msgWhatsapp += `${i.quantidade}x ${i.nome_do_produto} - R$ ${(i.preco * i.quantidade).toFixed(2).replace('.', ',')}\n`; });
                 msgWhatsapp += `\n*Subtotal:* R$ ${subtotalPreco.toFixed(2).replace('.', ',')}\n*Taxa Entrega:* R$ ${taxaPreco.toFixed(2).replace('.', ',')}`;
                 if(taxaPagamento > 0) msgWhatsapp += `\n*Taxa Cartão:* R$ ${taxaPagamento.toFixed(2).replace('.', ',')}`;
                 msgWhatsapp += `\n*TOTAL FINAL:* R$ ${totalFinal.toFixed(2).replace('.', ',')}\n\n*Pagamento:* ${pagamento}`;
@@ -1354,16 +1356,16 @@
             if(btnAtualizar) btnAtualizar.classList.add('fa-spin');
 
             try {
-                // FALLBACK INTELIGENTE (PGRST200): Impede que o Rastreio trave se a Foreign Key falhar.
-                let { data: pedidos, error } = await supabaseClient.from('pedidos').select('*, pedido_itens(*)').eq('idUsuario', meuIdUsuario).order('id', { ascending: false });
+                // FALLBACK INTELIGENTE (PGRST200): Impede que o Rastreio trave se a Foreign Key falhar. Lê itens_do_pedido.
+                let { data: pedidos, error } = await supabaseClient.from('pedidos').select('*, itens_do_pedido(*)').eq('id_usuario', meuIdUsuario).order('id', { ascending: false });
                 
                 if (error && error.code === 'PGRST200') {
-                    const resP = await supabaseClient.from('pedidos').select('*').eq('idUsuario', meuIdUsuario).order('id', { ascending: false });
+                    const resP = await supabaseClient.from('pedidos').select('*').eq('id_usuario', meuIdUsuario).order('id', { ascending: false });
                     pedidos = resP.data;
                     if(pedidos && pedidos.length > 0) {
                         const ids = pedidos.map(p => p.id);
-                        const resI = await supabaseClient.from('pedido_itens').select('*').in('pedido_id', ids);
-                        if(resI.data) pedidos.forEach(p => p.pedido_itens = resI.data.filter(i => i.pedido_id === p.id));
+                        const resI = await supabaseClient.from('itens_do_pedido').select('*').in('pedido_id', ids);
+                        if(resI.data) pedidos.forEach(p => p.itens_do_pedido = resI.data.filter(i => i.pedido_id === p.id));
                     }
                     error = resP.error;
                 }
@@ -1384,15 +1386,15 @@
 
         async function carregarRastreioSilencioso() {
             try {
-                let { data: pedidos, error } = await supabaseClient.from('pedidos').select('*, pedido_itens(*)').eq('idUsuario', meuIdUsuario).order('id', { ascending: false });
+                let { data: pedidos, error } = await supabaseClient.from('pedidos').select('*, itens_do_pedido(*)').eq('id_usuario', meuIdUsuario).order('id', { ascending: false });
                 
                 if (error && error.code === 'PGRST200') {
-                    const resP = await supabaseClient.from('pedidos').select('*').eq('idUsuario', meuIdUsuario).order('id', { ascending: false });
+                    const resP = await supabaseClient.from('pedidos').select('*').eq('id_usuario', meuIdUsuario).order('id', { ascending: false });
                     pedidos = resP.data;
                     if(pedidos && pedidos.length > 0) {
                         const ids = pedidos.map(p => p.id);
-                        const resI = await supabaseClient.from('pedido_itens').select('*').in('pedido_id', ids);
-                        if(resI.data) pedidos.forEach(p => p.pedido_itens = resI.data.filter(i => i.pedido_id === p.id));
+                        const resI = await supabaseClient.from('itens_do_pedido').select('*').in('pedido_id', ids);
+                        if(resI.data) pedidos.forEach(p => p.itens_do_pedido = resI.data.filter(i => i.pedido_id === p.id));
                     }
                     error = resP.error;
                 }
@@ -1420,7 +1422,8 @@
                     const isActive = index === abaRastreioAtual;
                     const baseClass = "py-1.5 px-3 rounded-xl font-bold text-[11px] whitespace-nowrap transition-colors border cursor-pointer select-none uppercase tracking-wider";
                     const activeClass = isActive ? "bg-insta-pink text-white border-insta-pink shadow-md" : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50";
-                    html += `<div onclick="mudarAbaRastreio(${index})" class="${baseClass} ${activeClass}"><i class="fas fa-receipt mr-1"></i> Pedido ${p.horaPedido}</div>`;
+                    const horaFormatada = p.hora_pedido || p.horaPedido || (p.criado_em ? new Date(p.criado_em).toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}) : 'Novo');
+                    html += `<div onclick="mudarAbaRastreio(${index})" class="${baseClass} ${activeClass}"><i class="fas fa-receipt mr-1"></i> Pedido ${horaFormatada}</div>`;
                 });
                 tabsContainer.innerHTML = html;
             }
@@ -1460,9 +1463,11 @@
             document.getElementById('rastreio-previsao-hora').textContent = pedido.previsao || '--:--';
 
             let strItens = '';
-            if(pedido.pedido_itens && Array.isArray(pedido.pedido_itens)) {
-                pedido.pedido_itens.forEach(i => {
-                    strItens += `<div class="flex justify-between items-start text-[11px] font-bold text-gray-800 leading-tight pb-1.5"><span class="flex-1 pr-2">${i.quantidade}x ${i.produto_nome}</span><span class="shrink-0 whitespace-nowrap">R$ ${(i.preco * i.quantidade).toFixed(2).replace('.', ',')}</span></div>`;
+            const itensArray = pedido.itens_do_pedido || pedido.pedido_itens;
+            if(itensArray && Array.isArray(itensArray)) {
+                itensArray.forEach(i => {
+                    const nomeProduto = i.nome_do_produto || i.produto_nome;
+                    strItens += `<div class="flex justify-between items-start text-[11px] font-bold text-gray-800 leading-tight pb-1.5"><span class="flex-1 pr-2">${i.quantidade}x ${nomeProduto}</span><span class="shrink-0 whitespace-nowrap">R$ ${(i.preco * i.quantidade).toFixed(2).replace('.', ',')}</span></div>`;
                 });
             }
             
@@ -1621,7 +1626,7 @@
 
             setTimeout(async () => {
                 try {
-                    const { data } = await supabaseClient.from('pedidos').select('status').eq('idUsuario', meuIdUsuario);
+                    const { data } = await supabaseClient.from('pedidos').select('status').eq('id_usuario', meuIdUsuario);
                     if(data) {
                         const temAtivo = data.some(p => p.status !== 'Entregue' && p.status !== 'Finalizado');
                         if (temAtivo) document.getElementById('notif-dot').classList.remove('hidden');
