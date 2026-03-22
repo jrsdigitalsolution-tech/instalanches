@@ -54,23 +54,29 @@
         ::-webkit-scrollbar { display: none !important; }
         * { scrollbar-width: none !important; -ms-overflow-style: none !important; }
 
+        /* ROLAGEM ORIGINAL RESTAURADA: Garante a navegação perfeita no PC e Mobile */
         html, body {
             margin: 0; 
             padding: 0;
             width: 100%;
+            min-height: 100vh;
+            overflow-x: hidden;
+            overflow-y: auto;
+            overscroll-behavior: none;
             background-color: #f8f9fa;
             background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='#d6249f' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* A ROLAGEM NATIVA ESTÁ DE VOLTA. 
-           Sem bloqueios, sem "overflow: hidden" bizarros.
-        */
         #main-scroll-area {
-            position: relative;
-            margin-top: var(--top-offset);
-            width: 100%;
-            display: block;
+            position: relative !important;
+            margin-top: var(--top-offset) !important;
+            width: 100% !important;
+            min-height: 100vh !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            -webkit-overflow-scrolling: touch !important;
+            display: block !important;
         }
         
         #container-cardapio { display: block !important; min-height: 300px; }
@@ -180,7 +186,7 @@
         <nav class="nav-scroll overflow-x-auto whitespace-nowrap px-4 py-2 sm:py-2.5 flex gap-4 sm:gap-6 max-w-5xl mx-auto" id="menu-categorias"></nav>
     </header>
 
-    <div id="main-scroll-area" class="relative w-full">
+    <div id="main-scroll-area" class="custom-scroll relative w-full">
         
         <main class="max-w-5xl mx-auto px-4 py-4 mt-2 pb-8 w-full" id="container-cardapio"></main>
 
@@ -638,7 +644,17 @@
             'agua': 'https://res.cloudinary.com/de9bsqp2z/image/upload/v1773529865/6_ul3jkg.png'
         };
 
-        const normalizarTexto = (str) => str ? String(str).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : '';
+        // Função de normalização blindada contra falhas em telemóveis antigos
+        const normalizarTexto = (str) => {
+            if (!str) return '';
+            try {
+                return String(str).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            } catch (e) {
+                let s = String(str).toLowerCase();
+                const map = {'á':'a','à':'a','â':'a','ã':'a','ä':'a','é':'e','è':'e','ê':'e','ë':'e','í':'i','ì':'i','î':'i','ï':'i','ó':'o','ò':'o','ô':'o','õ':'o','ö':'o','ú':'u','ù':'u','û':'u','ü':'u','ç':'c'};
+                return s.replace(/[áàâãäéèêëíìîïóòôõöúùûüç]/g, match => map[match] || match);
+            }
+        };
         
         function getIconeParaCategoria(categoria) {
             const catLower = normalizarTexto(categoria);
@@ -965,7 +981,9 @@
 
         function montarInterface(dados) {
             cardapioOriginal = Array.isArray(dados) ? dados : [];
-            const cardapioLoading = document.getElementById('cardapio-loading'); if (cardapioLoading) cardapioLoading.remove();
+            const cardapioLoading = document.getElementById('cardapio-loading'); 
+            if (cardapioLoading && cardapioLoading.parentNode) cardapioLoading.parentNode.removeChild(cardapioLoading);
+            
             const navMenu = document.getElementById('menu-categorias'); const mainContainer = document.getElementById('container-cardapio');
             navMenu.innerHTML = ''; mainContainer.innerHTML = '';
 
@@ -1500,13 +1518,18 @@
             }
         }
 
-        function esconderLoaderCardapio(){ const l=document.getElementById('cardapio-loading'); if(l) l.remove(); }
+        function esconderLoaderCardapio(){ 
+            const l=document.getElementById('cardapio-loading'); 
+            if(l && l.parentNode) l.parentNode.removeChild(l); 
+        }
 
         let isClickScrolling = false; let scrollTimeout;
         
+        // ROLAGEM E NAVEGAÇÃO 100% RESTAURADAS AO ORIGINAL QUE FUNCIONAVA
         function configurarNavegacao() {
             const navLinks = document.querySelectorAll('.nav-link');
             const navMenu = document.getElementById('menu-categorias');
+            const scrollArea = document.getElementById('main-scroll-area');
 
             document.querySelectorAll('main section').forEach(sec => { sec.style.scrollMarginTop = '15px'; });
 
@@ -1519,40 +1542,40 @@
                     navMenu.scrollTo({ left: scrollPos, behavior: 'smooth' });
 
                     const targetEl = document.querySelector(this.getAttribute('href'));
-                    if (targetEl) {
-                        const headerOffset = 135; 
-                        const elementPosition = targetEl.getBoundingClientRect().top;
-                        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
-                        window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+                    if (targetEl && scrollArea) {
+                        const topOffset = targetEl.getBoundingClientRect().top + scrollArea.scrollTop - scrollArea.getBoundingClientRect().top - 10;
+                        scrollArea.scrollTo({ top: topOffset, behavior: 'smooth' });
                     }
                     clearTimeout(scrollTimeout); scrollTimeout = setTimeout(() => { isClickScrolling = false; }, 800);
                 });
             });
 
-            const observer = new IntersectionObserver((entries) => {
-                if (isClickScrolling) return;
-                let activeId = null; let maxRatio = 0;
-                entries.forEach(entry => { 
-                    if (entry.isIntersecting && entry.intersectionRatio > maxRatio) { 
-                        maxRatio = entry.intersectionRatio; 
-                        activeId = entry.target.id; 
-                    } 
-                });
-                if (activeId) {
-                    navLinks.forEach(link => {
-                        if (link.getAttribute('href').substring(1) === activeId) {
-                            if (!link.classList.contains('active')) {
-                                link.classList.add('active');
-                                const scrollPos = link.offsetLeft - (navMenu.clientWidth / 2) + (link.clientWidth / 2);
-                                navMenu.scrollTo({ left: scrollPos, behavior: 'smooth' });
-                            }
-                        } else { link.classList.remove('active'); }
+            // Fallback de segurança para observar a rolagem
+            if ('IntersectionObserver' in window) {
+                const observer = new IntersectionObserver((entries) => {
+                    if (isClickScrolling) return;
+                    let activeId = null; let maxRatio = 0;
+                    entries.forEach(entry => { 
+                        if (entry.isIntersecting && entry.intersectionRatio > maxRatio) { 
+                            maxRatio = entry.intersectionRatio; 
+                            activeId = entry.target.id; 
+                        } 
                     });
-                }
-            }, { rootMargin: `-140px 0px -60% 0px`, threshold: [0, 0.1, 0.2, 0.5] });
-            
-            document.querySelectorAll('main section').forEach(sec => observer.observe(sec));
+                    if (activeId) {
+                        navLinks.forEach(link => {
+                            if (link.getAttribute('href').substring(1) === activeId) {
+                                if (!link.classList.contains('active')) {
+                                    link.classList.add('active');
+                                    const scrollPos = link.offsetLeft - (navMenu.clientWidth / 2) + (link.clientWidth / 2);
+                                    navMenu.scrollTo({ left: scrollPos, behavior: 'smooth' });
+                                }
+                            } else { link.classList.remove('active'); }
+                        });
+                    }
+                }, { root: scrollArea, rootMargin: `-10px 0px -80% 0px`, threshold: [0, 0.1, 0.2, 0.5, 1.0] });
+                
+                document.querySelectorAll('main section').forEach(sec => observer.observe(sec));
+            }
         }
 
         function initDraggableCart() {
@@ -1598,7 +1621,6 @@
             carregarCardapioSupabase();
             atualizarBotoesRepetirPedido();
 
-            // Notificação silenciosa baseada nos IDs locais
             setTimeout(async () => {
                 try {
                     let meusPedidosIds = JSON.parse(safeStorage.getItem('Insta_Ids_Pedidos_Locais') || '[]');
@@ -1629,7 +1651,7 @@
             setTimeout(initDraggableCart, 300);
 
             const footer = document.querySelector('footer');
-            if(footer) {
+            if(footer && 'IntersectionObserver' in window) {
                 const observerF = new IntersectionObserver((entries)=>{ entries.forEach(entry=>{ window.isFooterVisible = entry.isIntersecting; atualizarVisibilidadeCarrinhoGlob(); }); },{threshold:0.1});
                 observerF.observe(footer);
             }
