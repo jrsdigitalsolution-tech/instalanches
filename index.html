@@ -6,7 +6,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#d6249f">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <!-- Corrigido o aviso amarelo: atualizado o nome da meta tag para web apps -->
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>InstaLanches - Cardápio Premium</title>
     
@@ -1807,43 +1808,7 @@
         });
     </script>
 
-    <script>
-        function aplicarSVGsDepoisDeRender(){
-            const mapa = {
-                "hamb": "Hamburguer.svg",
-                "espet": "Espetinho.svg",
-                "pastel": "Patel.svg",
-                "por": "Porção.svg",
-                "beb": "Bebidas.svg",
-                "cerve": "Cerveja.svg"
-            };
-
-            document.querySelectorAll('#container-cardapio section').forEach(sec=>{
-                const titulo = (sec.querySelector('h2')?.innerText || '').toLowerCase();
-
-                let arquivo = null;
-                Object.keys(mapa).forEach(key=>{
-                if(titulo.includes(key)) arquivo = mapa[key];
-                });
-
-                if(!arquivo) return;
-
-                sec.querySelectorAll('i.fas').forEach(icon=>{
-                const img = document.createElement('img');
-                img.src = arquivo;
-                img.style.width = "48px";
-                img.style.height = "48px";
-                img.style.objectFit = "contain";
-                img.loading = "lazy";
-                icon.replaceWith(img);
-                });
-            });
-        }
-
-        window.addEventListener('load', ()=>{
-        setTimeout(aplicarSVGsDepoisDeRender, 800);
-        });
-    </script>
+    <!-- O bloco que tentava carregar os SVGs locais quebrados foi removido daqui para evitar os erros 404 -->
 
     <script>
         function mostrarLoaderCardapio(){
@@ -2134,7 +2099,8 @@
     </script>
 
 <script>
-const supabase = window.supabase.createClient(
+// Mudamos de "const supabase =" para "const supabaseClient =" para não dar conflito com o nome da biblioteca!
+const supabaseClient = window.supabase.createClient(
   'https://omjaecifdhrlgmmehweq.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tamFlY2lmZGhybGdtbWVod2VxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMzQ1NzYsImV4cCI6MjA4OTcxMDU3Nn0.xsQ0HFYJpZ0twCUOhtTFc0AoY7HC7aCOJ0lbX1NuPmk'
 );
