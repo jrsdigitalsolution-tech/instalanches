@@ -2131,12 +2131,6 @@
             setTimeout(initDraggableCart, 300);
         });
     </script>
-
-<script>
-  const supabaseUrl = 'https://omjaecifdhrlgmmehweq.supabase.co'
-  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tamFlY2lmZGhybGdtbWVod2VxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMzQ1NzYsImV4cCI6MjA4OTcxMDU3Nn0.xsQ0HFYJpZ0twCUOhtTFc0AoY7HC7aCOJ0lbX1NuPmk'
-  const supabase = window.supabase.createClient(supabaseUrl, supabaseKey)
-</script>
 <script>
 function teste() {
   alert('ok')
@@ -2145,7 +2139,7 @@ function teste() {
 window.addEventListener('load', async () => {
   const supabase = window.supabase.createClient(
     'https://omjaecifdhrlgmmehweq.supabase.co',
-    'SUA_CHAVE_AQUI'
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tamFlY2lmZGhybGdtbWVod2VxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMzQ1NzYsImV4cCI6MjA4OTcxMDU3Nn0.xsQ0HFYJpZ0twCUOhtTFc0AoY7HC7aCOJ0lbX1NuPmk'
   );
 
   const { data, error } = await supabase.from('produto').select('*');
