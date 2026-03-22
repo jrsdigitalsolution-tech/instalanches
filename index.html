@@ -6,7 +6,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#d6249f">
-    <!-- Corrigido o aviso amarelo: atualizado o nome da meta tag para web apps -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>InstaLanches - Cardápio Premium</title>
@@ -40,7 +39,7 @@
         }
     </script>
     
-    <!-- MÁGICA DO APP SHELL: Calcula a altura real da tela ANTES de renderizar o CSS -->
+    <!-- MÁGICA DO APP SHELL -->
     <script>
         function setAppHeight() {
             const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
@@ -60,11 +59,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        /* ===== BARRAS DE ROLAGEM INVISÍVEIS (SITE SEM CORTES) ===== */
         ::-webkit-scrollbar { display: none !important; }
         * { scrollbar-width: none !important; -ms-overflow-style: none !important; }
 
-        /* ===== ESTRUTURA GLOBAL NATIVA E FLUIDA ===== */
         html, body {
             margin: 0; 
             padding: 0;
@@ -87,16 +84,8 @@
         .nav-link.active { border-bottom: 3px solid #d6249f; color: #d6249f; font-weight: 700; }
         .custom-scroll { overscroll-behavior-y: contain; -webkit-overflow-scrolling: touch; }
         
-        @keyframes marquee {
-            0% { transform: translate3d(100vw, 0, 0); }
-            100% { transform: translate3d(-100%, 0, 0); }
-        }
-        .marquee-animation {
-            display: inline-block;
-            white-space: nowrap;
-            animation: marquee 35s linear infinite; 
-            will-change: transform;
-        }
+        @keyframes marquee { 0% { transform: translate3d(100vw, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
+        .marquee-animation { display: inline-block; white-space: nowrap; animation: marquee 35s linear infinite; will-change: transform; }
 
         .modal-wrapper { position: fixed; inset: 0; z-index: 10010; visibility: hidden; pointer-events: none; }
         .modal-wrapper.show { visibility: visible; pointer-events: auto; }
@@ -110,33 +99,13 @@
         .pb-safe-modal { padding-bottom: max(1.5rem, env(safe-area-inset-bottom)) !important; }
         
         @media (max-width: 640px) {
-            .modal-wrapper { 
-                padding: 0 !important; 
-                align-items: flex-start !important; 
-                height: var(--app-height, 100dvh) !important; 
-            }
-            .modal-content {
-                width: 100% !important; height: 100% !important; max-height: 100% !important;
-                border-radius: 0 !important; display: flex; flex-direction: column;
-                padding-top: max(1.5rem, env(safe-area-inset-top)) !important;
-                justify-content: flex-start;
-            }
+            .modal-wrapper { padding: 0 !important; align-items: flex-start !important; height: var(--app-height, 100dvh) !important; }
+            .modal-content { width: 100% !important; height: 100% !important; max-height: 100% !important; border-radius: 0 !important; display: flex; flex-direction: column; padding-top: max(1.5rem, env(safe-area-inset-top)) !important; justify-content: flex-start; }
             .modal-content > button.absolute { top: max(1.25rem, env(safe-area-inset-top)) !important; right: 1.25rem !important; }
-            
             #modal-add-item.modal-wrapper, #modal-loja-fechada.modal-wrapper, #modal-opcoes.modal-wrapper, #virtual-input-overlay.modal-wrapper, #modal-confirm-zap.modal-wrapper, #modal-admin-auth.modal-wrapper { padding: 1rem !important; align-items: center !important; justify-content: center !important;}
-            #modal-add-item .modal-content, #modal-loja-fechada .modal-content, #modal-opcoes .modal-content, #virtual-input-overlay .modal-content, #modal-confirm-zap .modal-content, #modal-admin-auth .modal-content {
-                width: 95% !important; height: auto !important; max-height: 90dvh !important;
-                border-radius: 2rem !important; padding-top: 1.5rem !important; margin: auto;
-                justify-content: flex-start !important; display: flex; flex-direction: column;
-            }
+            #modal-add-item .modal-content, #modal-loja-fechada .modal-content, #modal-opcoes .modal-content, #virtual-input-overlay .modal-content, #modal-confirm-zap .modal-content, #modal-admin-auth .modal-content { width: 95% !important; height: auto !important; max-height: 90dvh !important; border-radius: 2rem !important; padding-top: 1.5rem !important; margin: auto; justify-content: flex-start !important; display: flex; flex-direction: column; }
             #modal-add-item .modal-content > button.absolute, #modal-loja-fechada .modal-content > button.absolute, #modal-opcoes .modal-content > button.absolute, #modal-admin-auth .modal-content > button.absolute { top: 1.25rem !important; right: 1.25rem !important; }
-            
-            /* Admin Panel Mobile (Transformado em página completa) */
-            #modal-admin-panel .modal-content {
-                width: 100% !important; height: 100% !important; max-height: 100% !important;
-                border-radius: 0 !important; padding-top: max(1.5rem, env(safe-area-inset-top)) !important; margin: 0;
-                justify-content: flex-start !important; display: flex; flex-direction: column;
-            }
+            #modal-admin-panel .modal-content { width: 100% !important; height: 100% !important; max-height: 100% !important; border-radius: 0 !important; padding-top: max(1.5rem, env(safe-area-inset-top)) !important; margin: 0; justify-content: flex-start !important; display: flex; flex-direction: column; }
         }
         
         input, select, textarea { font-size: 16px !important; }
@@ -154,34 +123,12 @@
             #container-cardapio section > div.grid > div.group { padding: 1rem !important; gap: 1rem !important; border-radius: 1.6rem !important; }
         }
 
-        @keyframes popCartAnimation {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        .animate-pop-cart { animation: popCartAnimation 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-
-        @keyframes slideUpFadeBar {
-            0% { opacity: 0; transform: translate(-50%, 80px) scale(0.8); }
-            60% { opacity: 1; transform: translate(-50%, -15px) scale(1.05); }
-            100% { opacity: 1; transform: translate(-50%, 0) scale(1); }
-        }
+        @keyframes slideUpFadeBar { 0% { opacity: 0; transform: translate(-50%, 80px) scale(0.8); } 60% { opacity: 1; transform: translate(-50%, -15px) scale(1.05); } 100% { opacity: 1; transform: translate(-50%, 0) scale(1); } }
         .show-checkout-bar { display: flex !important; animation: slideUpFadeBar 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         
-        @keyframes party-glow-pulse {
-            0% { transform: scale(1) translateX(-50%); left: 50%; }
-            50% { transform: scale(1.03) translateX(-50%); left: 50%; }
-            100% { transform: scale(1) translateX(-50%); left: 50%; }
-        }
+        @keyframes party-glow-pulse { 0% { transform: scale(1) translateX(-50%); left: 50%; } 50% { transform: scale(1.03) translateX(-50%); left: 50%; } 100% { transform: scale(1) translateX(-50%); left: 50%; } }
         .btn-checkout-ready { animation: party-glow-pulse 1.8s infinite ease-in-out !important; }
 
-        @keyframes shake {
-            0%, 100% { margin-left: 0px; }
-            10%, 30%, 50%, 70%, 90% { margin-left: -5px; }
-            20%, 40%, 60%, 80% { margin-left: 5px; }
-        }
-        .animate-shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
-        
         #cardapio-loading{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:40px 0; width:100%; }
         #cardapio-loading img{width:90px;height:auto;}
         #cardapio-loading span{font-weight:600;opacity:.8;}
@@ -198,42 +145,15 @@
             --top-offset: calc(var(--banner-height) + var(--header-height));
         }
 
-        #statusBanner {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100% !important;
-            z-index: 10000 !important;
-            height: var(--banner-height);
-        }
-
-        #main-header {
-            position: fixed !important;
-            top: var(--banner-height) !important;
-            left: 0 !important;
-            width: 100% !important;
-            z-index: 9999 !important;
-            height: var(--header-height);
-        }
-
-        #main-scroll-area {
-            position: absolute !important;
-            top: var(--top-offset) !important;
-            left: 0 !important;
-            right: 0 !important;
-            bottom: 0 !important;
-            overflow-y: auto !important;
-            overflow-x: hidden !important;
-            -webkit-overflow-scrolling: touch !important;
-            display: block !important;
-        }
-
+        #statusBanner { position: fixed !important; top: 0 !important; left: 0 !important; width: 100% !important; z-index: 10000 !important; height: var(--banner-height); }
+        #main-header { position: fixed !important; top: var(--banner-height) !important; left: 0 !important; width: 100% !important; z-index: 9999 !important; height: var(--header-height); }
+        #main-scroll-area { position: absolute !important; top: var(--top-offset) !important; left: 0 !important; right: 0 !important; bottom: 0 !important; overflow-y: auto !important; overflow-x: hidden !important; -webkit-overflow-scrolling: touch !important; display: block !important; }
     </style>
 
     <!-- Importação do Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
-    <!-- Configuração do Supabase (Movida para o topo!) -->
+    <!-- Configuração do Supabase (A Ponte) -->
     <script>
         const supabaseClient = window.supabase.createClient(
             'https://omjaecifdhrlgmmehweq.supabase.co',
@@ -243,14 +163,12 @@
 </head>
 <body class="text-gray-800 font-sans bg-[#f8f9fa] relative w-full">
     
-    <!-- Banner Dinâmico em Letreiro -->
     <div id="statusBanner" style="background:#121212;color:white;padding-top: max(6px, env(safe-area-inset-top)); padding-bottom: 6px; font-size:14px;overflow:hidden;display:flex;align-items:center;">
         <div id="marqueeText" class="marquee-animation" style="font-weight:bold; letter-spacing:1px; text-transform:uppercase;">
             Carregando horário...
         </div>
     </div>
 
-    <!-- Header Principal (Com Botão de Rastreio Permanente) -->
     <header class="glass-header shadow-sm border-b border-gray-200" id="main-header">
         <div class="bg-white px-4 py-1 sm:py-2 relative shadow-sm rounded-b-[2rem]">
             <div class="max-w-5xl mx-auto flex items-center justify-between gap-3">
@@ -258,7 +176,6 @@
                 <div class="flex-1 flex justify-center">
                     <img src="https://res.cloudinary.com/de9bsqp2z/image/upload/v1773272375/logo_insta_lanches_instagram_transparente_rk9lxq.png" alt="Logo InstaLanches" decoding="async" class="h-[55px] sm:h-[65px] object-contain select-none pointer-events-none drop-shadow-sm scale-[1.9]">
                 </div>
-                <!-- SINO DE NOTIFICAÇÕES SEMPRE VISÍVEL -->
                 <button onclick="abrirRastreio()" id="btn-rastreio-header" aria-label="Notificações e Rastreio" class="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white text-gray-400 border border-gray-200 hover:text-insta-pink transition flex items-center justify-center relative shadow-sm shrink-0 cursor-pointer">
                     <i class="fas fa-bell text-lg"></i>
                     <span id="notif-dot" class="absolute top-[8px] right-[10px] w-2.5 h-2.5 bg-red-500 rounded-full border border-white hidden animate-pulse"></span>
@@ -268,51 +185,39 @@
         <nav class="nav-scroll overflow-x-auto whitespace-nowrap px-4 py-2 sm:py-2.5 flex gap-4 sm:gap-6 max-w-5xl mx-auto" id="menu-categorias"></nav>
     </header>
 
-    <!-- ÁREA ÚNICA DE ROLAGEM ISOLADA (Forçada e Segura) -->
     <div id="main-scroll-area" class="custom-scroll relative w-full">
         
-        <!-- Botão Repetir Último Pedido -->
         <div id="btn-repetir-pedido" class="hidden max-w-5xl mx-auto px-4 mt-6 animate-slide-up">
             <button onclick="repetirUltimoPedido()" class="w-full sm:w-auto sm:px-8 sm:mx-auto bg-gradient-to-r from-gray-800 to-gray-900 text-white font-semibold py-3.5 rounded-2xl shadow-lg flex items-center justify-center gap-3 hover:shadow-xl transition transform hover:-translate-y-1 border border-gray-700">
                  <i class="fas fa-redo text-lg"></i> Repetir Meu Último Pedido
             </button>
         </div>
 
-        <!-- Container Cardápio -->
         <main class="max-w-5xl mx-auto px-4 py-4 mt-2 pb-8 w-full" id="container-cardapio"></main>
 
-        <!-- Rodapé Ajustado -->
         <footer class="relative w-full" style="background:#0b0b0b;color:white;text-align:center;font-family:Poppins; padding: 30px 16px calc(160px + 10vh + env(safe-area-inset-bottom));">
             <img src="https://res.cloudinary.com/de9bsqp2z/image/upload/v1773272375/logo_insta_lanches_instagram_transparente_rk9lxq.png" style="width:80px;margin:auto;opacity:.95;filter:drop-shadow(0 5px 12px rgba(0,0,0,.5));">
-            
             <div style="margin-top:12px;font-size:13px;color:#cbd5e1;">📍 R. Rio de Janeiro, 295 • Caucaia - CE</div>
-            
             <div style="max-width:320px; height:100px; margin: 12px auto; border-radius: 12px; overflow: hidden; border: 1px solid #1f2937; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);">
                 <iframe src="https://maps.google.com/maps?q=R.%20Rio%20de%20Janeiro,%20295,%20Caucaia%20-%20CE&t=&z=15&ie=UTF8&iwloc=&output=embed" width="100%" height="100" style="border:0; filter: invert(90%) hue-rotate(180deg) contrast(1.1);" allowfullscreen="" loading="lazy" title="Localização InstaLanches"></iframe>
             </div>
-
             <div style="margin-top:12px;font-size:14px;font-weight:600;">📞 (85) 99155-8671</div>
             <div style="margin-top:10px;font-size:12px;color:#9ca3af;line-height:1.6;">Abertos das 17:00 ás 23:00 horas <br> Fechado • Toda Quarta-feira </div>
             <div style="margin-top:20px; display: flex; align-items: center; justify-content: center; gap: 8px; color:#6b7280; font-size:11px;">
                 <span>© 2024 InstaLanches • Todos os direitos reservados</span>
-                <!-- BOTÃO DO ESCUDO RESTAURADO -->
                 <i class="fas fa-user-shield cursor-pointer" onclick="abrirAdminAuth(event)" aria-label="Painel Admin" style="font-size: 13px; opacity: 0.7; margin-left: 4px;"></i>
             </div>
         </footer>
-
     </div>
 
-    <!-- DOCK UNIVERSAL: A "Mini Página" inferior que hospeda o Botão Flutuante -->
+    <!-- DOCK UNIVERSAL E MODAIS -->
     <div id="barra-flutuante-carrinho" class="fixed bottom-0 left-0 w-full z-[10015] pointer-events-none transform translate-y-full transition-transform duration-500 ease-out flex flex-col justify-end">
         <div class="w-full bg-gradient-to-t from-[#f8f9fa] via-[#f8f9fa]/95 to-transparent pt-8 px-4 flex justify-center" style="padding-bottom: calc(10vh + 16px + env(safe-area-inset-bottom)); pointer-events: none;">
-            
             <div id="cart-draggable-btn" class="relative flex items-center justify-between bg-white/90 backdrop-blur-xl rounded-2xl p-4 sm:p-5 shadow-[0_20px_40px_rgba(0,0,0,0.15)] border border-gray-200/50 pointer-events-auto w-full max-w-[340px] cursor-grab active:cursor-grabbing transition-transform">
-                <!-- Lado Esquerdo -->
                 <div class="flex flex-col text-left leading-none pointer-events-none select-none">
                     <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Total</span>
                     <span id="floating-total" class="text-xl sm:text-2xl font-black text-gray-800 tracking-tight">R$ 0,00</span>
                 </div>
-                <!-- Lado Direito -->
                 <div class="flex items-center gap-3 pointer-events-none select-none bg-gray-50/80 px-4 py-2.5 rounded-xl border border-gray-100 shadow-sm">
                     <span class="text-sm sm:text-base font-bold text-gray-800 tracking-wide">Ver Pedido</span>
                     <div class="bg-gradient-to-br from-insta-orange to-insta-pink text-white text-xs font-black rounded-lg w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center shadow-md">
@@ -320,11 +225,9 @@
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 
-    <!-- MODAL ESCOLHA DO PÃO -->
     <div id="modal-opcoes" class="modal-wrapper flex items-center justify-center p-4 z-[10060]">
         <div class="modal-overlay" onclick="fecharModal('modal-opcoes')"></div>
         <div class="modal-content pb-safe-modal bg-white w-[95%] sm:w-[450px] rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-7 shadow-2xl max-h-[90dvh] flex flex-col relative border border-insta-pink/10">
@@ -365,12 +268,10 @@
         </div>
     </div>
 
-    <!-- MODAL CARRINHO -->
     <div id="cart-modal" class="modal-wrapper flex items-center justify-center p-4 z-[10050]">
         <div class="modal-overlay" onclick="fecharModal('cart-modal')"></div>
         <div class="modal-content pb-safe-modal bg-[#f3f4f6] w-full sm:w-[480px] rounded-[2.5rem] p-6 sm:p-7 shadow-2xl max-h-[90dvh] flex flex-col relative overflow-hidden">
-            
-            <div class="flex justify-between items-center mb-4 pt-2 shrink-0 w-full relative z-20 px-1 bg-transparent before:content-[''] before:absolute before:bottom-full before:left-0 before:w-full before:h-[50vh] before:pointer-events-none">
+            <div class="flex justify-between items-center mb-4 pt-2 shrink-0 w-full relative z-20 px-1 bg-transparent">
                 <div class="flex flex-col text-left">
                     <h2 class="text-2xl sm:text-3xl font-display tracking-wide uppercase italic gradient-text pb-1 -ml-0.5" style="transform: skewX(-8deg);">Seu Pedido</h2>
                     <p class="text-[10px] sm:text-xs text-gray-500 font-bold uppercase tracking-wider">Confira os Itens</p>
@@ -378,9 +279,7 @@
                 <button type="button" onclick="fecharModal('cart-modal')" class="text-gray-400 hover:text-gray-800 bg-transparent text-xl w-8 h-8 flex items-center justify-center transition z-20"><i class="fas fa-times"></i></button>
             </div>
 
-            <!-- Área Rolável Segura para Teclado -->
             <div class="overflow-y-auto custom-scroll flex-1 pr-1 pb-36 relative">
-                    
                 <div class="bg-white rounded-[1.5rem] p-4 shadow-sm border border-gray-100/80 mb-4 mt-2 flex flex-col">
                     <h3 class="text-xs font-bold text-gray-800 mb-3 flex items-center gap-2 uppercase tracking-wider shrink-0"><i class="fas fa-utensils text-insta-orange text-sm"></i> Itens do Carrinho</h3>
                     <div id="cart-items" class="space-y-3 overflow-y-auto custom-scroll pr-2 pb-1" style="max-height: 25vh;"></div>
@@ -396,7 +295,6 @@
                 </div>
 
                 <form id="checkout-form" class="space-y-4 relative group" onsubmit="processarCheckout(event)">
-                    
                     <div class="bg-white rounded-[1.5rem] p-4 shadow-sm border border-gray-100/80">
                         <h3 class="text-xs font-bold text-gray-800 mb-3 flex items-center gap-2 uppercase tracking-wider"><i class="fas fa-user-circle text-insta-purple text-sm"></i> Seus Dados</h3>
                         <div class="space-y-3">
@@ -413,7 +311,6 @@
 
                     <div class="bg-white rounded-[1.5rem] p-4 shadow-sm border border-gray-100/80">
                         <h3 class="text-xs font-bold text-gray-800 mb-3 flex items-center gap-2 uppercase tracking-wider"><i class="fas fa-motorcycle text-success-green text-sm"></i> Onde deseja receber?</h3>
-                        
                         <div class="relative mt-2">
                             <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest absolute -top-2 left-3 bg-white px-1">Tipo de Pedido</label>
                             <select id="tipo-pedido" class="w-full bg-transparent border-2 border-gray-100 rounded-2xl py-3.5 pl-4 pr-10 outline-none focus:border-insta-pink transition appearance-none font-semibold text-gray-800 text-sm sm:text-base" required onchange="mudarTipoPedido()">
@@ -435,7 +332,6 @@
                                     <i class="fas fa-chevron-down absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none mt-1"></i>
                                 </div>
                             </div>
-                            
                             <div class="grid grid-cols-3 gap-3">
                                 <div class="col-span-2 space-y-1.5">
                                     <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-white px-1 relative top-2 left-2 z-10">Rua</label>
@@ -446,7 +342,6 @@
                                     <input type="text" id="numero-input" placeholder="Ex: 123" class="w-full bg-transparent border-2 border-gray-100 rounded-2xl py-3.5 px-4 outline-none focus:border-insta-pink transition font-semibold text-gray-800 text-sm sm:text-base">
                                 </div>
                             </div>
-
                             <div class="space-y-1.5">
                                 <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-white px-1 relative top-2 left-2 z-10">Referência</label>
                                 <input type="text" id="referencia-input" placeholder="Ex: Próximo ao mercado..." class="w-full bg-transparent border-2 border-gray-100 rounded-2xl py-3.5 px-4 outline-none focus:border-insta-pink transition font-semibold text-gray-800 text-sm sm:text-base">
@@ -463,7 +358,6 @@
 
                     <div class="bg-white rounded-[1.5rem] p-4 shadow-sm border border-gray-100/80">
                         <h3 class="text-xs font-bold text-gray-800 mb-3 flex items-center gap-2 uppercase tracking-wider"><i class="fas fa-wallet text-gray-400 text-sm"></i> Pagamento</h3>
-                        
                         <div class="relative mt-2">
                             <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest absolute -top-2 left-3 bg-white px-1">Forma de Pagamento</label>
                             <select id="pagamento" class="w-full bg-transparent border-2 border-gray-100 rounded-2xl py-3.5 pl-4 pr-10 outline-none focus:border-insta-pink transition appearance-none font-semibold text-gray-800 text-sm sm:text-base" required onchange="toggleTroco()">
@@ -474,7 +368,6 @@
                             </select>
                             <i class="fas fa-chevron-down absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
                         </div>
-
                         <div id="troco-container" class="hidden mt-4 transition-all">
                             <div class="relative">
                                 <label class="text-[10px] font-bold text-success-green uppercase tracking-widest absolute -top-2 left-3 bg-white px-1">Troco para quanto?</label>
@@ -484,16 +377,13 @@
                     </div>
 
                     <button type="submit" id="btn-submit-hidden" class="hidden"></button>
-
                 </form>
             </div>
         </div>
     </div>
     
-    <!-- DOCK UNIVERSAL DE CHECKOUT -->
     <div id="checkout-floating-bar" class="fixed bottom-0 left-0 w-full z-[10070] pointer-events-none transform translate-y-full transition-transform duration-500 ease-out flex flex-col justify-end hidden">
         <div class="w-full bg-gradient-to-t from-[#f3f4f6] via-[#f3f4f6]/95 to-transparent pt-8 px-4 flex justify-center" style="padding-bottom: calc(10vh + 16px + env(safe-area-inset-bottom)); pointer-events: none;">
-            
             <div id="btn-finalizar" class="relative flex items-center justify-between bg-white/95 backdrop-blur-xl rounded-2xl p-4 sm:p-5 shadow-[0_20px_40px_rgba(0,0,0,0.15)] border border-gray-200/50 pointer-events-auto w-full max-w-[340px] cursor-pointer active:scale-95 transition-transform" onclick="document.getElementById('btn-submit-hidden').click()">
                 <div class="flex flex-col text-left leading-none pointer-events-none select-none">
                     <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Total a Pagar</span>
@@ -506,7 +396,6 @@
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 
@@ -514,7 +403,6 @@
     <div id="modal-rastreio" class="modal-wrapper flex items-center justify-center p-4 z-[10080]">
         <div class="modal-overlay" onclick="fecharModal('modal-rastreio')"></div>
         <div class="modal-content pb-0 bg-[#f3f4f6] w-full sm:w-[480px] rounded-[2.5rem] pt-6 sm:pt-7 shadow-2xl max-h-[90dvh] flex flex-col relative overflow-hidden">
-            
             <div class="flex justify-between items-center mb-2 px-6 shrink-0 w-full relative z-20">
                 <div class="flex flex-col text-left">
                     <h2 class="text-2xl sm:text-3xl font-display tracking-wide uppercase italic gradient-text pb-1 -ml-0.5" style="transform: skewX(-8deg);">Seu Pedido</h2>
@@ -523,7 +411,6 @@
                 <button type="button" onclick="fecharModal('modal-rastreio')" class="text-gray-400 hover:text-gray-800 bg-transparent text-xl w-8 h-8 flex items-center justify-center transition z-20"><i class="fas fa-times"></i></button>
             </div>
 
-            <!-- CONTAINER VAZIO (NENHUM PEDIDO) -->
             <div id="rastreio-vazio" class="hidden flex-col items-center justify-center flex-1 px-6 pb-10 mt-10">
                 <div class="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center mb-4 text-gray-400 shadow-inner">
                     <i class="fas fa-box-open text-4xl"></i>
@@ -535,79 +422,42 @@
                 </button>
             </div>
 
-            <!-- CONTAINER ATIVO (COM PEDIDO) -->
             <div id="rastreio-ativo" class="flex-col flex-1 flex overflow-hidden relative">
-                <!-- ABAS DE PEDIDOS (Aparece se houver mais de um) -->
                 <div id="rastreio-tabs" class="flex gap-2 overflow-x-auto px-6 mb-2 hidden custom-scroll shrink-0 pb-2"></div>
-
                 <div class="overflow-y-auto custom-scroll flex-1 px-6 pb-36 relative">
-                    <!-- TIMELINE DA ENTREGA -->
-                    <div class="relative pl-4 border-l-2 border-gray-100 ml-4 space-y-8 my-6" id="rastreio-timeline">
-                        <!-- Javascript injects steps here -->
-                    </div>
-
-                    <!-- RESUMO ESTILO CUPOM FISCAL -->
+                    <div class="relative pl-4 border-l-2 border-gray-100 ml-4 space-y-8 my-6" id="rastreio-timeline"></div>
                     <div class="mt-8 mb-4 mx-2">
                         <div class="w-full h-3 bg-repeat-x" style="background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMCIgaGVpZ2h0PSIxMCI+PHBvbHlnb24gcG9pbnRzPSIwLDEwIDUsMCAxMCwxMCIgZmlsbD0iI2ZkZmJmNyIvPjwvc3ZnPg==');"></div>
                         <div class="bg-[#fdfbf7] px-5 py-4 shadow-sm font-mono text-gray-700 flex flex-col">
-                            
                             <div class="text-center border-b-2 border-dashed border-gray-300 pb-3 mb-3">
                                 <h4 class="text-base font-bold uppercase tracking-widest text-black">InstaLanches</h4>
                                 <p class="text-[10px] uppercase mt-0.5 font-bold">Cupom de Pedido</p>
                             </div>
-                            
                             <div class="flex justify-between items-center mb-3 text-xs font-bold border-b-2 border-dashed border-gray-300 pb-3">
                                 <span class="uppercase">Previsão de Entrega:</span>
                                 <span class="font-black text-sm text-black" id="rastreio-previsao-hora">--:--</span>
                             </div>
-
                             <div class="pt-1 mb-3 border-b-2 border-dashed border-gray-300 pb-3">
                                 <div class="flex justify-between text-[10px] uppercase font-bold mb-2 text-gray-400">
                                     <span>QTD DESCRIÇÃO</span>
                                     <span>VALOR</span>
                                 </div>
-                                <div id="rastreio-resumo-itens" class="space-y-1">
-                                    <!-- JS Injects Items -->
-                                    <div class="text-xs font-bold text-gray-800 uppercase leading-tight text-center">Carregando itens...</div>
-                                </div>
+                                <div id="rastreio-resumo-itens" class="space-y-1"></div>
                             </div>
-
-                            <!-- TOTAIS E PAGAMENTO -->
                             <div class="space-y-1 mb-3 border-b-2 border-dashed border-gray-300 pb-3">
-                                <div class="flex justify-between text-xs font-bold text-gray-600">
-                                    <span class="uppercase">Subtotal</span>
-                                    <span id="rastreio-subtotal">--</span>
-                                </div>
-                                <div class="flex justify-between text-xs font-bold text-gray-600">
-                                    <span class="uppercase">Taxa de Entrega</span>
-                                    <span id="rastreio-taxa">--</span>
-                                </div>
-                                <div class="flex justify-between text-sm font-black text-black mt-2 pt-1">
-                                    <span class="uppercase">Total</span>
-                                    <span id="rastreio-total">--</span>
-                                </div>
+                                <div class="flex justify-between text-xs font-bold text-gray-600"><span class="uppercase">Subtotal</span><span id="rastreio-subtotal">--</span></div>
+                                <div class="flex justify-between text-xs font-bold text-gray-600"><span class="uppercase">Taxa de Entrega</span><span id="rastreio-taxa">--</span></div>
+                                <div class="flex justify-between text-sm font-black text-black mt-2 pt-1"><span class="uppercase">Total</span><span id="rastreio-total">--</span></div>
                             </div>
-                            
-                            <div class="flex justify-between text-xs font-bold text-gray-600 mb-3">
-                                <span class="uppercase">Pagamento</span>
-                                <span id="rastreio-pagamento" class="uppercase">--</span>
-                            </div>
-
-                            <div class="border-t-2 border-dashed border-gray-300 pt-3 text-center">
-                                <p class="text-[10px] uppercase font-bold text-black">Obrigado pela preferência!</p>
-                            </div>
+                            <div class="flex justify-between text-xs font-bold text-gray-600 mb-3"><span class="uppercase">Pagamento</span><span id="rastreio-pagamento" class="uppercase">--</span></div>
+                            <div class="border-t-2 border-dashed border-gray-300 pt-3 text-center"><p class="text-[10px] uppercase font-bold text-black">Obrigado pela preferência!</p></div>
                         </div>
                         <div class="w-full h-3 bg-repeat-x" style="background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMCIgaGVpZ2h0PSIxMCI+PHBvbHlnb24gcG9pbnRzPSIwLDAgNSwxMCAxMCwwIiBmaWxsPSIjZmRmYmY3Ii8+PC9zdmc+');"></div>
                     </div>
-
                 </div>
-                
-                <!-- DOCK DO BOTÃO DE ATUALIZAR -->
                 <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-[#f3f4f6] via-[#f3f4f6]/95 to-transparent pt-8 px-4 flex justify-center z-30" style="padding-bottom: calc(10vh + 16px + env(safe-area-inset-bottom));">
                     <div class="relative flex items-center justify-center bg-white/95 backdrop-blur-xl rounded-2xl p-4 sm:p-5 shadow-[0_20px_40px_rgba(0,0,0,0.15)] border border-gray-200/50 pointer-events-auto w-full max-w-[340px] cursor-pointer active:scale-95 transition-transform" onclick="carregarRastreio()">
-                        <span class="text-sm sm:text-base font-black text-gray-800 tracking-wide flex items-center gap-2">
-                            <i class="fas fa-sync-alt text-insta-pink"></i> Atualizar Status
-                        </span>
+                        <span class="text-sm sm:text-base font-black text-gray-800 tracking-wide flex items-center gap-2"><i class="fas fa-sync-alt text-insta-pink"></i> Atualizar Status</span>
                     </div>
                 </div>
             </div>
@@ -633,7 +483,7 @@
         </div>
     </div>
 
-    <!-- MODAL LOGIN ADMIN MOBILE (RESTAURADO) -->
+    <!-- MODAL LOGIN ADMIN MOBILE -->
     <div id="modal-admin-auth" class="modal-wrapper flex items-center justify-center p-4 z-[10090]">
         <div class="modal-overlay" onclick="fecharModal('modal-admin-auth')"></div>
         <div class="modal-content bg-white w-[95%] sm:w-[400px] rounded-[2rem] p-6 shadow-2xl flex flex-col relative">
@@ -647,19 +497,107 @@
         </div>
     </div>
 
-    <!-- MODAL ADMIN PANEL MOBILE (RESTAURADO EM FORMATO PÁGINA) -->
+    <!-- MODAL ADMIN PANEL MOBILE -->
     <div id="modal-admin-panel" class="modal-wrapper flex items-start sm:items-center justify-center p-0 sm:p-4 z-[10095]">
         <div class="modal-overlay" onclick="fecharModal('modal-admin-panel')"></div>
         <div class="modal-content pb-safe-modal bg-[#f3f4f6] w-full sm:w-[480px] h-[100dvh] sm:h-[90dvh] rounded-none sm:rounded-[2.5rem] flex flex-col relative overflow-hidden">
             <div class="bg-white px-5 py-4 border-b border-gray-200 flex justify-between items-center shrink-0 shadow-sm z-10 pt-safe-top">
                 <h3 class="font-bold text-lg text-gray-800"><i class="fas fa-mobile-alt text-insta-pink mr-2"></i> Gestão Rápida</h3>
                 <div class="flex gap-4">
-                    <button onclick="carregarPedidosMobile()" class="text-gray-500 hover:text-insta-pink"><i class="fas fa-sync-alt text-lg"></i></button>
                     <button onclick="fecharModal('modal-admin-panel')" class="text-gray-500 hover:text-gray-800"><i class="fas fa-times text-xl"></i></button>
                 </div>
             </div>
-            <div class="flex-1 overflow-y-auto custom-scroll p-4 relative" id="mobile-admin-pedidos-lista">
-                <!-- Pedidos aqui -->
+            
+            <!-- ABAS DE NAVEGAÇÃO ADMIN -->
+            <div class="flex overflow-x-auto bg-white border-b border-gray-200 shrink-0 custom-scroll px-2 shadow-sm relative z-10" id="admin-tabs">
+                <button onclick="mudarAbaAdmin('admin-pedidos', this)" class="admin-tab-btn active flex-1 py-3 px-2 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-insta-pink border-b-2 border-insta-pink whitespace-nowrap"><i class="fas fa-receipt mr-1"></i> Pedidos</button>
+                <button onclick="mudarAbaAdmin('admin-loja', this)" class="admin-tab-btn flex-1 py-3 px-2 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-400 border-b-2 border-transparent hover:text-gray-600 whitespace-nowrap"><i class="fas fa-store mr-1"></i> Loja</button>
+                <button onclick="mudarAbaAdmin('admin-cardapio', this)" class="admin-tab-btn flex-1 py-3 px-2 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-400 border-b-2 border-transparent hover:text-gray-600 whitespace-nowrap"><i class="fas fa-hamburger mr-1"></i> Cardápio</button>
+                <button onclick="mudarAbaAdmin('admin-taxas', this)" class="admin-tab-btn flex-1 py-3 px-2 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-400 border-b-2 border-transparent hover:text-gray-600 whitespace-nowrap"><i class="fas fa-motorcycle mr-1"></i> Taxas</button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto custom-scroll relative bg-[#f3f4f6]">
+                
+                <!-- ABA PEDIDOS -->
+                <div id="admin-pedidos" class="admin-tab-content p-4 block">
+                    <div class="flex justify-between items-center mb-3 px-1">
+                        <h4 class="font-bold text-gray-700 uppercase tracking-wider text-xs">Acompanhamento</h4>
+                        <button onclick="carregarPedidosMobile()" class="text-insta-pink text-sm font-bold bg-white px-3 py-1 rounded-full shadow-sm border border-gray-100"><i class="fas fa-sync-alt"></i> Atualizar</button>
+                    </div>
+                    <div id="mobile-admin-pedidos-lista">
+                        <!-- Pedidos aqui -->
+                    </div>
+                </div>
+
+                <!-- ABA LOJA -->
+                <div id="admin-loja" class="admin-tab-content p-4 hidden space-y-4">
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                        <h4 class="font-bold text-gray-800 mb-4"><i class="fas fa-door-open text-insta-orange mr-2"></i> Status de Funcionamento</h4>
+                        <div class="space-y-3">
+                            <label class="relative flex items-center p-3 cursor-pointer rounded-xl border border-gray-100 bg-gray-50 hover:bg-white transition-all">
+                                <input type="radio" name="admin_loja_status" value="AUTO" class="peer sr-only">
+                                <div class="relative z-10 flex-1 pl-2">
+                                    <h4 class="font-bold text-gray-800 text-sm peer-checked:text-insta-pink">Horário Automático</h4>
+                                    <p class="text-[10px] text-gray-500 mt-0.5">Abre e fecha sozinho</p>
+                                </div>
+                                <div class="relative z-10 w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center peer-checked:border-insta-pink peer-checked:bg-insta-pink"></div>
+                            </label>
+                            <label class="relative flex items-center p-3 cursor-pointer rounded-xl border border-gray-100 bg-gray-50 hover:bg-white transition-all">
+                                <input type="radio" name="admin_loja_status" value="FORCAR_ABERTO" class="peer sr-only">
+                                <div class="relative z-10 flex-1 pl-2">
+                                    <h4 class="font-bold text-success-green text-sm">Forçar Aberta</h4>
+                                    <p class="text-[10px] text-gray-500 mt-0.5">Ignora o horário padrão</p>
+                                </div>
+                                <div class="relative z-10 w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center peer-checked:border-success-green peer-checked:bg-success-green"></div>
+                            </label>
+                            <label class="relative flex items-center p-3 cursor-pointer rounded-xl border border-gray-100 bg-gray-50 hover:bg-white transition-all">
+                                <input type="radio" name="admin_loja_status" value="FORCAR_FECHADO" class="peer sr-only">
+                                <div class="relative z-10 flex-1 pl-2">
+                                    <h4 class="font-bold text-red-500 text-sm">Forçar Fechada</h4>
+                                    <p class="text-[10px] text-gray-500 mt-0.5">Pausa os pedidos agora</p>
+                                </div>
+                                <div class="relative z-10 w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center peer-checked:border-red-500 peer-checked:bg-red-500"></div>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                        <h4 class="font-bold text-gray-800 mb-3"><i class="fas fa-bullhorn text-insta-purple mr-2"></i> Letreiro Dinâmico</h4>
+                        <textarea id="admin-banner-loja" rows="2" placeholder="Ex: Hoje temos promoção de X-Tudo! Deixe em branco para mensagem padrão." class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 outline-none focus:border-insta-pink text-sm resize-none"></textarea>
+                    </div>
+                    <button onclick="salvarConfiguracoesLoja(this)" class="w-full gradient-bg text-white font-bold py-4 rounded-xl shadow-md active:scale-95 flex items-center justify-center gap-2"><i class="fas fa-save"></i> Guardar Alterações</button>
+                </div>
+
+                <!-- ABA CARDÁPIO -->
+                <div id="admin-cardapio" class="admin-tab-content p-4 hidden">
+                    <div class="bg-blue-50 border border-blue-100 p-4 rounded-2xl mb-4 text-xs text-blue-800 flex items-start gap-3">
+                        <i class="fas fa-info-circle mt-0.5 text-blue-500 text-lg"></i> 
+                        <p>Para adicionar novas fotos e produtos complexos, utilize diretamente o painel do <b>Supabase</b> no seu computador.</p>
+                    </div>
+                    <div class="flex justify-between items-center mb-3 px-1">
+                        <h4 class="font-bold text-gray-700 uppercase tracking-wider text-xs">Itens Cadastrados</h4>
+                        <button onclick="carregarAdminCardapio()" class="text-insta-pink text-sm font-bold bg-white px-3 py-1 rounded-full shadow-sm border border-gray-100"><i class="fas fa-sync-alt"></i> Atualizar</button>
+                    </div>
+                    <div id="admin-lista-cardapio" class="space-y-3">
+                        <!-- Itens do cardapio -->
+                    </div>
+                </div>
+
+                <!-- ABA TAXAS -->
+                <div id="admin-taxas" class="admin-tab-content p-4 hidden">
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-5">
+                        <h4 class="font-bold text-gray-800 mb-3 text-sm"><i class="fas fa-plus-circle text-success-green mr-2"></i> Adicionar Nova Taxa</h4>
+                        <div class="flex gap-2">
+                            <input type="text" id="nova-taxa-bairro" placeholder="Nome do Bairro" class="flex-1 bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-insta-pink">
+                            <input type="number" id="nova-taxa-valor" placeholder="R$ 0,00" class="w-24 bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-insta-pink text-center font-bold">
+                            <button onclick="adicionarTaxaAdmin(this)" class="bg-success-green text-white rounded-xl px-5 font-bold shadow-md active:scale-95 transition"><i class="fas fa-plus"></i></button>
+                        </div>
+                    </div>
+                    <h4 class="font-bold text-gray-700 uppercase tracking-wider text-xs mb-3 px-1">Bairros e Taxas Atuais</h4>
+                    <div id="admin-lista-taxas" class="space-y-3">
+                        <!-- Taxas aqui -->
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -667,22 +605,17 @@
     <!-- MODAL TECLADO VIRTUAL -->
     <div id="virtual-input-overlay" class="fixed inset-0 z-[10090] hidden" style="z-index: 9999998 !important;">
         <div id="virtual-overlay-bg" class="absolute inset-0 bg-black/60 backdrop-blur-sm opacity-0 transition-opacity duration-300 cursor-pointer" onclick="fecharTecladoVirtual()"></div>
-        
         <div id="virtual-flying-container" class="fixed transition-all duration-300 ease-[cubic-bezier(0.2,1,0.3,1)] z-10 flex flex-col opacity-0 pointer-events-none">
             <div class="flex justify-end mb-2">
                 <button type="button" onclick="fecharTecladoVirtual()" class="text-white bg-white/20 backdrop-blur-md border border-white/30 rounded-full w-8 h-8 flex items-center justify-center transition shadow-sm active:scale-95"><i class="fas fa-times"></i></button>
             </div>
-            <div id="virtual-input-field-container" class="w-full relative shadow-2xl rounded-2xl">
-            </div>
+            <div id="virtual-input-field-container" class="w-full relative shadow-2xl rounded-2xl"></div>
             <div class="mt-3 shrink-0">
-                <button type="button" onclick="confirmarTecladoVirtual()" class="w-full gradient-bg text-white font-bold py-3.5 sm:py-4 rounded-2xl shadow-xl active:scale-95 transition flex items-center justify-center gap-2 text-base sm:text-lg border border-white/20">
-                    Confirmar
-                </button>
+                <button type="button" onclick="confirmarTecladoVirtual()" class="w-full gradient-bg text-white font-bold py-3.5 sm:py-4 rounded-2xl shadow-xl active:scale-95 transition flex items-center justify-center gap-2 text-base sm:text-lg border border-white/20">Confirmar</button>
             </div>
         </div>
     </div>
 
-    <!-- Toast -->
     <div id="toast" class="fixed z-[100000] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-2 sm:gap-3 opacity-0 pointer-events-none transition-all duration-300 scale-95 bg-gray-900/95 backdrop-blur-md text-white px-5 py-3.5 rounded-[2rem] shadow-[0_10px_25px_rgba(0,0,0,0.3)] border border-gray-700/50">
         <i id="toast-icon" class="fas fa-check-circle text-success-green text-xl"></i>
         <span id="toast-msg" class="font-bold text-xs sm:text-sm tracking-wide text-white">Ação realizada!</span>
@@ -692,12 +625,9 @@
     <!--                               JAVASCRIPT PRINCIPAL                                        -->
     <!-- ========================================================================================= -->
 
-    <!-- LÓGICA DO ADMIN MOBILE -->
+    <!-- LÓGICA DO ADMIN MOBILE COM SUPABASE -->
     <script>
-        window.abrirAdminAuth = function(e) {
-            if(e) { e.preventDefault(); e.stopPropagation(); }
-            abrirModal('modal-admin-auth');
-        };
+        window.abrirAdminAuth = function(e) { if(e) { e.preventDefault(); e.stopPropagation(); } abrirModal('modal-admin-auth'); };
 
         function verificarSenhaAdminMobile() {
             const senha = document.getElementById('senha-admin-mobile').value;
@@ -705,24 +635,190 @@
                 fecharModal('modal-admin-auth');
                 document.getElementById('senha-admin-mobile').value = '';
                 abrirModal('modal-admin-panel');
-                carregarPedidosMobile();
-            } else {
-                showToast('Senha incorreta!', 'error');
+                mudarAbaAdmin('admin-pedidos', document.querySelector('#admin-tabs button')); // Foca na primeira aba
+            } else { showToast('Senha incorreta!', 'error'); }
+        }
+
+        // --- SISTEMA DE ABAS ---
+        function mudarAbaAdmin(abaId, btnElement) {
+            // Esconde todas as abas
+            document.querySelectorAll('.admin-tab-content').forEach(el => {
+                el.classList.add('hidden');
+                el.classList.remove('block');
+            });
+            // Mostra a aba selecionada
+            document.getElementById(abaId).classList.remove('hidden');
+            document.getElementById(abaId).classList.add('block');
+
+            // Atualiza botões
+            document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+                btn.classList.remove('active', 'text-insta-pink', 'border-insta-pink');
+                btn.classList.add('text-gray-400', 'border-transparent');
+            });
+            
+            if(btnElement) {
+                btnElement.classList.remove('text-gray-400', 'border-transparent');
+                btnElement.classList.add('active', 'text-insta-pink', 'border-insta-pink');
+            }
+
+            // Carrega os dados específicos de cada aba
+            if(abaId === 'admin-pedidos') carregarPedidosMobile();
+            if(abaId === 'admin-loja') {
+                const radios = document.getElementsByName('admin_loja_status');
+                for(let r of radios) { if(r.value === configLojaGlob.status) r.checked = true; }
+                document.getElementById('admin-banner-loja').value = configLojaGlob.textoBanner || '';
+            }
+            if(abaId === 'admin-cardapio') carregarAdminCardapio();
+            if(abaId === 'admin-taxas') carregarAdminTaxas();
+        }
+
+        // --- ABA LOJA ---
+        async function salvarConfiguracoesLoja(btn) {
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+            btn.disabled = true;
+
+            let novoStatus = 'AUTO';
+            document.getElementsByName('admin_loja_status').forEach(r => { if(r.checked) novoStatus = r.value; });
+            const novoBanner = document.getElementById('admin-banner-loja').value;
+
+            try {
+                // Upsert assumindo que a linha com id=1 guarda as configurações
+                const { error } = await supabaseClient.from('configuracoes').upsert({
+                    id: 1, 
+                    status: novoStatus,
+                    mostrarBanner: true,
+                    textoBanner: novoBanner
+                });
+
+                if(error) throw error;
+                showToast('Loja atualizada com sucesso!');
+                carregarConfiguracoesSupabase(); // Recarrega as globais
+            } catch(e) {
+                console.error(e);
+                showToast('Erro ao guardar configurações.', 'error');
+            } finally {
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
             }
         }
 
-        function carregarPedidosMobile() {
+        // --- ABA CARDAPIO ---
+        async function carregarAdminCardapio() {
+            const container = document.getElementById('admin-lista-cardapio');
+            container.innerHTML = '<div class="text-center p-8"><i class="fas fa-circle-notch fa-spin text-3xl text-insta-pink mb-2"></i><br><span class="text-sm text-gray-500">Buscando produtos...</span></div>';
+            try {
+                const { data, error } = await supabaseClient.from('produto').select('*').order('categoria');
+                if(error) throw error;
+                
+                let html = '';
+                if(!data || data.length === 0) {
+                    html = '<div class="text-center bg-white p-6 rounded-2xl border border-gray-100"><p class="text-gray-400 font-bold">Nenhum produto cadastrado.</p></div>';
+                } else {
+                    data.forEach(p => {
+                        html += `
+                        <div class="bg-white p-4 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.03)] border border-gray-100 flex justify-between items-center gap-3">
+                            <div class="flex-1 min-w-0">
+                                <p class="font-bold text-sm text-gray-800 truncate">${p.nome}</p>
+                                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-0.5 truncate">${p.categoria}</p>
+                            </div>
+                            <div class="font-black text-insta-purple text-base whitespace-nowrap bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200">
+                                R$ ${parseFloat(p.preco).toFixed(2).replace('.',',')}
+                            </div>
+                        </div>`;
+                    });
+                }
+                container.innerHTML = html;
+            } catch(e) { container.innerHTML = '<p class="text-center text-red-500 font-bold p-4">Erro ao carregar cardápio</p>'; }
+        }
+
+        // --- ABA TAXAS (AGORA CONECTADA A 'taxas_entrega' e 'taxa') ---
+        async function carregarAdminTaxas() {
+            const container = document.getElementById('admin-lista-taxas');
+            container.innerHTML = '<div class="text-center p-8"><i class="fas fa-circle-notch fa-spin text-3xl text-insta-pink mb-2"></i><br><span class="text-sm text-gray-500">Buscando taxas...</span></div>';
+            try {
+                // ATUALIZADO: Procura na sua tabela 'taxas_entrega'
+                const { data, error } = await supabaseClient.from('taxas_entrega').select('*').order('bairro');
+                if(error) throw error;
+                
+                let html = '';
+                if(!data || data.length === 0) {
+                    html = '<div class="text-center bg-white p-6 rounded-2xl border border-gray-100"><p class="text-gray-400 font-bold text-sm">Nenhuma taxa cadastrada.</p></div>';
+                } else {
+                    data.forEach(t => {
+                        // Aceita 'taxa' ou 'valor' caso o nome mude
+                        const valorTaxa = t.taxa !== undefined ? t.taxa : t.valor;
+                        html += `
+                        <div class="bg-white p-4 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.03)] border border-gray-100 flex justify-between items-center group">
+                            <span class="font-bold text-sm text-gray-700 uppercase tracking-wide flex-1 pr-2">${t.bairro}</span>
+                            <div class="flex items-center gap-4">
+                                <span class="text-insta-pink font-black text-base bg-pink-50 px-3 py-1 rounded-lg">R$ ${parseFloat(valorTaxa).toFixed(2).replace('.',',')}</span>
+                                <button onclick="deletarTaxaAdmin('${t.id}')" class="text-gray-300 hover:text-red-500 transition w-8 h-8 rounded-full bg-gray-50 hover:bg-red-50 flex items-center justify-center border border-gray-100 hover:border-red-100"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>`;
+                    });
+                }
+                container.innerHTML = html;
+            } catch(e) { container.innerHTML = '<p class="text-center text-red-500 font-bold p-4">Erro ao carregar taxas</p>'; }
+        }
+
+        async function adicionarTaxaAdmin(btn) {
+            const bairro = document.getElementById('nova-taxa-bairro').value.trim();
+            const valor = document.getElementById('nova-taxa-valor').value;
+            if(!bairro || !valor) return showToast('Preencha o bairro e o valor!', 'error');
+
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            btn.disabled = true;
+
+            try {
+                // ATUALIZADO: Insere em 'taxas_entrega' usando a coluna 'taxa' e 'ativo: true'
+                const { error } = await supabaseClient.from('taxas_entrega').insert([{ bairro: bairro, taxa: parseFloat(valor), ativo: true }]);
+                if(error) throw error;
+                
+                showToast('Taxa adicionada com sucesso!');
+                document.getElementById('nova-taxa-bairro').value = '';
+                document.getElementById('nova-taxa-valor').value = '';
+                carregarAdminTaxas(); // atualiza a lista do admin
+                carregarTaxasSupabase(); // atualiza o dropdown do cliente
+            } catch(e) { 
+                showToast('Erro ao adicionar.', 'error'); 
+            } finally {
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            }
+        }
+
+        async function deletarTaxaAdmin(id) {
+            if(!confirm('Tem certeza que deseja apagar esta taxa?')) return;
+            try {
+                // ATUALIZADO: Apaga da tabela 'taxas_entrega'
+                const { error } = await supabaseClient.from('taxas_entrega').delete().eq('id', id);
+                if(error) throw error;
+                showToast('Taxa apagada!');
+                carregarAdminTaxas();
+                carregarTaxasSupabase();
+            } catch(e) { showToast('Erro ao apagar.', 'error'); }
+        }
+
+        // --- ABA PEDIDOS ---
+        async function carregarPedidosMobile() {
             const container = document.getElementById('mobile-admin-pedidos-lista');
-            container.innerHTML = '<div class="text-center py-10 text-gray-500"><i class="fas fa-circle-notch fa-spin text-3xl mb-3 text-insta-pink"></i><br>A procurar pedidos...</div>';
+            container.innerHTML = '<div class="text-center py-10 text-gray-500"><i class="fas fa-circle-notch fa-spin text-3xl mb-3 text-insta-pink"></i><br>Buscando pedidos no Supabase...</div>';
             
-            if(isAppsScript() && google.script.run.obterPedidosAdmin) {
-                google.script.run.withSuccessHandler(dados => {
-                    renderizarPedidosMobile(dados || []);
-                }).withFailureHandler(() => {
-                    container.innerHTML = '<div class="text-center py-10 text-red-500 font-bold">Erro ao carregar os pedidos. Verifique se tem a função obterPedidosAdmin no seu script.</div>';
-                }).obterPedidosAdmin();
-            } else {
-                container.innerHTML = '<div class="text-center py-10 text-gray-400 font-bold"><i class="fas fa-info-circle text-4xl mb-2 text-gray-300"></i><br>O script não tem a função<br>obterPedidosAdmin.</div>';
+            try {
+                const { data, error } = await supabaseClient
+                    .from('pedidos')
+                    .select('*')
+                    .neq('status', 'Finalizado')
+                    .neq('status', 'Entregue')
+                    .order('id', { ascending: false });
+
+                if (error) throw error;
+                renderizarPedidosMobile(data || []);
+            } catch (err) {
+                console.error("Erro no admin:", err);
+                container.innerHTML = '<div class="text-center py-10 text-red-500 font-bold">Erro ao carregar os pedidos do banco de dados.</div>';
             }
         }
 
@@ -735,25 +831,25 @@
             
             let html = '';
             pedidos.forEach(p => {
-                const isDel = p.abaOrigem === 'DELIVERY';
+                const isDel = p.tipoPedido === 'entrega';
                 const badge = isDel 
                     ? `<span class="bg-blue-500 text-white text-[9px] px-2 py-0.5 rounded uppercase font-bold tracking-wider shadow-sm"><i class="fas fa-motorcycle"></i> Entregar</span>` 
                     : `<span class="bg-purple-500 text-white text-[9px] px-2 py-0.5 rounded uppercase font-bold tracking-wider shadow-sm"><i class="fas fa-store"></i> Local</span>`;
                 
-                const whatsNum = p.whatsapp ? p.whatsapp.replace(/\D/g, '') : '';
+                const whatsNum = p.telefone ? p.telefone.replace(/\D/g, '') : '';
                 let botoes = '';
                 
                 if(isDel) {
                     botoes = `
-                        <button onclick="mudarStatusPedidoMobile(${p.linha}, 'Preparando', '${whatsNum}', '${p.nomeCliente}', '${p.abaOrigem}', this)" class="flex-1 py-2 text-[10px] font-bold rounded border bg-white text-gray-600 hover:bg-orange-50 shadow-sm ${p.status === 'Preparando' ? 'border-orange-400 text-orange-500' : 'border-gray-200'}">Prep.</button>
-                        <button onclick="mudarStatusPedidoMobile(${p.linha}, 'Saiu para entrega', '${whatsNum}', '${p.nomeCliente}', '${p.abaOrigem}', this)" class="flex-1 py-2 text-[10px] font-bold rounded border bg-white text-gray-600 hover:bg-blue-50 shadow-sm ${p.status === 'Saiu para entrega' ? 'border-blue-400 text-blue-500' : 'border-gray-200'}">Entregar</button>
-                        <button onclick="mudarStatusPedidoMobile(${p.linha}, 'Finalizado', '${whatsNum}', '${p.nomeCliente}', '${p.abaOrigem}', this)" class="flex-1 py-2 text-[10px] font-bold rounded border bg-white text-gray-600 hover:bg-green-50 shadow-sm border-gray-200">Finalizar</button>
+                        <button onclick="mudarStatusPedidoMobile(${p.id}, 'Preparando', '${whatsNum}', '${p.nome}', this)" class="flex-1 py-2 text-[10px] font-bold rounded border bg-white text-gray-600 hover:bg-orange-50 shadow-sm ${p.status === 'Preparando' ? 'border-orange-400 text-orange-500' : 'border-gray-200'}">Prep.</button>
+                        <button onclick="mudarStatusPedidoMobile(${p.id}, 'Saiu para entrega', '${whatsNum}', '${p.nome}', this)" class="flex-1 py-2 text-[10px] font-bold rounded border bg-white text-gray-600 hover:bg-blue-50 shadow-sm ${p.status === 'Saiu para entrega' ? 'border-blue-400 text-blue-500' : 'border-gray-200'}">Entregar</button>
+                        <button onclick="mudarStatusPedidoMobile(${p.id}, 'Entregue', '${whatsNum}', '${p.nome}', this)" class="flex-1 py-2 text-[10px] font-bold rounded border bg-white text-gray-600 hover:bg-green-50 shadow-sm border-gray-200">Finalizar</button>
                     `;
                 } else {
                     botoes = `
-                        <button onclick="mudarStatusPedidoMobile(${p.linha}, 'Preparando', '${whatsNum}', '${p.nomeCliente}', '${p.abaOrigem}', this)" class="flex-1 py-2 text-[10px] font-bold rounded border bg-white text-gray-600 hover:bg-orange-50 shadow-sm ${p.status === 'Preparando' ? 'border-orange-400 text-orange-500' : 'border-gray-200'}">Prep.</button>
-                        <button onclick="mudarStatusPedidoMobile(${p.linha}, 'Pronto', '${whatsNum}', '${p.nomeCliente}', '${p.abaOrigem}', this)" class="flex-1 py-2 text-[10px] font-bold rounded border bg-white text-gray-600 hover:bg-blue-50 shadow-sm ${p.status === 'Pronto' ? 'border-blue-400 text-blue-500' : 'border-gray-200'}">Pronto</button>
-                        <button onclick="mudarStatusPedidoMobile(${p.linha}, 'Finalizado', '${whatsNum}', '${p.nomeCliente}', '${p.abaOrigem}', this)" class="flex-1 py-2 text-[10px] font-bold rounded border bg-white text-gray-600 hover:bg-green-50 shadow-sm border-gray-200">Finalizar</button>
+                        <button onclick="mudarStatusPedidoMobile(${p.id}, 'Preparando', '${whatsNum}', '${p.nome}', this)" class="flex-1 py-2 text-[10px] font-bold rounded border bg-white text-gray-600 hover:bg-orange-50 shadow-sm ${p.status === 'Preparando' ? 'border-orange-400 text-orange-500' : 'border-gray-200'}">Prep.</button>
+                        <button onclick="mudarStatusPedidoMobile(${p.id}, 'Pronto', '${whatsNum}', '${p.nome}', this)" class="flex-1 py-2 text-[10px] font-bold rounded border bg-white text-gray-600 hover:bg-blue-50 shadow-sm ${p.status === 'Pronto' ? 'border-blue-400 text-blue-500' : 'border-gray-200'}">Pronto</button>
+                        <button onclick="mudarStatusPedidoMobile(${p.id}, 'Finalizado', '${whatsNum}', '${p.nome}', this)" class="flex-1 py-2 text-[10px] font-bold rounded border bg-white text-gray-600 hover:bg-green-50 shadow-sm border-gray-200">Finalizar</button>
                     `;
                 }
 
@@ -762,14 +858,15 @@
                     <div class="flex justify-between items-start">
                         <div class="flex-1 pr-2">
                             <div class="flex items-center gap-2 mb-1">
-                                <h4 class="font-bold text-gray-800 text-sm truncate max-w-[150px]">${p.nomeCliente}</h4>
+                                <h4 class="font-bold text-gray-800 text-sm truncate max-w-[150px]">${p.nome}</h4>
                                 ${badge}
                             </div>
                             <p class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest">${p.horaPedido} • <span class="text-insta-pink">${p.status}</span></p>
+                            <p class="text-[10px] text-gray-500 mt-1">${p.endereco || p.mesa}</p>
                         </div>
                         <a href="https://wa.me/${whatsNum}" target="_blank" class="w-8 h-8 rounded-full bg-green-50 text-success-green flex items-center justify-center shrink-0 shadow-sm border border-green-100"><i class="fab fa-whatsapp"></i></a>
                     </div>
-                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 text-[11px] text-gray-700 whitespace-pre-wrap font-mono custom-scroll max-h-24 overflow-y-auto leading-snug">${p.item}</div>
+                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 text-[11px] text-gray-700 whitespace-pre-wrap font-mono custom-scroll max-h-24 overflow-y-auto leading-snug">${p.itens}</div>
                     <div class="flex gap-2 mt-1 pt-1">
                         ${botoes}
                     </div>
@@ -779,34 +876,34 @@
             container.innerHTML = html;
         }
 
-        function mudarStatusPedidoMobile(linha, status, whatsapp, nome, aba, btnElement) {
+        async function mudarStatusPedidoMobile(idPedido, novoStatus, whatsapp, nome, btnElement) {
             const oldHtml = btnElement.innerHTML;
             btnElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             btnElement.disabled = true;
 
-            if(isAppsScript() && google.script.run.atualizarStatusPlanilha) {
-                google.script.run.withSuccessHandler(() => {
-                    showToast(status === 'Finalizado' ? 'Enviado para Gestão!' : 'Status Atualizado!');
-                    carregarPedidosMobile();
-                    if(whatsapp && status !== 'Finalizado') {
-                        if(confirm(`Avisar no WhatsApp de ${nome}?`)) {
-                            let numero = whatsapp.length <= 11 ? "55" + whatsapp : whatsapp;
-                            window.open(`https://wa.me/${numero}?text=${encodeURIComponent(`Olá, *${nome}*! O seu pedido mudou o estado para: *${status}*.`)}`, '_blank');
-                        }
+            try {
+                const { error } = await supabaseClient.from('pedidos').update({ status: novoStatus }).eq('id', idPedido);
+                if (error) throw error;
+
+                showToast(novoStatus.includes('Finalizado') || novoStatus.includes('Entregue') ? 'Enviado para Gestão!' : 'Status Atualizado!');
+                carregarPedidosMobile(); 
+
+                if(whatsapp && !novoStatus.includes('Finalizado') && !novoStatus.includes('Entregue')) {
+                    if(confirm(`Avisar no WhatsApp de ${nome}?`)) {
+                        let numero = whatsapp.length <= 11 ? "55" + whatsapp : whatsapp;
+                        window.open(`https://wa.me/${numero}?text=${encodeURIComponent(`Olá, *${nome}*! O seu pedido mudou o estado para: *${novoStatus}*.`)}`, '_blank');
                     }
-                }).withFailureHandler(() => {
-                    showToast('Erro ao atualizar.', 'error');
-                    btnElement.innerHTML = oldHtml;
-                    btnElement.disabled = false;
-                }).atualizarStatusPlanilha(linha, status, '', aba);
-            } else {
-                showToast(`Teste Local: Status alterado para ${status}`);
+                }
+            } catch (err) {
+                console.error("Erro ao atualizar status:", err);
+                showToast('Erro ao atualizar.', 'error');
                 btnElement.innerHTML = oldHtml;
                 btnElement.disabled = false;
             }
         }
     </script>
 
+    <!-- VARIÁVEIS GLOBAIS E LÓGICA DO CARRINHO/LOJA -->
     <script>
         let carrinho = []; 
         let cardapioOriginal = []; 
@@ -818,6 +915,8 @@
         let statusLoja = { aceitandoPedidos: true, bloqueadoManual: false, motivo: 'aberta', mensagemBanner: 'Aberto para pedidos', horario: { abre: 17, fecha: 23, diaFechado: 3, textoDiaFechado: 'Quarta-feira' } };
         
         let loopRastreio = null;
+        let pedidosRastreioCliente = []; 
+        let abaRastreioAtual = 0;
 
         const TELEFONE_WHATSAPP = "5585991558671"; 
 
@@ -876,7 +975,6 @@
         };
 
         const normalizarTexto = (str) => str ? str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : '';
-        const isAppsScript = () => typeof google !== 'undefined' && google.script && google.script.run;
 
         function getIconeParaCategoria(categoria) {
             const catLower = normalizarTexto(categoria);
@@ -884,27 +982,57 @@
             return 'https://res.cloudinary.com/de9bsqp2z/image/upload/v1773529854/4_symwgr.png';
         }
 
-        const dadosExemplo = [
-            { id: '1', categoria: 'Hambúrgueres', nome: 'X Tudão Completo', descricao: 'Pão, carne, queijo, frango, ovo, presunto, calabresa.', preco: 20.00, imagem: '' },
-            { id: '2', categoria: 'Porções', nome: 'Batata Frita Suprema', descricao: 'Com cheddar e bacon deliciosos e crocantes.', preco: 28.00, imagem: '' },
-            { id: '3', categoria: 'Bebidas', nome: 'Coca-Cola 2L', descricao: 'Bem gelada', preco: 12.00, imagem: '' }
-        ];
+        // --- CONEXÕES COM SUPABASE ---
+        
+        async function carregarConfiguracoesSupabase() {
+            try {
+                const { data, error } = await supabaseClient.from('configuracoes').select('*').limit(1);
+                if (error && error.code !== '42P01') throw error; 
+                
+                if (data && data.length > 0) {
+                    const config = data[0];
+                    configLojaGlob.status = config.status || 'AUTO';
+                    configLojaGlob.mostrarBanner = config.mostrarBanner !== false;
+                    configLojaGlob.textoBanner = config.textoBanner || '';
+                    
+                    localStorage.setItem('InstaLanches_ConfigLoja', JSON.stringify(configLojaGlob));
+                    statusLoja = obterStatusLocal();
+                    aplicarStatusLojaInterface();
+                }
+            } catch (err) { console.error("Aviso Configurações:", err); }
+        }
 
-        // NOVA FUNÇÃO: Busca os dados na tabela 'produto' do Supabase
+        async function carregarTaxasSupabase() {
+            try {
+                // ATUALIZADO: Puxa os bairros da tabela 'taxas_entrega'
+                const { data, error } = await supabaseClient.from('taxas_entrega').select('*');
+                if (error && error.code !== '42P01') throw error;
+                
+                if (data && data.length > 0) {
+                    taxasOriginal = data;
+                    preencherSelectTaxas();
+                } else {
+                    taxasOriginal = [
+                        { id: 'taxa_1', bairro: 'Barra Nova', taxa: 7.00 },
+                        { id: 'taxa_2', bairro: 'Estrada Velha', taxa: 7.00 }
+                    ];
+                    preencherSelectTaxas();
+                }
+            } catch (err) { 
+                console.error("Aviso Taxas:", err); 
+                taxasOriginal = [{ id: 'taxa_1', bairro: 'Taxa Padrão', taxa: 5.00 }];
+                preencherSelectTaxas();
+            }
+        }
+
         async function carregarCardapioSupabase() {
             mostrarLoaderCardapio();
             try {
-                // Vai na tabela "produto" e pega todas as colunas
-                const { data, error } = await supabaseClient
-                    .from('produto')
-                    .select('*');
-
+                const { data, error } = await supabaseClient.from('produto').select('*');
                 if (error) throw error;
 
                 if (data && data.length > 0) {
-                    // Guarda uma cópia no celular do cliente para carregar mais rápido da próxima vez
                     localStorage.setItem('InstaLanches_CardapioCache', JSON.stringify(data));
-                    // Desenha o cardápio na tela
                     montarInterface(data);
                 } else {
                     esconderLoaderCardapio();
@@ -912,9 +1040,8 @@
                 }
             } catch (err) {
                 console.error("Erro ao carregar do Supabase:", err);
-                showToast("Erro ao conectar. Carregando cardápio de segurança.", "error");
-                // Plano B: Se o banco falhar, carrega os dados de exemplo para a tela não ficar em branco
-                montarInterface(dadosExemplo);
+                showToast("Erro ao conectar. Tente recarregar a página.", "error");
+                esconderLoaderCardapio();
             }
         }
 
@@ -951,18 +1078,6 @@
 
                 return { aceitandoPedidos, bloqueadoManual: configLojaGlob.status === 'FORCAR_FECHADO', motivo, mensagemBanner, horario: horarioPadrao };
             } catch (e) { return { aceitandoPedidos: true, bloqueadoManual: false, motivo: 'aberta', mensagemBanner: '', horario: horarioPadrao }; }
-        }
-
-        function carregarStatusLoja(callback) {
-            statusLoja = obterStatusLocal();
-            aplicarStatusLojaInterface();
-            if (typeof callback === 'function') callback();
-        }
-
-        function verificarPedidoAnterior() { 
-            if (localStorage.getItem('InstaLanches_UltimoPedido')) { 
-                document.getElementById('btn-repetir-pedido').classList.remove('hidden'); 
-            } 
         }
 
         function nomeDiaFechado(indice) {
@@ -1147,9 +1262,6 @@
             }
         }
 
-        // =========================================================================
-        // MÁGICA: TECLADO VIRTUAL DE SOBREPOSIÇÃO
-        // =========================================================================
         let inputAtivoParaTeclado = null;
         let rectOrigemTeclado = null;
 
@@ -1291,7 +1403,6 @@
             flyingContainer.style.width = `${rectOrigemTeclado.width}px`;
             flyingContainer.style.pointerEvents = 'none';
 
-            // Correção mobile keyboard jump
             window.scrollTo({ top: document.body.scrollTop, behavior: 'smooth' });
 
             setTimeout(() => {
@@ -1445,11 +1556,15 @@
         }
 
         // =========================================================================
-        // PROCESSAR CHECKOUT E CRIAR CUPOM FISCAL
+        // PROCESSAR CHECKOUT E ENVIAR PARA SUPABASE
         // =========================================================================
-        function processarCheckout(e) {
+        async function processarCheckout(e) {
             e.preventDefault();
             if (carrinho.length === 0) return showToast('O seu carrinho está vazio', 'error');
+
+            const btnFinalizar = document.getElementById('btn-finalizar');
+            btnFinalizar.style.pointerEvents = 'none';
+            btnFinalizar.style.opacity = '0.7';
 
             const nome = document.getElementById('nome-cliente').value;
             const whatsapp = document.getElementById('whatsapp-cliente').value.trim();
@@ -1466,6 +1581,7 @@
                 const ref = document.getElementById('referencia-input').value.trim();
                 
                 if(!bairro || !rua || !num || selectBairro.value === "") {
+                    btnFinalizar.style.pointerEvents = 'auto'; btnFinalizar.style.opacity = '1';
                     return showToast('Preencha o seu endereço completo (Bairro, Rua e Número)!', 'error');
                 }
                 endereco = `${rua}, ${num} - ${bairro}. Ref: ${ref}`;
@@ -1498,58 +1614,64 @@
 
             const url = `https://wa.me/${TELEFONE_WHATSAPP}?text=${encodeURIComponent(msgWhatsapp)}`;
             
-            if (isAppsScript()) {
-                const agora = new Date();
-                const horaStr = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-                const dataStr = agora.toLocaleDateString('pt-BR');
-                const previsaoDate = new Date(agora.getTime() + 60 * 60000); 
-                const previsaoStr = previsaoDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            const agora = new Date();
+            const horaStr = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            const dataStr = agora.toLocaleDateString('pt-BR');
+            const previsaoDate = new Date(agora.getTime() + 60 * 60000); 
+            const previsaoStr = previsaoDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
-                const pedidoCompleto = {
-                    idUsuario: meuIdUsuario,
-                    dataPedido: dataStr,
-                    horaPedido: horaStr,
-                    nome: nome,
-                    telefone: whatsapp,
-                    tipoPedido: tipoPedido,
-                    endereco: endereco,
-                    mesa: mesa,
-                    pagamento: pagamento,
-                    troco: trocoPara || '-',
-                    observacoes: observacoes || '-',
-                    taxaEntrega: taxaPreco,
-                    subtotal: subtotalPreco,
-                    total: total,
-                    itens: resumoItensCupom.trim(),
-                    previsao: previsaoStr,
-                    status: 'Recebido'
-                };
-                
-                if (google.script.run.enviarPedidoOficial) {
-                    google.script.run.withSuccessHandler(() => {
-                        document.getElementById('notif-dot').classList.remove('hidden');
-                        abrirModal('modal-rastreio');
-                    }).withFailureHandler(e => console.error("Erro ao registar pedido:", e)).enviarPedidoOficial(pedidoCompleto);
-                }
-            }
-
-            localStorage.setItem('InstaLanches_UltimoPedido', JSON.stringify(carrinho));
-            localStorage.setItem('InstaLanches_UltimoRecibo', JSON.stringify({
-                subtotal: subtotalPreco,
-                taxa: taxaPreco,
-                total: total,
+            const pedidoCompleto = {
+                idUsuario: meuIdUsuario,
+                dataPedido: dataStr,
+                horaPedido: horaStr,
+                nome: nome,
+                telefone: whatsapp,
+                tipoPedido: tipoPedido,
+                endereco: endereco,
+                mesa: mesa,
                 pagamento: pagamento,
-                troco: trocoPara
-            }));
+                troco: trocoPara || '-',
+                observacoes: observacoes || '-',
+                taxaEntrega: taxaPreco,
+                subtotal: subtotalPreco,
+                total: total,
+                itens: resumoItensCupom.trim(),
+                previsao: previsaoStr,
+                status: 'Recebido'
+            };
             
-            document.getElementById('btn-repetir-pedido').classList.remove('hidden');
+            try {
+                const { error } = await supabaseClient.from('pedidos').insert([pedidoCompleto]);
+                if (error) throw error;
 
-            window.open(url, '_blank');
-            
-            carrinho = [];
-            atualizarCarrinho();
-            fecharModal('cart-modal');
-            showToast('Pedido enviado!');
+                document.getElementById('notif-dot').classList.remove('hidden');
+                
+                localStorage.setItem('InstaLanches_UltimoPedido', JSON.stringify(carrinho));
+                localStorage.setItem('InstaLanches_UltimoRecibo', JSON.stringify({
+                    subtotal: subtotalPreco,
+                    taxa: taxaPreco,
+                    total: total,
+                    pagamento: pagamento,
+                    troco: trocoPara
+                }));
+                
+                document.getElementById('btn-repetir-pedido').classList.remove('hidden');
+                window.open(url, '_blank'); 
+                
+                carrinho = [];
+                atualizarCarrinho();
+                fecharModal('cart-modal');
+                showToast('Pedido enviado com sucesso!');
+
+                setTimeout(() => { abrirModal('modal-rastreio'); }, 500);
+
+            } catch(err) {
+                console.error("Erro ao salvar pedido no Supabase:", err);
+                showToast('Ocorreu um erro ao enviar seu pedido. Tente novamente.', 'error');
+            } finally {
+                btnFinalizar.style.pointerEvents = 'auto';
+                btnFinalizar.style.opacity = '1';
+            }
         }
 
         function repetirUltimoPedido() {
@@ -1562,6 +1684,9 @@
             }
         }
 
+        // =========================================================
+        // SCROLL INTELIGENTE E MENU
+        // =========================================================
         let isClickScrolling = false;
         let scrollTimeout;
 
@@ -1570,9 +1695,7 @@
             const navMenu = document.getElementById('menu-categorias');
             const scrollArea = document.getElementById('main-scroll-area');
 
-            document.querySelectorAll('main section').forEach(sec => {
-                sec.style.scrollMarginTop = '15px'; 
-            });
+            document.querySelectorAll('main section').forEach(sec => { sec.style.scrollMarginTop = '15px'; });
 
             navLinks.forEach(link => {
                 link.addEventListener('click', function(e) {
@@ -1622,17 +1745,13 @@
                         }
                     });
                 }
-            }, { 
-                root: scrollArea,
-                rootMargin: `-10px 0px -80% 0px`,
-                threshold: [0, 0.1, 0.2, 0.5, 1.0]
-            });
+            }, { root: scrollArea, rootMargin: `-10px 0px -80% 0px`, threshold: [0, 0.1, 0.2, 0.5, 1.0] });
             
             document.querySelectorAll('main section').forEach(sec => observer.observe(sec));
         }
 
         // =========================================================
-        // FUNÇÕES DE RASTREIO E CUPOM FISCAL 
+        // FUNÇÕES DE RASTREIO E CUPOM FISCAL (SUPABASE)
         // =========================================================
         function mostrarRastreioVazio() {
             const v = document.getElementById('rastreio-vazio');
@@ -1654,66 +1773,59 @@
             carregarRastreio();
         }
 
-        function carregarRastreio() {
+        async function carregarRastreio() {
             const btnAtualizar = document.querySelector('#modal-rastreio .fa-sync-alt');
             if(btnAtualizar) btnAtualizar.classList.add('fa-spin');
 
-            if (!isAppsScript()) {
-                setTimeout(() => {
-                    if(btnAtualizar) btnAtualizar.classList.remove('fa-spin');
-                    mostrarRastreioAtivo();
-                    renderizarCupomRastreio({
-                        status: 'Recebido',
-                        previsao: '23:45',
-                        item: '1x X Tudão Completo | R$ 20,00\n1x Coca-Cola 2L | R$ 12,00'
-                    });
-                }, 800);
-                return;
-            }
+            try {
+                const { data, error } = await supabaseClient
+                    .from('pedidos')
+                    .select('*')
+                    .eq('idUsuario', meuIdUsuario)
+                    .order('id', { ascending: false });
 
-            if (google.script.run.obterStatusDelivery) {
-                google.script.run.withSuccessHandler((pedido) => {
-                    if(btnAtualizar) btnAtualizar.classList.remove('fa-spin');
-                    if (pedido) {
-                        let pedidoFinal = pedido;
-                        if (Array.isArray(pedido)) pedidoFinal = pedido[0];
-                        if(pedidoFinal) {
-                            mostrarRastreioAtivo();
-                            renderizarCupomRastreio(pedidoFinal);
-                        } else {
-                            mostrarRastreioVazio();
-                        }
-                    } else {
-                        mostrarRastreioVazio();
-                    }
-                }).withFailureHandler((erro) => {
-                    if(btnAtualizar) btnAtualizar.classList.remove('fa-spin');
-                    showToast('Erro ao atualizar rastreio.', 'error');
-                }).obterStatusDelivery(meuIdUsuario);
+                if(btnAtualizar) btnAtualizar.classList.remove('fa-spin');
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    pedidosRastreioCliente = data;
+                    abaRastreioAtual = 0; 
+                    renderizarAbasRastreio();
+                } else {
+                    mostrarRastreioVazio();
+                }
+            } catch (err) {
+                console.error("Erro no rastreio:", err);
+                if(btnAtualizar) btnAtualizar.classList.remove('fa-spin');
+                showToast('Erro ao atualizar rastreio.', 'error');
+                mostrarRastreioVazio();
             }
         }
 
-        function carregarRastreioSilencioso() {
-            if (!isAppsScript()) return;
-            if (google.script.run.obterStatusDelivery) {
-                google.script.run.withSuccessHandler((pedidos) => {
-                    if (pedidos && Array.isArray(pedidos) && pedidos.length > 0) {
-                        let mudou = false;
-                        if(pedidos.length !== pedidosRastreioCliente.length) mudou = true;
-                        else {
-                            for(let i=0; i<pedidos.length; i++) {
-                                if(pedidos[i].status !== pedidosRastreioCliente[i].status) mudou = true;
-                            }
+        async function carregarRastreioSilencioso() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('pedidos')
+                    .select('*')
+                    .eq('idUsuario', meuIdUsuario)
+                    .order('id', { ascending: false });
+
+                if (!error && data && data.length > 0) {
+                    let mudou = false;
+                    if(data.length !== pedidosRastreioCliente.length) mudou = true;
+                    else {
+                        for(let i=0; i<data.length; i++) {
+                            if(data[i].status !== pedidosRastreioCliente[i].status) mudou = true;
                         }
-                        pedidosRastreioCliente = pedidos;
-                        if (mudou) renderizarAbasRastreio();
                     }
-                }).withFailureHandler((erro) => console.warn("Erro no rastreio silencioso:", erro)).obterStatusDelivery(meuIdUsuario);
-            }
+                    pedidosRastreioCliente = data;
+                    if (mudou) renderizarAbasRastreio();
+                }
+            } catch (err) { console.warn("Erro no rastreio silencioso:", err); }
         }
 
         function renderizarAbasRastreio() {
-            if (pedidosRastreioCliente.length === 0) {
+            if (!pedidosRastreioCliente || pedidosRastreioCliente.length === 0) {
                 mostrarRastreioVazio();
                 return;
             }
@@ -1748,6 +1860,13 @@
             const passos = ['Recebido', 'Preparando', 'Saiu para entrega', 'Entregue'];
             let idxAtual = passos.indexOf(pedido.status);
             if (idxAtual === -1) idxAtual = 0;
+            
+            if(pedido.tipoPedido !== 'entrega') {
+                passos[2] = 'Pronto';
+                passos[3] = 'Finalizado';
+                idxAtual = passos.indexOf(pedido.status);
+                if (idxAtual === -1) idxAtual = 0;
+            }
 
             let timelineHTML = '';
             passos.forEach((passo, i) => {
@@ -1758,8 +1877,8 @@
                 let icone = '';
                 if(i===0) icone = 'fa-file-alt';
                 if(i===1) icone = 'fa-fire-burner';
-                if(i===2) icone = 'fa-motorcycle';
-                if(i===3) icone = 'fa-house-user';
+                if(i===2) icone = (pedido.tipoPedido === 'entrega' ? 'fa-motorcycle' : 'fa-bell-concierge');
+                if(i===3) icone = (pedido.tipoPedido === 'entrega' ? 'fa-house-user' : 'fa-check-double');
 
                 timelineHTML += `
                 <div class="relative flex items-center gap-4">
@@ -1778,20 +1897,13 @@
             document.getElementById('rastreio-status-texto').textContent = `Status Atual: ${pedido.status}`;
             document.getElementById('rastreio-previsao-hora').textContent = pedido.previsao || '--:--';
 
-            // Mágica para extrair e calcular os itens e preços do texto vindo da planilha
-            const linhasItens = (pedido.item || '').split('\n').filter(l => l.trim() !== '');
+            const linhasItens = (pedido.itens || '').split('\n').filter(l => l.trim() !== '');
             let itensHTML = '';
-            let subtotalCalculado = 0;
-
+            
             linhasItens.forEach(linha => {
                 const partes = linha.split('|');
                 const desc = partes[0].trim();
                 let precoStr = partes.length > 1 ? partes[1].trim() : '--';
-                
-                if (partes.length > 1) {
-                    const precoNum = parseFloat(precoStr.replace('R$', '').replace('.', '').replace(',', '.').trim());
-                    if (!isNaN(precoNum)) subtotalCalculado += precoNum;
-                }
 
                 itensHTML += `
                 <div class="flex justify-between items-start text-[11px] font-bold text-gray-800 leading-tight pb-1.5">
@@ -1802,27 +1914,14 @@
 
             document.getElementById('rastreio-resumo-itens').innerHTML = itensHTML;
 
-            // Busca as taxas exatas que salvamos na hora do checkout
-            let reciboStr = localStorage.getItem('InstaLanches_UltimoRecibo');
-            let taxa = 0, total = subtotalCalculado, pagamento = pedido.pagamento || 'Não informado';
-            
-            if (reciboStr) {
-                try {
-                    const recibo = JSON.parse(reciboStr);
-                    const subLS = parseFloat(recibo.subtotal);
-                    taxa = parseFloat(recibo.taxa) || 0;
-                    total = parseFloat(recibo.total) || (subtotalCalculado + taxa);
-                    pagamento = recibo.pagamento || pagamento;
-                    
-                    if (!isNaN(subLS) && subLS > 0) subtotalCalculado = subLS;
-                } catch(e) {}
-            }
+            const sub = parseFloat(pedido.subtotal) || 0;
+            const tx = parseFloat(pedido.taxaEntrega) || 0;
+            const tot = parseFloat(pedido.total) || 0;
 
-            // Injeta os valores finais no cupom
-            document.getElementById('rastreio-subtotal').textContent = `R$ ${subtotalCalculado.toFixed(2).replace('.', ',')}`;
-            document.getElementById('rastreio-taxa').textContent = `R$ ${taxa.toFixed(2).replace('.', ',')}`;
-            document.getElementById('rastreio-total').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
-            document.getElementById('rastreio-pagamento').textContent = pagamento;
+            document.getElementById('rastreio-subtotal').textContent = `R$ ${sub.toFixed(2).replace('.', ',')}`;
+            document.getElementById('rastreio-taxa').textContent = `R$ ${tx.toFixed(2).replace('.', ',')}`;
+            document.getElementById('rastreio-total').textContent = `R$ ${tot.toFixed(2).replace('.', ',')}`;
+            document.getElementById('rastreio-pagamento').textContent = pedido.pagamento || 'Não informado';
         }
     </script>
     <script>
@@ -1843,11 +1942,7 @@
         window.addEventListener('load', ()=>{
             controlarCarrinhoFooter();
         });
-    </script>
 
-    <!-- O bloco que tentava carregar os SVGs locais quebrados foi removido daqui para evitar os erros 404 -->
-
-    <script>
         function mostrarLoaderCardapio(){
             const c=document.querySelector('#container-cardapio');
             if(!c) return;
@@ -1869,15 +1964,15 @@
             if(!select) return;
             select.innerHTML = '<option value="" data-taxa="0">Selecione seu Bairro...</option>';
             taxasOriginal.forEach(taxa => {
-                select.innerHTML += `<option value="${taxa.bairro}" data-taxa="${taxa.valor}">${taxa.bairro} - R$ ${parseFloat(taxa.valor).toFixed(2).replace('.', ',')}</option>`;
+                // ATUALIZADO: Aceita tanto 'taxa' quanto 'valor' para compatibilidade total
+                const valorAtual = taxa.taxa !== undefined ? taxa.taxa : taxa.valor;
+                select.innerHTML += `<option value="${taxa.bairro}" data-taxa="${valorAtual}">${taxa.bairro} - R$ ${parseFloat(valorAtual).toFixed(2).replace('.', ',')}</option>`;
             });
         }
 
         document.addEventListener("DOMContentLoaded", () => {
-            // ATIVA IMEDIATAMENTE O STATUS CORRETO DA LOJA
             statusLoja = obterStatusLocal();
             
-            // Tenta carregar do cache instantaneamente
             const cacheCardapio = localStorage.getItem('InstaLanches_CardapioCache');
             if (cacheCardapio) {
                 try {
@@ -1888,73 +1983,23 @@
                 mostrarLoaderCardapio();
             }
 
-            // CARREGAMENTO MÁGICO DO GOOGLE SHEETS
-            if (isAppsScript()) {
-                if (google.script.run.obterConfiguracoes) {
-                    google.script.run.withSuccessHandler((config) => {
-                        if (config) {
-                            configLojaGlob.status = config.status;
-                            configLojaGlob.mostrarBanner = config.mostrarBanner;
-                            configLojaGlob.textoBanner = config.textoBanner;
-                            
-                            localStorage.setItem('InstaLanches_ConfigLoja', JSON.stringify(configLojaGlob));
-                            
-                            statusLoja = obterStatusLocal();
-                            aplicarStatusLojaInterface();
-                        }
-                    }).obterConfiguracoes();
-                }
+            carregarConfiguracoesSupabase();
+            carregarTaxasSupabase();
+            carregarCardapioSupabase();
 
-                if (google.script.run.obterTaxas) {
-                    google.script.run.withSuccessHandler((taxasNuvem) => {
-                        if (taxasNuvem && taxasNuvem.length > 0) {
-                            taxasOriginal = taxasNuvem;
-                        }
-                        preencherSelectTaxas();
-                    }).obterTaxas();
-                }
-
-                if (google.script.run.obterCardapio) {
-                    google.script.run.withSuccessHandler((dadosCardapio) => {
-                        if (dadosCardapio && dadosCardapio.length > 0) {
-                            // Atualiza a cache e a interface silenciosamente
-                            localStorage.setItem('InstaLanches_CardapioCache', JSON.stringify(dadosCardapio));
-                            montarInterface(dadosCardapio);
-                        } else {
-                            esconderLoaderCardapio();
-                            document.getElementById('container-cardapio').innerHTML = '<p class="text-center text-gray-500 py-10 font-bold">Nenhum item encontrado no cardápio.</p>';
-                        }
-                    }).withFailureHandler((erro) => {
-                        showToast('Erro ao carregar o cardápio!', 'error');
-                        esconderLoaderCardapio();
-                    }).obterCardapio();
-                }
-                
-                // Verifica o Rastreio silenciosamente
-                if (google.script.run.obterStatusDelivery) {
-                    google.script.run.withSuccessHandler((pedidos) => {
-                        let lista = [];
-                        if (pedidos) {
-                            if (Array.isArray(pedidos)) lista = pedidos;
-                            else if (typeof pedidos === 'object' && Object.keys(pedidos).length > 0) lista = [pedidos];
-                        }
-                        const temAtivo = lista.some(p => p && p.status !== 'Entregue' && p.status !== 'Finalizado');
-                        if (temAtivo) {
-                            document.getElementById('notif-dot').classList.remove('hidden');
-                        }
-                    }).obterStatusDelivery(meuIdUsuario);
-                }
-
-            } else {
-                taxasOriginal = [
-                    { id: 'taxa_1', bairro: 'Barra Nova', valor: 7.00 },
-                    { id: 'taxa_2', bairro: 'Estrada Velha', valor: 7.00 }
-                ];
-                preencherSelectTaxas();
-                
-                // NOVO: Aqui chamamos a função para pegar os produtos do Supabase!
-                carregarCardapioSupabase();
-            }
+            setTimeout(async () => {
+                try {
+                    const { data } = await supabaseClient
+                        .from('pedidos')
+                        .select('status')
+                        .eq('idUsuario', meuIdUsuario);
+                        
+                    if(data) {
+                        const temAtivo = data.some(p => p.status !== 'Entregue' && p.status !== 'Finalizado');
+                        if (temAtivo) document.getElementById('notif-dot').classList.remove('hidden');
+                    }
+                } catch(e) {}
+            }, 2000);
 
             const formCheckout = document.getElementById('checkout-form');
             if (formCheckout) {
@@ -1975,12 +2020,7 @@
             obs.observe(target,{childList:true,subtree:true});
             setTimeout(prepararInputsVirtuais, 1000); 
         });
-    </script>
 
-    <script>
-        // =========================================================
-        // VALIDAÇÃO E ANIMAÇÃO DE COMEMORAÇÃO DO CHECKOUT
-        // =========================================================
         let isCheckoutReady = false;
 
         function validarCheckout() {
@@ -2036,20 +2076,9 @@
                 btnFinalizar.classList.remove('btn-checkout-ready');
             }
         }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const formCheckout = document.getElementById('checkout-form');
-            if (formCheckout) {
-                formCheckout.addEventListener('input', validarCheckout);
-                formCheckout.addEventListener('change', validarCheckout);
-            }
-        });
     </script>
 
     <script>
-        // =========================================================
-        // LÓGICA DE ARRASTAR O BOTÃO DO CARRINHO (ESTILINGUE)
-        // =========================================================
         function initDraggableCart() {
             const dragHandle = document.getElementById('cart-draggable-btn');
             if (!dragHandle) return;
