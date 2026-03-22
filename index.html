@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR" class="scroll-smooth">
 
-<!-- ===== AREA 1: CONFIGURAÇÕES GERAIS (meta, fonts, tailwind, estilos globais) ===== -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -102,8 +101,8 @@
             .modal-wrapper { padding: 0 !important; align-items: flex-start !important; height: var(--app-height, 100dvh) !important; }
             .modal-content { width: 100% !important; height: 100% !important; max-height: 100% !important; border-radius: 0 !important; display: flex; flex-direction: column; padding-top: max(1.5rem, env(safe-area-inset-top)) !important; justify-content: flex-start; }
             .modal-content > button.absolute { top: max(1.25rem, env(safe-area-inset-top)) !important; right: 1.25rem !important; }
-            #modal-add-item.modal-wrapper, #modal-loja-fechada.modal-wrapper, #modal-opcoes.modal-wrapper, #modal-confirm-zap.modal-wrapper, #modal-admin-auth.modal-wrapper { padding: 1rem !important; align-items: center !important; justify-content: center !important;}
-            #modal-add-item .modal-content, #modal-loja-fechada .modal-content, #modal-opcoes .modal-content, #modal-confirm-zap .modal-content, #modal-admin-auth .modal-content { width: 95% !important; height: auto !important; max-height: 90dvh !important; border-radius: 2rem !important; padding-top: 1.5rem !important; margin: auto; justify-content: flex-start !important; display: flex; flex-direction: column; }
+            #modal-add-item.modal-wrapper, #modal-loja-fechada.modal-wrapper, #modal-opcoes.modal-wrapper, #modal-admin-auth.modal-wrapper { padding: 1rem !important; align-items: center !important; justify-content: center !important;}
+            #modal-add-item .modal-content, #modal-loja-fechada .modal-content, #modal-opcoes .modal-content, #modal-admin-auth .modal-content { width: 95% !important; height: auto !important; max-height: 90dvh !important; border-radius: 2rem !important; padding-top: 1.5rem !important; margin: auto; justify-content: flex-start !important; display: flex; flex-direction: column; }
             #modal-add-item .modal-content > button.absolute, #modal-loja-fechada .modal-content > button.absolute, #modal-opcoes .modal-content > button.absolute, #modal-admin-auth .modal-content > button.absolute { top: 1.25rem !important; right: 1.25rem !important; }
             #modal-admin-panel .modal-content { width: 100% !important; height: 100% !important; max-height: 100% !important; border-radius: 0 !important; padding-top: max(1.5rem, env(safe-area-inset-top)) !important; margin: 0; justify-content: flex-start !important; display: flex; flex-direction: column; }
         }
@@ -153,7 +152,7 @@
     <!-- Importação do Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
-    <!-- Configuração do Supabase -->
+    <!-- Configuração do Supabase (A Ponte) -->
     <script>
         const supabaseClient = window.supabase.createClient(
             'https://omjaecifdhrlgmmehweq.supabase.co',
@@ -907,15 +906,8 @@
             const container = document.getElementById('mobile-admin-pedidos-lista');
             container.innerHTML = '<div class="text-center py-10 text-gray-500"><i class="fas fa-circle-notch fa-spin text-3xl mb-3 text-insta-pink"></i><br>Buscando pedidos...</div>';
             try {
-                const { data: pedidos, error } = await supabaseClient.from('pedidos').select('*').neq('status', 'Finalizado').neq('status', 'Entregue').order('id', { ascending: false });
+                const { data: pedidos, error } = await supabaseClient.from('pedidos').select('*, pedido_itens(*)').neq('status', 'Finalizado').neq('status', 'Entregue').order('id', { ascending: false });
                 if (error) throw error;
-                
-                if(pedidos && pedidos.length > 0) {
-                    const ids = pedidos.map(p => p.id);
-                    const { data: itens } = await supabaseClient.from('pedido_itens').select('*').in('pedido_id', ids);
-                    pedidos.forEach(p => { p.pedido_itens = itens ? itens.filter(i => i.pedido_id === p.id) : []; });
-                }
-                
                 renderizarPedidosMobile(pedidos || []);
             } catch (err) { container.innerHTML = `<div class="text-center py-10 text-red-500 font-bold">Erro: ${err.message || 'ao carregar pedidos.'}</div>`; }
         }
@@ -1316,16 +1308,12 @@
             if(btnAtualizar) btnAtualizar.classList.add('fa-spin');
 
             try {
-                // SOLUÇÃO INFALÍVEL DO RELACIONAMENTO (JOIN MANUAL)
-                const { data: pedidos, error } = await supabaseClient.from('pedidos').select('*').eq('idUsuario', meuIdUsuario).order('id', { ascending: false });
+                // RELAÇÃO NATIVA (FOREIGN KEY) PARA O RASTREIO DO CLIENTE
+                const { data: pedidos, error } = await supabaseClient.from('pedidos').select('*, pedido_itens(*)').eq('idUsuario', meuIdUsuario).order('id', { ascending: false });
                 if(btnAtualizar) btnAtualizar.classList.remove('fa-spin');
                 if (error) throw error;
 
                 if (pedidos && pedidos.length > 0) {
-                    const ids = pedidos.map(p => p.id);
-                    const { data: itens } = await supabaseClient.from('pedido_itens').select('*').in('pedido_id', ids);
-                    pedidos.forEach(p => { p.pedido_itens = itens ? itens.filter(i => i.pedido_id === p.id) : []; });
-
                     pedidosRastreioCliente = pedidos; abaRastreioAtual = 0; renderizarAbasRastreio();
                 } else { mostrarRastreioVazio(); }
             } catch (err) {
@@ -1336,13 +1324,9 @@
 
         async function carregarRastreioSilencioso() {
             try {
-                const { data: pedidos, error } = await supabaseClient.from('pedidos').select('*').eq('idUsuario', meuIdUsuario).order('id', { ascending: false });
+                // RELAÇÃO NATIVA (FOREIGN KEY) PARA O RASTREIO SILENCIOSO EM SEGUNDO PLANO
+                const { data: pedidos, error } = await supabaseClient.from('pedidos').select('*, pedido_itens(*)').eq('idUsuario', meuIdUsuario).order('id', { ascending: false });
                 if (!error && pedidos && pedidos.length > 0) {
-                    
-                    const ids = pedidos.map(p => p.id);
-                    const { data: itens } = await supabaseClient.from('pedido_itens').select('*').in('pedido_id', ids);
-                    pedidos.forEach(p => { p.pedido_itens = itens ? itens.filter(i => i.pedido_id === p.id) : []; });
-
                     let mudou = false;
                     if(pedidos.length !== pedidosRastreioCliente.length) mudou = true;
                     else { for(let i=0; i<pedidos.length; i++) { if(pedidos[i].status !== pedidosRastreioCliente[i].status) mudou = true; } }
