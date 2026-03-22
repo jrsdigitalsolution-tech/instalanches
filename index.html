@@ -68,8 +68,6 @@
             width: 100%;
             min-height: 100vh;
             overflow-x: hidden;
-            overflow-y: auto;
-            overscroll-behavior: none;
             background-color: #f8f9fa;
             background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='#d6249f' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
             -webkit-tap-highlight-color: transparent;
@@ -150,7 +148,7 @@
 
         #statusBanner { position: fixed !important; top: 0 !important; left: 0 !important; width: 100% !important; z-index: 10000 !important; height: var(--banner-height); }
         #main-header { position: fixed !important; top: var(--banner-height) !important; left: 0 !important; width: 100% !important; z-index: 9999 !important; height: var(--header-height); }
-        #main-scroll-area { position: relative !important; margin-top: var(--top-offset) !important; width: 100% !important; min-height: 100vh !important; overflow-y: auto !important; overflow-x: hidden !important; -webkit-overflow-scrolling: touch !important; display: block !important; }
+        #main-scroll-area { position: relative !important; padding-top: var(--top-offset) !important; width: 100% !important; min-height: 100vh !important; display: block !important; }
     </style>
 
     <!-- Importação do Supabase -->
@@ -1540,9 +1538,8 @@
         function configurarNavegacao() {
             const navLinks = document.querySelectorAll('.nav-link');
             const navMenu = document.getElementById('menu-categorias');
-            const scrollArea = document.getElementById('main-scroll-area');
 
-            document.querySelectorAll('main section').forEach(sec => { sec.style.scrollMarginTop = '15px'; });
+            document.querySelectorAll('main section').forEach(sec => { sec.style.scrollMarginTop = '120px'; });
 
             navLinks.forEach(link => {
                 link.addEventListener('click', function(e) {
@@ -1552,9 +1549,9 @@
                     navMenu.scrollTo({ left: scrollPos, behavior: 'smooth' });
 
                     const targetEl = document.querySelector(this.getAttribute('href'));
-                    if (targetEl && scrollArea) {
-                        const topOffset = targetEl.getBoundingClientRect().top + scrollArea.scrollTop - scrollArea.getBoundingClientRect().top - 10; 
-                        scrollArea.scrollTo({ top: topOffset, behavior: 'smooth' });
+                    if (targetEl) {
+                        const topOffset = targetEl.getBoundingClientRect().top + window.scrollY - 110; 
+                        window.scrollTo({ top: topOffset, behavior: 'smooth' });
                     }
                     clearTimeout(scrollTimeout); scrollTimeout = setTimeout(() => { isClickScrolling = false; }, 800);
                 });
@@ -1575,7 +1572,7 @@
                         } else { link.classList.remove('active'); }
                     });
                 }
-            }, { root: scrollArea, rootMargin: `-10px 0px -80% 0px`, threshold: [0, 0.1, 0.2, 0.5, 1.0] });
+            }, { root: null, rootMargin: `-120px 0px -60% 0px`, threshold: [0, 0.1, 0.2, 0.5, 1.0] });
             document.querySelectorAll('main section').forEach(sec => observer.observe(sec));
         }
 
@@ -1617,7 +1614,15 @@
         document.addEventListener("DOMContentLoaded", () => {
             statusLoja = calcularStatusLoja();
             const cacheCardapio = safeStorage.getItem('InstaLanches_CardapioCache');
-            if (cacheCardapio) { try { const dadosCached = JSON.parse(cacheCardapio); if (dadosCached && dadosCached.length > 0) montarInterface(dadosCached); } catch(e) {} } 
+            if (cacheCardapio) { 
+                try { 
+                    const dadosCached = JSON.parse(cacheCardapio); 
+                    if (dadosCached && dadosCached.length > 0) montarInterface(dadosCached); 
+                } catch(e) {
+                    safeStorage.removeItem('InstaLanches_CardapioCache');
+                    mostrarLoaderCardapio();
+                } 
+            } 
             else { mostrarLoaderCardapio(); }
 
             carregarConfiguracoesSupabase();
