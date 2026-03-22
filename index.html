@@ -63,15 +63,14 @@
             -webkit-tap-highlight-color: transparent;
         }
 
+        /* A ROLAGEM NATIVA ESTÁ DE VOLTA. 
+           Sem bloqueios, sem "overflow: hidden" bizarros.
+        */
         #main-scroll-area {
-            position: relative !important;
-            margin-top: var(--top-offset) !important;
-            width: 100% !important;
-            min-height: 100vh !important;
-            overflow-y: auto !important;
-            overflow-x: hidden !important;
-            -webkit-overflow-scrolling: touch !important;
-            display: block !important;
+            position: relative;
+            margin-top: var(--top-offset);
+            width: 100%;
+            display: block;
         }
         
         #container-cardapio { display: block !important; min-height: 300px; }
@@ -181,7 +180,7 @@
         <nav class="nav-scroll overflow-x-auto whitespace-nowrap px-4 py-2 sm:py-2.5 flex gap-4 sm:gap-6 max-w-5xl mx-auto" id="menu-categorias"></nav>
     </header>
 
-    <div id="main-scroll-area" class="custom-scroll relative w-full">
+    <div id="main-scroll-area" class="relative w-full">
         
         <main class="max-w-5xl mx-auto px-4 py-4 mt-2 pb-8 w-full" id="container-cardapio"></main>
 
@@ -1508,7 +1507,6 @@
         function configurarNavegacao() {
             const navLinks = document.querySelectorAll('.nav-link');
             const navMenu = document.getElementById('menu-categorias');
-            const scrollArea = document.getElementById('main-scroll-area');
 
             document.querySelectorAll('main section').forEach(sec => { sec.style.scrollMarginTop = '15px'; });
 
@@ -1516,13 +1514,17 @@
                 link.addEventListener('click', function(e) {
                     e.preventDefault(); isClickScrolling = true;
                     navLinks.forEach(l => l.classList.remove('active')); this.classList.add('active');
+                    
                     const scrollPos = this.offsetLeft - (navMenu.clientWidth / 2) + (this.clientWidth / 2);
                     navMenu.scrollTo({ left: scrollPos, behavior: 'smooth' });
 
                     const targetEl = document.querySelector(this.getAttribute('href'));
-                    if (targetEl && scrollArea) {
-                        const topOffset = targetEl.getBoundingClientRect().top + scrollArea.scrollTop - scrollArea.getBoundingClientRect().top - 10;
-                        scrollArea.scrollTo({ top: topOffset, behavior: 'smooth' });
+                    if (targetEl) {
+                        const headerOffset = 135; 
+                        const elementPosition = targetEl.getBoundingClientRect().top;
+                        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+                        window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
                     }
                     clearTimeout(scrollTimeout); scrollTimeout = setTimeout(() => { isClickScrolling = false; }, 800);
                 });
@@ -1531,7 +1533,12 @@
             const observer = new IntersectionObserver((entries) => {
                 if (isClickScrolling) return;
                 let activeId = null; let maxRatio = 0;
-                entries.forEach(entry => { if (entry.isIntersecting && entry.intersectionRatio > maxRatio) { maxRatio = entry.intersectionRatio; activeId = entry.target.id; } });
+                entries.forEach(entry => { 
+                    if (entry.isIntersecting && entry.intersectionRatio > maxRatio) { 
+                        maxRatio = entry.intersectionRatio; 
+                        activeId = entry.target.id; 
+                    } 
+                });
                 if (activeId) {
                     navLinks.forEach(link => {
                         if (link.getAttribute('href').substring(1) === activeId) {
@@ -1543,7 +1550,8 @@
                         } else { link.classList.remove('active'); }
                     });
                 }
-            }, { root: scrollArea, rootMargin: `-10px 0px -80% 0px`, threshold: [0, 0.1, 0.2, 0.5, 1.0] });
+            }, { rootMargin: `-140px 0px -60% 0px`, threshold: [0, 0.1, 0.2, 0.5] });
+            
             document.querySelectorAll('main section').forEach(sec => observer.observe(sec));
         }
 
