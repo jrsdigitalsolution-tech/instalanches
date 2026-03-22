@@ -671,7 +671,8 @@
         // ---------------------------------------------------------
         async function carregarConfiguracoesSupabase() {
             try {
-                const { data, error } = await supabaseClient.from('configuracoes').select('*').limit(1);
+                // .order('id') garante que ele pegue sempre a linha certa, não importando a ordem no DB
+                const { data, error } = await supabaseClient.from('configuracoes').select('*').order('id', { ascending: true }).limit(1);
                 if (error && error.code !== '42P01') throw error; 
                 
                 if (data && data.length > 0) {
@@ -682,8 +683,8 @@
                     configLojaGlob.mostrarBanner = false; 
                     configLojaGlob.textoBanner = '';
                     
-                    localStorage.setItem('InstaLanches_ConfigLoja', JSON.stringify(configLojaGlob));
-                    statusLoja = obterStatusLocal();
+                    // CACHE LOCAL ELIMINADO AQUI: O sistema agora baseia-se 100% na verdade vinda do Supabase em tempo real!
+                    statusLoja = calcularStatusLoja();
                     aplicarStatusLojaInterface();
                 }
             } catch (err) { console.error("Aviso Configurações:", err); }
@@ -718,33 +719,23 @@
         // ---------------------------------------------------------
         // 3. LÓGICA DE FUNCIONAMENTO (ABERTO/FECHADO)
         // ---------------------------------------------------------
-        function obterStatusLocal() {
+        function calcularStatusLoja() {
             const horarioPadrao = { abre: 17, fecha: 23, diaFechado: 3, textoDiaFechado: 'Quarta-feira' };
-            try {
-                const configSalva = localStorage.getItem('InstaLanches_ConfigLoja');
-                if (configSalva) {
-                    const parsed = JSON.parse(configSalva);
-                    configLojaGlob.status = parsed.status || 'AUTO';
-                    configLojaGlob.mostrarBanner = parsed.mostrarBanner !== undefined ? parsed.mostrarBanner : true;
-                    configLojaGlob.textoBanner = parsed.textoBanner || '';
-                }
+            const agora = new Date();
+            const fechadoPorDia = agora.getDay() === horarioPadrao.diaFechado;
+            const fechadoPorHorario = agora.getHours() < horarioPadrao.abre || agora.getHours() >= horarioPadrao.fecha;
+            
+            let aceitandoPedidos = false; let motivo = 'aberta'; let mensagemBanner = configLojaGlob.textoBanner || '';
 
-                const agora = new Date();
-                const fechadoPorDia = agora.getDay() === horarioPadrao.diaFechado;
-                const fechadoPorHorario = agora.getHours() < horarioPadrao.abre || agora.getHours() >= horarioPadrao.fecha;
-                
-                let aceitandoPedidos = false; let motivo = 'aberta'; let mensagemBanner = configLojaGlob.textoBanner || '';
+            if (configLojaGlob.status === 'FORCAR_ABERTO') { aceitandoPedidos = true; motivo = 'aberta'; } 
+            else if (configLojaGlob.status === 'FORCAR_FECHADO') { aceitandoPedidos = false; motivo = 'bloqueio_manual'; } 
+            else {
+                if (fechadoPorDia) { aceitandoPedidos = false; motivo = 'dia_fechado'; }
+                else if (fechadoPorHorario) { aceitandoPedidos = false; motivo = 'fora_do_horario'; }
+                else { aceitandoPedidos = true; motivo = 'aberta'; }
+            }
 
-                if (configLojaGlob.status === 'FORCAR_ABERTO') { aceitandoPedidos = true; motivo = 'aberta'; } 
-                else if (configLojaGlob.status === 'FORCAR_FECHADO') { aceitandoPedidos = false; motivo = 'bloqueio_manual'; } 
-                else {
-                    if (fechadoPorDia) { aceitandoPedidos = false; motivo = 'dia_fechado'; }
-                    else if (fechadoPorHorario) { aceitandoPedidos = false; motivo = 'fora_do_horario'; }
-                    else { aceitandoPedidos = true; motivo = 'aberta'; }
-                }
-
-                return { aceitandoPedidos, bloqueadoManual: configLojaGlob.status === 'FORCAR_FECHADO', motivo, mensagemBanner, horario: horarioPadrao };
-            } catch (e) { return { aceitandoPedidos: true, bloqueadoManual: false, motivo: 'aberta', mensagemBanner: '', horario: { abre: 17, fecha: 23, diaFechado: 3 } }; }
+            return { aceitandoPedidos, bloqueadoManual: configLojaGlob.status === 'FORCAR_FECHADO', motivo, mensagemBanner, horario: horarioPadrao };
         }
 
         function proximoDiaFuncionamento(diaAtual, diaFechado) {
@@ -817,41 +808,24 @@
         }
 
         async function salvarConfiguracoesLoja(btn) {
-            const originalHtml = btn.innerHTML; 
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...'; 
-            btn.disabled = true;
+            const originalHtml = btn.innerHTML; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...'; btn.disabled = true;
+            let novoStatus = 'AUTO'; document.getElementsByName('admin_loja_status').forEach(r => { if(r.checked) novoStatus = r.value; });
             
             try {
-                let novoStatus = 'AUTO'; 
-                document.getElementsByName('admin_loja_status').forEach(r => { if(r.checked) novoStatus = r.value; });
-                
-                const { data: existente } = await supabaseClient.from('configuracoes').select('id').limit(1);
-                
+                // Adicionado ordenação para assegurar que sempre atualiza o registro ID 1
+                const { data: existente } = await supabaseClient.from('configuracoes').select('id').order('id', { ascending: true }).limit(1);
                 let isAberto = true; let isManual = false;
                 if (novoStatus === 'FORCAR_ABERTO') { isAberto = true; isManual = true; } else if (novoStatus === 'FORCAR_FECHADO') { isAberto = false; isManual = true; }
 
-                const configPayload = { aberto: isAberto, modo_manual: isManual }; 
-                let err = null;
+                const configPayload = { aberto: isAberto, modo_manual: isManual }; let error = null;
 
-                if (existente && existente.length > 0) { 
-                    const { error } = await supabaseClient.from('configuracoes').update(configPayload).eq('id', existente[0].id); 
-                    err = error; 
-                } else { 
-                    const { error } = await supabaseClient.from('configuracoes').insert([configPayload]); 
-                    err = error; 
-                }
+                if (existente && existente.length > 0) { const res = await supabaseClient.from('configuracoes').update(configPayload).eq('id', existente[0].id); error = res.error; } 
+                else { const res = await supabaseClient.from('configuracoes').insert([configPayload]); error = res.error; }
 
-                if(err) throw err;
-                
-                showToast('Loja atualizada com sucesso!'); 
-                await carregarConfiguracoesSupabase(); 
-            } catch(e) { 
-                console.error("Erro Configurações:", e);
-                showToast('Erro Supabase: ' + (e.message || 'Falha ao guardar'), 'error'); 
-            } finally { 
-                btn.innerHTML = originalHtml; 
-                btn.disabled = false; 
-            }
+                if(error) throw error;
+                showToast('Loja atualizada com sucesso!'); carregarConfiguracoesSupabase(); 
+            } catch(e) { showToast('Erro Supabase: ' + (e.message || 'Falha ao guardar'), 'error'); } 
+            finally { btn.innerHTML = originalHtml; btn.disabled = false; }
         }
 
         async function carregarAdminCardapio() {
@@ -1613,7 +1587,7 @@
         // 8. INICIALIZAÇÃO DA PÁGINA (START)
         // ---------------------------------------------------------
         document.addEventListener("DOMContentLoaded", () => {
-            statusLoja = obterStatusLocal();
+            statusLoja = calcularStatusLoja();
             const cacheCardapio = localStorage.getItem('InstaLanches_CardapioCache');
             if (cacheCardapio) { try { const dadosCached = JSON.parse(cacheCardapio); if (dadosCached && dadosCached.length > 0) montarInterface(dadosCached); } catch(e) {} } 
             else { mostrarLoaderCardapio(); }
