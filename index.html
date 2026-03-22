@@ -1484,7 +1484,10 @@
 
         function mostrarLoaderCardapio(){
             const c=document.querySelector('#container-cardapio'); if(!c) return;
-            if(!document.getElementById('cardapio-loading')){ c.innerHTML=`<div id="cardapio-loading"><img src="https://res.cloudinary.com/de9bsqp2z/image/upload/v1773535880/omidas_tjylr6.gif"><span>Carregando cardápio...</span></div>`; }
+            // Correção Mobile: Só mostra o loader se o cardápio estiver completamente vazio (não destrói o Cache rápido)
+            if(!document.getElementById('cardapio-loading') && !c.querySelector('section')){ 
+                c.innerHTML=`<div id="cardapio-loading"><img src="https://res.cloudinary.com/de9bsqp2z/image/upload/v1773535880/omidas_tjylr6.gif"><span>Carregando cardápio...</span></div>`; 
+            }
         }
 
         function esconderLoaderCardapio(){ const l=document.getElementById('cardapio-loading'); if(l) l.remove(); }
@@ -1670,7 +1673,8 @@
                 }
             }
 
-            setTimeout(prepararInputsVirtuais, 1000); 
+            // CORREÇÃO MOBILE: Desativado o teclado virtual customizado. O iOS e Android agora usarão os seus teclados nativos perfeitamente.
+            // setTimeout(prepararInputsVirtuais, 1000); 
             setTimeout(initDraggableCart, 300);
 
             const footer = document.querySelector('footer');
